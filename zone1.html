@@ -23,8 +23,7 @@
             padding: 0;
             display: flex;
             flex-direction: column;
-            /* Changé pour aligner les enfants au centre par défaut */
-            justify-content: center; 
+            justify-content: center;
             align-items: center;
             height: 100vh;
             color: white;
@@ -54,7 +53,7 @@
         /* ---------------------------------------------------- */
         /* BOÎTE DE DIALOGUE (Visual Novel Style) */
         #dialogue-box {
-            display: none; /* Reste CACHÉ jusqu'au clic 2 */
+            display: none;
             width: 90%;
             height: 20vh;
             background-color: rgba(0, 0, 0, 0.85);
@@ -63,8 +62,8 @@
             margin-bottom: 20px;
             box-sizing: border-box;
             cursor: pointer;
-            position: fixed; /* Position fixe pour rester en bas */
-            bottom: 0; /* Alignement en bas */
+            position: fixed;
+            bottom: 0;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
@@ -73,12 +72,12 @@
         #dialogue-text {
             font-size: 0.8em;
             line-height: 1.5;
-            white-space: normal; /* Retour à la ligne correct */
+            white-space: normal;
             overflow: hidden; 
             height: 100%;
         }
         
-        /* CURSEUR (Style conservé, mais affiché par JS) */
+        /* CURSEUR */
         .cursor-active {
             border-right: 0.15em solid white;
             animation: blink-cursor 0.5s step-end infinite;
@@ -116,7 +115,7 @@
             border: 2px dashed #ff00ff;
             padding: 15px;
             box-sizing: border-box;
-            position: fixed; /* Position fixe pour rester en bas */
+            position: fixed;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
@@ -132,13 +131,30 @@
         #page-click-handler {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            z-index: 1; /* Derrière le bouton et les boîtes de dialogue */
+            z-index: 1;
             cursor: pointer;
+        }
+
+        /* ---------------------------------------------------- */
+        /* IMAGE DISCORD (NOUVEL AJOUT) */
+        #discord-screen {
+            display: none;
+            opacity: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 80%;
+            height: auto;
+            border: 3px solid white;
+            /* Transition pour le fondu en noir de l'image */
+            transition: opacity 2s ease-in-out; 
+            z-index: 20;
         }
     </style>
 </head>
 
-<body> 
+<body> 
     <audio id="zone-audio" loop>
         <source src="https://dl.dropboxusercontent.com/scl/fi/dlinbl4zwtp6fv75m3cbb/Hacker-Archives-Computer-Programming-Cyberpunk-Ambient-Night-Coding-Technology-Sounds-HD.mp3?rlkey=t20c0opoaoddyacmy2tb0eowd&st=01c1gfb7&dl=0" type="audio/mpeg">
         Ton navigateur ne supporte pas l'audio HTML5.
@@ -160,14 +176,17 @@
         <span id="thought-text"></span>
     </div>
 
+    <img id="discord-screen" src="https://i.imgur.com/DTmG30l.png" alt="Capture d'écran Discord avec un message de Guilian">
+
 
     <script>
         // --- DONNÉES DE JEU ---
         const initialText = "Le silence est assourdissant. Impossible de voir autour de toi, la pièce est plongée dans l'obscurité. Il n'y a rien d'autre que le bruit de la ventilation de ton ordinateur. Ce lieu est vide, mais réconfortant.";
         const thoughtText = "Je suis si seule... À quoi bon vivre au final ?";
+        const discordIntroText = "Puis soudain, le bruit d'une notification discord vint rompre ce silence assourdissant.";
         
         let typingInterval;
-        let isTyping = false; // Flag pour éviter le skip si le texte n'est pas terminé
+        let isTyping = false;
 
         const dialogueBox = document.getElementById('dialogue-box');
         const dialogueTextElement = document.getElementById('dialogue-text');
@@ -177,61 +196,89 @@
         const zoneAudio = document.getElementById('zone-audio');
         const overlay = document.getElementById('intro-overlay-zone1');
         const pageClickHandler = document.getElementById('page-click-handler');
+        const discordScreen = document.getElementById('discord-screen');
 
-        // --- GESTION DES CLICS ---
+        // --- FONCTIONS CLÉS ---
 
-        // Clic 1 : Démarrer la scène
+        // Clic 1 : Démarrer la scène (Musique + Révélation du fond)
         overlay.addEventListener('click', function() {
             zoneAudio.play().catch(error => { console.log("Audio bloqué."); });
             overlay.style.display = 'none';
-            pageClickHandler.style.display = 'block'; // Active le listener pour le Clic 2
-        }, { once: true }); // Ne s'exécute qu'une fois
+            pageClickHandler.style.display = 'block'; // Active le Clic 2
+        }, { once: true });
 
-        // Clic 2 : Afficher la boîte de dialogue et lancer la machine à écrire
+        // Clic 2 : Afficher la boîte de dialogue et lancer la machine à écrire (Texte Initial)
         pageClickHandler.addEventListener('click', function() {
-            pageClickHandler.style.display = 'none'; // Désactive le Clic 2
-            dialogueBox.style.display = 'block'; // Affiche la boîte de dialogue
+            pageClickHandler.style.display = 'none';
+            dialogueBox.style.display = 'block';
             
-            // Lancement immédiat de l'effet machine à écrire
             typeWriter(initialText, dialogueTextElement, () => {
-                isTyping = false;
                 dialogueBox.addEventListener('click', handleDialogueClick, { once: true }); // Active le Clic 3
             });
-        }, { once: true }); // Ne s'exécute qu'une fois
+        }, { once: true });
 
-        // Clic 3 : Clic sur la boîte de dialogue (après que le texte soit complet)
+        // Clic 3 : Fait disparaître la boîte pour révéler le bouton "Penser"
         function handleDialogueClick() {
-            if (isTyping) return; // Ne fait rien si le texte est encore en cours d'écriture (sécurité)
+            if (isTyping) return;
 
-            // Clic 3 : Fait disparaître la boîte pour révéler le bouton
             dialogueBox.style.display = 'none';
-            thinkButton.style.display = 'block'; // Afficher le bouton Penser
-            // On laisse le bouton s'occuper du clic suivant (showThought)
+            thinkButton.style.display = 'block'; // Affiche le bouton Penser
         }
         
-        // Clic 4 : Clic sur le bouton "Penser"
+        // Clic 4 : Clic sur le bouton "Penser" (Révélation de la Pensée)
         function showThought() {
-            thinkButton.style.display = 'none'; // Cacher le bouton
-            thoughtBox.style.display = 'block'; // Afficher la boîte de pensée
+            thinkButton.style.display = 'none';
+            thoughtBox.style.display = 'block';
             
-            // Affichage du texte de pensée avec l'effet machine à écrire
             typeWriter(thoughtText, thoughtTextElement, () => {
-                // Le texte de la pensée est terminé. Le prochain clic sur thoughtBox peut passer à l'étape suivante.
-                thoughtBox.addEventListener('click', nextScene);
+                thoughtBox.addEventListener('click', continueToDiscord, { once: true }); // Active le Clic 5
             });
         }
 
-        // Clic 5 : Clic sur la pensée pour passer à la scène suivante (ordinateur)
-        function nextScene() {
+        // Clic 5 : Clic sur la Pensée (Annonce Discord)
+        function continueToDiscord() {
              thoughtBox.style.display = 'none';
-             // *** ICI VIENDRA LE CODE DE L'ORDINATEUR PORTABLE ***
-             console.log("Passage à l'ordinateur portable !");
+             dialogueBox.style.display = 'block'; // Affiche la boîte principale à nouveau
+             
+             typeWriter(discordIntroText, dialogueTextElement, () => {
+                dialogueBox.addEventListener('click', showDiscordImage, { once: true }); // Active le Clic 6
+             });
+        }
+
+        // Clic 6 : Clic sur l'Annonce Discord (Révélation de l'Image en fondu)
+        function showDiscordImage() {
+            if (isTyping) return;
+            
+            dialogueBox.style.display = 'none';
+            
+            // Révélation de l'image
+            discordScreen.style.display = 'block';
+            // Lancement du fondu
+            setTimeout(() => {
+                discordScreen.style.opacity = 1;
+            }, 50); 
+
+            // Active le Clic 7 pour la suite
+            discordScreen.addEventListener('click', nextScene, { once: true }); 
+            console.log("Image Discord révélée. Prêt pour la suite (Clic 7).");
+        }
+        
+        // Clic 7 : Clic sur l'Image (Transition vers la Zone 2 ou la suite)
+        function nextScene() {
+             // Lance le fondu de disparition
+             discordScreen.style.opacity = 0;
+             setTimeout(() => {
+                 discordScreen.style.display = 'none';
+                 // *** ICI COMMENCE LA ZONE 2 ***
+                 console.log("Fondu de l'image terminé. Passage à la suite.");
+                 // window.location.href = 'zone2.html'; 
+             }, 2000); // 2 secondes de transition
         }
 
 
         // --- FONCTION MACHINE À ÉCRIRE ---
         function typeWriter(text, targetElement, callback) {
-            if(typingInterval) clearInterval(typingInterval); // Stop tout intervalle précédent
+            if(typingInterval) clearInterval(typingInterval);
             
             isTyping = true;
             targetElement.innerHTML = '';
