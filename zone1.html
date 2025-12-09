@@ -53,7 +53,6 @@
             padding: 20px;
             margin-bottom: 20px;
             box-sizing: border-box;
-            cursor: pointer;
             position: fixed;
             bottom: 0;
             left: 50%;
@@ -102,6 +101,7 @@
             border: 2px dashed #ff00ff;
             padding: 15px;
             box-sizing: border-box;
+            cursor: pointer; /* Curseur de clic ajouté */
             position: fixed;
             bottom: 30px;
             left: 50%;
@@ -200,23 +200,22 @@
 
         // Fonction pour jouer le son de clic/validation (OMORI)
         function playClickSound() {
-            // Utiliser cloneNode(true) pour éviter que le son soit occupé
             clickSound.cloneNode(true).play().catch(e => {}); 
         }
 
-        // Clic 1 : Démarrer la scène (Musique + Révélation du fond)
+        // Clic 1 : Démarrer la scène 
         overlay.addEventListener('click', function() {
             zoneAudio.play().catch(error => { console.log("Audio zone 1 bloqué."); });
             overlay.style.display = 'none';
             pageClickHandler.style.display = 'block'; 
         }, { once: true });
 
-        // Clic 2 : Afficher la boîte de dialogue et lancer la machine à écrire (Texte Initial)
+        // Clic 2 : Lancer le dialogue initial (AVEC son de frappe)
         pageClickHandler.addEventListener('click', function(event) {
             pageClickHandler.style.display = 'none';
             dialogueBox.style.display = 'block';
             
-            typeWriter(initialText, dialogueTextElement, () => {
+            typeWriter(initialText, dialogueTextElement, false, () => { // false = PAS silencieux
                 dialogueBox.addEventListener('click', handleDialogueClick, { once: true }); 
             });
         }, { once: true });
@@ -224,7 +223,7 @@
         // Clic 3 : Clic sur la boîte de dialogue (VALIDE le texte, révèle le bouton)
         function handleDialogueClick() {
             if (isTyping) return;
-            // CORRIGÉ : Retire playClickSound() ici. Le son sera joué au clic sur "Penser".
+            // PAS DE SON ICI
 
             dialogueBox.style.display = 'none';
             thinkButton.style.display = 'block'; 
@@ -237,20 +236,19 @@
             thinkButton.style.display = 'none';
             thoughtBox.style.display = 'block';
             
-            typeWriter(thoughtText, thoughtTextElement, () => {
+            typeWriter(thoughtText, thoughtTextElement, true, () => { // true = SILENCIEUX
                 thoughtBox.addEventListener('click', continueToDiscord, { once: true }); // Active le Clic 5
             });
         }
 
         // Clic 5 : Clic sur la Pensée (Annonce Discord)
         function continueToDiscord() {
-             playClickSound(); // <-- SON UNIQUEMENT AU CLIC SUR LA PENSÉE
+             // CORRIGÉ : PAS DE SON ICI. L'idée ou la pensée se termine en silence.
 
              thoughtBox.style.display = 'none';
              dialogueBox.style.display = 'block'; 
              
-             typeWriter(discordIntroText, dialogueTextElement, () => {
-                // IMPORTANT : La notification se joue au Clic 6
+             typeWriter(discordIntroText, dialogueTextElement, false, () => { // false = PAS silencieux
                 dialogueBox.addEventListener('click', showDiscordImage, { once: true }); // Active le Clic 6
              });
         }
@@ -259,8 +257,7 @@
         function showDiscordImage() {
             if (isTyping) return;
             
-            // CORRIGÉ : Retire playClickSound() ici. On ne garde QUE le discordSfx.
-            discordSfx.cloneNode(true).play().catch(e => {}); 
+            discordSfx.cloneNode(true).play().catch(e => {}); // Notification Omori
 
             dialogueBox.style.display = 'none';
             
@@ -279,7 +276,7 @@
         
         // Clic 7 : Clic sur l'Image (Transition vers la Zone 2 ou la suite)
         function nextScene() {
-             // CORRIGÉ : Retire playClickSound() ici. C'est la fin de la scène.
+             // PAS DE SON ICI
              discordMusic.pause(); 
              // Lance le fondu de disparition
              discordScreen.style.opacity = 0;
@@ -292,11 +289,11 @@
         }
 
 
-        // --- FONCTION MACHINE À ÉCRIRE (Garantie de non-répétition du son) ---
-        function typeWriter(text, targetElement, callback) {
+        // --- FONCTION MACHINE À ÉCRIRE (Mise à jour pour gérer le silence) ---
+        function typeWriter(text, targetElement, isSilent, callback) {
             if(typingInterval) clearInterval(typingInterval);
             
-            // 1. ARRÊTER le son s'il jouait (pour éviter les superpositions entre dialogues)
+            // 1. Gérer le son s'il est actif
             if (isTypingAudioPlaying) {
                 typeSound.pause();
                 typeSound.currentTime = 0;
@@ -308,10 +305,11 @@
             targetElement.classList.add('cursor-active');
             let i = 0;
 
-            // 2. DÉMARRER le son au début du texte
-            typeSound.play().catch(e => {}); 
-            isTypingAudioPlaying = true;
-
+            // 2. DÉMARRER le son UNIQUEMENT si isSilent n'est PAS VRAI
+            if (!isSilent) {
+                typeSound.play().catch(e => {}); 
+                isTypingAudioPlaying = true;
+            }
 
             typingInterval = setInterval(() => {
                 if (i < text.length) {
@@ -320,10 +318,12 @@
                 } else {
                     clearInterval(typingInterval);
                     
-                    // 3. ARRÊTER le son à la fin du texte
-                    typeSound.pause();
-                    typeSound.currentTime = 0; 
-                    isTypingAudioPlaying = false;
+                    // 3. ARRÊTER le son s'il était actif
+                    if (isTypingAudioPlaying) {
+                        typeSound.pause();
+                        typeSound.currentTime = 0; 
+                        isTypingAudioPlaying = false;
+                    }
                     
                     targetElement.classList.remove('cursor-active');
                     isTyping = false;
