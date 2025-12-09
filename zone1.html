@@ -94,8 +94,6 @@
             transform: translate(-50%, -50%);
             z-index: 5;
         }
-        /* J'ai lié le son au clic et non au hover ou à l'apparition */
-        /* #think-button:hover { background-color: #880000; } */
 
         #thought-box {
             display: none;
@@ -196,7 +194,6 @@
         const pageClickHandler = document.getElementById('page-click-handler');
         const discordScreen = document.getElementById('discord-screen');
         
-        // Volume ajusté pour le son de frappe
         typeSound.volume = 0.5;
 
         // --- FONCTIONS CLÉS ---
@@ -211,18 +208,15 @@
         overlay.addEventListener('click', function() {
             zoneAudio.play().catch(error => { console.log("Audio zone 1 bloqué."); });
             overlay.style.display = 'none';
-            // Le premier clic est géré par l'overlay, le Clic 2 est géré par pageClickHandler.
             pageClickHandler.style.display = 'block'; 
         }, { once: true });
 
         // Clic 2 : Afficher la boîte de dialogue et lancer la machine à écrire (Texte Initial)
         pageClickHandler.addEventListener('click', function(event) {
-            // Le Clic 2 peut aussi être le clic de l'overlay, donc on s'assure qu'il y a un seul déclenchement.
             pageClickHandler.style.display = 'none';
             dialogueBox.style.display = 'block';
             
             typeWriter(initialText, dialogueTextElement, () => {
-                // IMPORTANT : On attache l'écouteur Clic 3 uniquement après que l'écriture soit terminée
                 dialogueBox.addEventListener('click', handleDialogueClick, { once: true }); 
             });
         }, { once: true });
@@ -230,16 +224,14 @@
         // Clic 3 : Clic sur la boîte de dialogue (VALIDE le texte, révèle le bouton)
         function handleDialogueClick() {
             if (isTyping) return;
-            playClickSound(); // <-- SON UNIQUEMENT AU CLIC
+            // CORRIGÉ : Retire playClickSound() ici. Le son sera joué au clic sur "Penser".
 
             dialogueBox.style.display = 'none';
             thinkButton.style.display = 'block'; 
-            // NOTE : Le bouton "Penser" est un élément HTML avec un `onclick="showThought()"`
         }
         
         // Clic 4 : Clic sur le bouton "Penser" (Révélation de la Pensée)
         function showThought() {
-            // NOTE : Cette fonction est appelée par l'attribut `onclick` du bouton.
             playClickSound(); // <-- SON UNIQUEMENT AU CLIC SUR LE BOUTON
             
             thinkButton.style.display = 'none';
@@ -252,12 +244,13 @@
 
         // Clic 5 : Clic sur la Pensée (Annonce Discord)
         function continueToDiscord() {
-             // Pas de playClickSound() ici si le son de validation doit se faire sur la boîte de dialogue suivante
+             playClickSound(); // <-- SON UNIQUEMENT AU CLIC SUR LA PENSÉE
+
              thoughtBox.style.display = 'none';
-             dialogueBox.style.display = 'block'; // Affiche la boîte principale à nouveau
+             dialogueBox.style.display = 'block'; 
              
              typeWriter(discordIntroText, dialogueTextElement, () => {
-                // IMPORTANT : La notification ne doit PAS jouer ici, mais au prochain clic!
+                // IMPORTANT : La notification se joue au Clic 6
                 dialogueBox.addEventListener('click', showDiscordImage, { once: true }); // Active le Clic 6
              });
         }
@@ -266,9 +259,7 @@
         function showDiscordImage() {
             if (isTyping) return;
             
-            playClickSound(); // <-- SON DE VALIDATION AU CLIC
-
-            // CORRECTION: La notification se joue EXACTEMENT au clic 6, avec l'image
+            // CORRIGÉ : Retire playClickSound() ici. On ne garde QUE le discordSfx.
             discordSfx.cloneNode(true).play().catch(e => {}); 
 
             dialogueBox.style.display = 'none';
@@ -288,7 +279,7 @@
         
         // Clic 7 : Clic sur l'Image (Transition vers la Zone 2 ou la suite)
         function nextScene() {
-             playClickSound();
+             // CORRIGÉ : Retire playClickSound() ici. C'est la fin de la scène.
              discordMusic.pause(); 
              // Lance le fondu de disparition
              discordScreen.style.opacity = 0;
