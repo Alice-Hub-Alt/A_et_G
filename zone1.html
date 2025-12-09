@@ -10,9 +10,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
         /* ---------------------------------------------------- */
-        /* STYLES DE BASE ET FOND */
+        /* STYLES DE BASE ET FOND (Inchangés) */
         body {
-            /* Le GIF de fond */
             background-image: url('https://i.pinimg.com/originals/ed/88/da/ed88da8c757d74f6255717ffc7a78154.gif');
             background-size: cover;
             background-repeat: no-repeat;
@@ -34,7 +33,7 @@
         }
 
         /* ---------------------------------------------------- */
-        /* OVERLAY D'INTRODUCTION */
+        /* OVERLAY D'INTRODUCTION (Inchangé) */
         #intro-overlay-zone1 {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -51,7 +50,7 @@
         }
 
         /* ---------------------------------------------------- */
-        /* BOÎTE DE DIALOGUE (Visual Novel Style) */
+        /* BOÎTE DE DIALOGUE (Inchangée) */
         #dialogue-box {
             display: none;
             width: 90%;
@@ -77,7 +76,7 @@
             height: 100%;
         }
         
-        /* CURSEUR */
+        /* CURSEUR (Inchangé) */
         .cursor-active {
             border-right: 0.15em solid white;
             animation: blink-cursor 0.5s step-end infinite;
@@ -88,7 +87,7 @@
         }
 
         /* ---------------------------------------------------- */
-        /* BOUTON DE RÉFLEXION */
+        /* BOUTON DE RÉFLEXION (Inchangé) */
         #think-button {
             display: none;
             padding: 15px 30px;
@@ -107,7 +106,7 @@
         }
         #think-button:hover { background-color: #880000; }
 
-        /* BOÎTE DE PENSÉE */
+        /* BOÎTE DE PENSÉE (Inchangée) */
         #thought-box {
             display: none;
             width: 90%;
@@ -127,7 +126,7 @@
             line-height: 1.5;
         }
 
-        /* NOUVEL ÉLÉMENT POUR CAPTURER LE CLIC DE LA PAGE */
+        /* NOUVEL ÉLÉMENT POUR CAPTURER LE CLIC DE LA PAGE (Inchangé) */
         #page-click-handler {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -135,8 +134,7 @@
             cursor: pointer;
         }
 
-        /* ---------------------------------------------------- */
-        /* IMAGE DISCORD (NOUVEL AJOUT) */
+        /* IMAGE DISCORD (Inchangée) */
         #discord-screen {
             display: none;
             opacity: 0;
@@ -147,7 +145,6 @@
             max-width: 80%;
             height: auto;
             border: 3px solid white;
-            /* Transition pour le fondu en noir de l'image */
             transition: opacity 2s ease-in-out; 
             z-index: 20;
         }
@@ -160,9 +157,11 @@
         Ton navigateur ne supporte pas l'audio HTML5.
     </audio>
 
-    <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/71m48m1v9z9y4v7d2q9e3/Typewriter-Sound.mp3?rlkey=2n9i2f9g0i70f1g7q9s8q8o6k&st=m6w2b3v6&dl=0"></audio>
+    <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?rlkey=q1hljzkfdh6b4qjj89yut92oy&st=8d2bqys3&dl=0"></audio>
 
-    <audio id="click-sound" src="https://dl.dropboxusercontent.com/scl/fi/o28z5d2yv3x9f4j0m2c7h/Confirm-Click-Sound.mp3?rlkey=1c4x4t8t0j8n0d8p9p7p3p3v6&st=u9i4c0g4&dl=0"></audio>
+    <audio id="click-sound" src="https://dl.dropboxusercontent.com/scl/fi/2wnzok93isvtcv1ztbh2x/Beep-OMORI-SFX.mp3?rlkey=ddgajf6uqlftp4drff77fmsdv&st=crjm5oee&dl=0"></audio>
+
+    <audio id="discord-sfx" src="https://dl.dropboxusercontent.com/scl/fi/jg6wbserycyspqewz9ogc/SPOILER-Omori-play-sound-effect-READ-PINNED-COMMENT.mp3?rlkey=glagwcdgsnvzqnqvkgdoihyza&st=pmjvrfjb&dl=0"></audio>
 
     <audio id="discord-music" loop src="https://dl.dropboxusercontent.com/scl/fi/8w03j8k7h1p5d8j2r2t8u/Cyberpunk-Uplifting-Track.mp3?rlkey=4m6j5k9j5l8p7n6r3q0h1w9e4&st=n0g7v0r9&dl=0"></audio>
 
@@ -200,9 +199,10 @@
         const thoughtBox = document.getElementById('thought-box');
         const thoughtTextElement = document.getElementById('thought-text');
         const zoneAudio = document.getElementById('zone-audio');
-        const typeSound = document.getElementById('type-sound'); // NOUVEAU
-        const clickSound = document.getElementById('click-sound'); // NOUVEAU
-        const discordMusic = document.getElementById('discord-music'); // NOUVEAU
+        const typeSound = document.getElementById('type-sound'); 
+        const clickSound = document.getElementById('click-sound'); 
+        const discordSfx = document.getElementById('discord-sfx'); // NOUVEAU SFX
+        const discordMusic = document.getElementById('discord-music'); 
         const overlay = document.getElementById('intro-overlay-zone1');
         const pageClickHandler = document.getElementById('page-click-handler');
         const discordScreen = document.getElementById('discord-screen');
@@ -229,7 +229,8 @@
         // Clic 3 : Fait disparaître la boîte pour révéler le bouton "Penser"
         function handleDialogueClick() {
             if (isTyping) return;
-            clickSound.play().catch(e => {}); // Bruit de clic pour la validation
+            // Bruit de clic pour la validation (Beep OMORI)
+            clickSound.cloneNode(true).play().catch(e => {}); 
 
             dialogueBox.style.display = 'none';
             thinkButton.style.display = 'block'; // Affiche le bouton Penser
@@ -237,7 +238,8 @@
         
         // Clic 4 : Clic sur le bouton "Penser" (Révélation de la Pensée)
         function showThought() {
-            clickSound.play().catch(e => {}); // Bruit de clic pour le bouton
+            // Bruit de clic pour le bouton (Beep OMORI)
+            clickSound.cloneNode(true).play().catch(e => {}); 
             
             thinkButton.style.display = 'none';
             thoughtBox.style.display = 'block';
@@ -247,12 +249,14 @@
             });
         }
 
-        // Clic 5 : Clic sur la Pensée (Annonce Discord)
+        // Clic 5 : Clic sur la Pensée (Annonce Discord et Bruitage Notification)
         function continueToDiscord() {
              thoughtBox.style.display = 'none';
              dialogueBox.style.display = 'block'; // Affiche la boîte principale à nouveau
              
              typeWriter(discordIntroText, dialogueTextElement, () => {
+                // NOUVEAU : Bruitage de notification Discord (Omori SFX)
+                discordSfx.cloneNode(true).play().catch(e => {});
                 dialogueBox.addEventListener('click', showDiscordImage, { once: true }); // Active le Clic 6
              });
         }
@@ -305,7 +309,7 @@
                     targetElement.innerHTML += text.charAt(i);
                     i++;
                     
-                    // NOUVEAU : Bruit de frappe
+                    // Bruit de frappe : utiliser cloneNode(true) pour ne pas interrompre l'ancien son
                     try {
                         let soundClone = typeSound.cloneNode(true);
                         soundClone.volume = 0.3; 
