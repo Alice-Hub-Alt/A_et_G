@@ -94,7 +94,8 @@
             transform: translate(-50%, -50%);
             z-index: 5;
         }
-        #think-button:hover { background-color: #880000; }
+        /* J'ai lié le son au clic et non au hover ou à l'apparition */
+        /* #think-button:hover { background-color: #880000; } */
 
         #thought-box {
             display: none;
@@ -179,8 +180,6 @@
         
         let typingInterval;
         let isTyping = false;
-        
-        // NOUVEAU FLAG GLOBAL : Pour gérer l'audio d'ambiance de frappe
         let isTypingAudioPlaying = false; 
 
         const dialogueBox = document.getElementById('dialogue-box');
@@ -197,13 +196,14 @@
         const pageClickHandler = document.getElementById('page-click-handler');
         const discordScreen = document.getElementById('discord-screen');
         
-        // Volume ajusté pour le son de frappe afin qu'il soit subtil
+        // Volume ajusté pour le son de frappe
         typeSound.volume = 0.5;
 
         // --- FONCTIONS CLÉS ---
 
-        // Fonction pour jouer le son de clic (réutilisable)
+        // Fonction pour jouer le son de clic/validation (OMORI)
         function playClickSound() {
+            // Utiliser cloneNode(true) pour éviter que le son soit occupé
             clickSound.cloneNode(true).play().catch(e => {}); 
         }
 
@@ -211,31 +211,36 @@
         overlay.addEventListener('click', function() {
             zoneAudio.play().catch(error => { console.log("Audio zone 1 bloqué."); });
             overlay.style.display = 'none';
-            pageClickHandler.style.display = 'block'; // Active le Clic 2
+            // Le premier clic est géré par l'overlay, le Clic 2 est géré par pageClickHandler.
+            pageClickHandler.style.display = 'block'; 
         }, { once: true });
 
         // Clic 2 : Afficher la boîte de dialogue et lancer la machine à écrire (Texte Initial)
-        pageClickHandler.addEventListener('click', function() {
+        pageClickHandler.addEventListener('click', function(event) {
+            // Le Clic 2 peut aussi être le clic de l'overlay, donc on s'assure qu'il y a un seul déclenchement.
             pageClickHandler.style.display = 'none';
             dialogueBox.style.display = 'block';
             
             typeWriter(initialText, dialogueTextElement, () => {
-                dialogueBox.addEventListener('click', handleDialogueClick, { once: true }); // Active le Clic 3
+                // IMPORTANT : On attache l'écouteur Clic 3 uniquement après que l'écriture soit terminée
+                dialogueBox.addEventListener('click', handleDialogueClick, { once: true }); 
             });
         }, { once: true });
 
-        // Clic 3 : Clic sur la boîte de dialogue (après que le texte soit complet)
+        // Clic 3 : Clic sur la boîte de dialogue (VALIDE le texte, révèle le bouton)
         function handleDialogueClick() {
             if (isTyping) return;
-            playClickSound(); 
+            playClickSound(); // <-- SON UNIQUEMENT AU CLIC
 
             dialogueBox.style.display = 'none';
-            thinkButton.style.display = 'block'; // Affiche le bouton Penser
+            thinkButton.style.display = 'block'; 
+            // NOTE : Le bouton "Penser" est un élément HTML avec un `onclick="showThought()"`
         }
         
         // Clic 4 : Clic sur le bouton "Penser" (Révélation de la Pensée)
         function showThought() {
-            playClickSound();
+            // NOTE : Cette fonction est appelée par l'attribut `onclick` du bouton.
+            playClickSound(); // <-- SON UNIQUEMENT AU CLIC SUR LE BOUTON
             
             thinkButton.style.display = 'none';
             thoughtBox.style.display = 'block';
@@ -245,27 +250,31 @@
             });
         }
 
-        // Clic 5 : Clic sur la Pensée (Annonce Discord et Bruitage Notification)
+        // Clic 5 : Clic sur la Pensée (Annonce Discord)
         function continueToDiscord() {
+             // Pas de playClickSound() ici si le son de validation doit se faire sur la boîte de dialogue suivante
              thoughtBox.style.display = 'none';
              dialogueBox.style.display = 'block'; // Affiche la boîte principale à nouveau
              
              typeWriter(discordIntroText, dialogueTextElement, () => {
-                // Bruitage de notification Discord (Omori SFX)
-                discordSfx.cloneNode(true).play().catch(e => {});
+                // IMPORTANT : La notification ne doit PAS jouer ici, mais au prochain clic!
                 dialogueBox.addEventListener('click', showDiscordImage, { once: true }); // Active le Clic 6
              });
         }
 
-        // Clic 6 : Clic sur l'Annonce Discord (Révélation de l'Image en fondu et CHANGEMENT DE MUSIQUE)
+        // Clic 6 : Clic sur l'Annonce Discord (Révélation de l'Image + SFX + Musique)
         function showDiscordImage() {
             if (isTyping) return;
             
-            playClickSound();
+            playClickSound(); // <-- SON DE VALIDATION AU CLIC
+
+            // CORRECTION: La notification se joue EXACTEMENT au clic 6, avec l'image
+            discordSfx.cloneNode(true).play().catch(e => {}); 
+
             dialogueBox.style.display = 'none';
             
-            zoneAudio.pause(); // Arrête l'ancienne musique
-            discordMusic.play().catch(e => {}); // Démarre la nouvelle ambiance
+            zoneAudio.pause(); 
+            discordMusic.play().catch(e => {}); 
 
             // Révélation de l'image
             discordScreen.style.display = 'block';
@@ -280,7 +289,7 @@
         // Clic 7 : Clic sur l'Image (Transition vers la Zone 2 ou la suite)
         function nextScene() {
              playClickSound();
-             discordMusic.pause(); // Arrête la musique de transition
+             discordMusic.pause(); 
              // Lance le fondu de disparition
              discordScreen.style.opacity = 0;
              setTimeout(() => {
@@ -288,11 +297,11 @@
                  // *** ICI COMMENCE LA ZONE 2 ***
                  console.log("Fondu de l'image terminé. Passage à la suite.");
                  // window.location.href = 'zone2.html'; 
-             }, 2000); // 2 secondes de transition
+             }, 2000); 
         }
 
 
-        // --- FONCTION MACHINE À ÉCRIRE (CORRIGÉE : Joue le son 1 fois et l'arrête) ---
+        // --- FONCTION MACHINE À ÉCRIRE (Garantie de non-répétition du son) ---
         function typeWriter(text, targetElement, callback) {
             if(typingInterval) clearInterval(typingInterval);
             
@@ -322,7 +331,7 @@
                     
                     // 3. ARRÊTER le son à la fin du texte
                     typeSound.pause();
-                    typeSound.currentTime = 0; // Remet au début pour le prochain dialogue
+                    typeSound.currentTime = 0; 
                     isTypingAudioPlaying = false;
                     
                     targetElement.classList.remove('cursor-active');
