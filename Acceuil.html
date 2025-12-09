@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L'Écho du Vide</title>
+    <style>
+        /* ---------------------------------------------------- */
+        /* POLICE PIXEL : Assurez-vous que le fichier est disponible */
+        /* Pour un test rapide, nous utilisons 'Press Start 2P' (disponible Google Fonts) */
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        /* ---------------------------------------------------- */
+        /* STYLES DE BASE ET FOND */
+        body {
+            /* Le GIF de fond */
+            background-image: url('https://c.tenor.com/3wGip25Y5agAAAAd/tenor.gif');
+            background-size: cover; /* Couvre tout l'écran */
+            background-repeat: no-repeat;
+            background-attachment: fixed; /* Fixe le fond pour un effet immersif */
+            background-position: center center;
+            
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+            font-family: 'Press Start 2P', monospace; /* Utilisation de la police Pixel Art */
+            overflow: hidden; /* Empêche les barres de défilement */
+        }
+        
+        /* ---------------------------------------------------- */
+        /* STYLES DU TITRE PRINCIPAL (La résurrection d'Alice) */
+        .title {
+            font-size: 3em; /* Grande taille pour l'effet jeu vidéo */
+            text-align: center;
+            margin-bottom: 50px;
+            /* Ombre pour un meilleur contraste sur le GIF */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            
+            /* Animation pour venir du haut */
+            animation: dropTitle 2s ease-out forwards;
+            position: relative;
+            top: -100px; /* Commence en haut, hors écran */
+        }
+
+        /* Définition de l'animation de chute */
+        @keyframes dropTitle {
+            from { top: -100px; opacity: 0; }
+            to { top: 0; opacity: 1; }
+        }
+
+        /* ---------------------------------------------------- */
+        /* STYLES DU TEXTE CLIGNOTANT (Commencer l'histoire) */
+        .start-text {
+            font-size: 1em;
+            text-align: center;
+            cursor: pointer; /* Indique que c'est cliquable */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            
+            /* Animation de clignotement */
+            animation: blinker 1s linear infinite;
+        }
+
+        /* Définition de l'animation de clignotement */
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="title">
+        La résurrection d'Alice
+    </div>
+
+    <a href="#" class="start-text">
+        Commencer l'histoire
+    </a>
+    
+</body>
+</html>
