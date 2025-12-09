@@ -12,7 +12,7 @@
         /* ---------------------------------------------------- */
         /* STYLES DE BASE ET FOND */
         body {
-            /* Le GIF de fond (utilisé dans le code fourni) */
+            /* Le GIF de fond */
             background-image: url('https://i.pinimg.com/originals/ed/88/da/ed88da8c757d74f6255717ffc7a78154.gif');
             background-size: cover;
             background-repeat: no-repeat;
@@ -23,7 +23,7 @@
             padding: 0;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end; /* ALIGNÉ EN BAS */
+            justify-content: flex-end;
             align-items: center;
             height: 100vh;
             color: white;
@@ -34,16 +34,34 @@
         }
 
         /* ---------------------------------------------------- */
+        /* OVERLAY D'INTRODUCTION (Nouveau) */
+        #intro-overlay-zone1 {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: black; /* Totalement opaque */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            cursor: pointer;
+            font-size: 1.5em;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.3);
+            text-align: center;
+        }
+
+        /* ---------------------------------------------------- */
         /* BOÎTE DE DIALOGUE (Visual Novel Style) */
         #dialogue-box {
+            display: none; /* CACHÉ initialement (sera affiché après le 2ème clic) */
             width: 90%;
-            height: 20vh; /* Hauteur pour la boîte de dialogue */
+            height: 20vh;
             background-color: rgba(0, 0, 0, 0.85);
             border: 3px solid white;
             padding: 20px;
-            margin-bottom: 20px; /* Espace par rapport au bas de l'écran */
+            margin-bottom: 20px;
             box-sizing: border-box;
-            cursor: pointer; /* Indique qu'on peut cliquer pour avancer */
+            cursor: pointer;
             position: relative;
             z-index: 10;
         }
@@ -51,13 +69,17 @@
         #dialogue-text {
             font-size: 0.8em;
             line-height: 1.5;
-            /* Le curseur clignotant pour l'effet machine à écrire */
-            border-right: 0.15em solid white; /* Ligne verticale clignotante */
-            white-space: nowrap; /* Garde le texte sur une seule ligne avant qu'il ne s'affiche */
-            overflow: hidden; /* Cache le texte non encore affiché */
+            /* CORRECTION : Permet le retour à la ligne */
+            white-space: normal; 
+            overflow: hidden; 
+            height: 100%; /* S'assure que le contenu peut remplir la boîte */
+            /* Le curseur sera géré par JS après que le texte soit écrit */
         }
         
-        /* CURSEUR CLIGNOTANT */
+        /* CURSEUR (Style conservé, mais affiché par JS) */
+        .cursor-active {
+            border-right: 0.15em solid white;
+        }
         @keyframes blink-cursor {
             from, to { border-color: transparent }
             50% { border-color: white; }
@@ -66,16 +88,16 @@
         /* ---------------------------------------------------- */
         /* BOUTON DE RÉFLEXION */
         #think-button {
-            display: none; /* Caché au début */
+            display: none;
             padding: 15px 30px;
             font-size: 1.2em;
-            background-color: #550000; /* Rouge sombre */
+            background-color: #550000;
             color: white;
-            border: 3px solid #ff0000; /* Bordure rouge vif */
+            border: 3px solid #ff0000;
             cursor: pointer;
             text-shadow: 1px 1px 2px black;
             transition: background-color 0.3s;
-            position: absolute; /* Position absolue pour être au milieu */
+            position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
@@ -86,43 +108,47 @@
             background-color: #880000;
         }
 
-        /* ---------------------------------------------------- */
-        /* BOÎTE DE PENSÉE (Nouvelle boîte de dialogue pour la pensée) */
+        /* BOÎTE DE PENSÉE */
         #thought-box {
-            display: none; /* Caché au début */
+            display: none;
             width: 90%;
             background-color: rgba(0, 0, 0, 0.7);
-            border: 2px dashed #ff00ff; /* Bordure violette pour la pensée */
+            border: 2px dashed #ff00ff;
             padding: 15px;
             box-sizing: border-box;
             position: absolute;
             bottom: 30px;
             z-index: 10;
         }
-
         #thought-text {
             font-size: 0.7em;
-            color: #ff00ff; /* Texte violet */
+            color: #ff00ff;
             line-height: 1.5;
         }
-
     </style>
 </head>
-<body onload="launchAudio()"> 
 
+<body> 
     <audio id="zone-audio" loop>
         <source src="https://dl.dropboxusercontent.com/scl/fi/dlinbl4zwtp6fv75m3cbb/Hacker-Archives-Computer-Programming-Cyberpunk-Ambient-Night-Coding-Technology-Sounds-HD.mp3?rlkey=t20c0opoaoddyacmy2tb0eowd&st=01c1gfb7&dl=0" type="audio/mpeg">
         Ton navigateur ne supporte pas l'audio HTML5.
     </audio>
 
-    <button id="think-button" onclick="showThought()">Penser</button>
-
-    <div id="dialogue-box" onclick="nextStage()">
-        <span id="dialogue-text"></span>
+    <div id="intro-overlay-zone1">
+        Zone 1 : La Grotte Illusoire <br><br> (Cliquer pour continuer)
     </div>
 
-    <div id="thought-box">
-        <span id="thought-text"></span>
+    <div id="page-click-area">
+        
+        <button id="think-button" onclick="showThought()">Penser</button>
+
+        <div id="dialogue-box">
+            <span id="dialogue-text"></span>
+        </div>
+
+        <div id="thought-box">
+            <span id="thought-text"></span>
+        </div>
     </div>
 
 
@@ -132,7 +158,7 @@
         const thoughtText = "Je suis si seule... À quoi bon vivre au final ?";
         
         let currentTextIndex = 0;
-        let dialogueStage = 0; // 0: Texte initial, 1: En attente, 2: Boîte de pensée affichée
+        let dialogueStage = 0; // 0: Attente clic pour dialogue, 1: Texte initial affiché, 2: Bouton Penser, 3: Pensée affichée
 
         const dialogueBox = document.getElementById('dialogue-box');
         const dialogueTextElement = document.getElementById('dialogue-text');
@@ -140,69 +166,97 @@
         const thoughtBox = document.getElementById('thought-box');
         const thoughtTextElement = document.getElementById('thought-text');
         const zoneAudio = document.getElementById('zone-audio');
+        const overlay = document.getElementById('intro-overlay-zone1');
 
-
-        // --- FONCTIONS AUDIO ---
-        function launchAudio() {
-            // Tentative de lecture audio immédiate. Nécessite F5 si bloqué.
+        // Ajout du listener de clic pour l'audio et la transition (Clic 1)
+        overlay.addEventListener('click', function() {
+            // Clic 1 : Lance la musique et retire l'overlay
             zoneAudio.play().catch(error => {
-                console.log("Lecture audio Zone 1 bloquée. Veuillez rafraîchir ou cliquer.");
+                console.log("Lecture audio Zone 1 bloquée. Continuer la séquence.");
             });
+            overlay.style.display = 'none';
+            dialogueStage = 0; // Passe au stage où l'on attend le prochain clic sur la page
+            document.body.addEventListener('click', handlePageClick, { once: true }); // Active le listener pour le Clic 2
+        });
+
+        // Fonction pour gérer le 2ème clic (Clic 2)
+        function handlePageClick() {
+            if (dialogueStage === 0) {
+                // Clic 2 : Affiche la boîte de dialogue
+                dialogueBox.style.display = 'block';
+                dialogueBox.addEventListener('click', handleDialogueClick, { once: true }); // Active le listener pour le Clic 3
+            }
         }
         
+        // Fonction pour gérer le 3ème clic (Clic 3) et les suivants
+        function handleDialogueClick() {
+             if (dialogueStage === 0) {
+                // Clic 3 : Démarre l'écriture du premier dialogue
+                typeWriter(initialText, dialogueTextElement, () => {
+                    // Une fois l'écriture finie:
+                    dialogueStage = 1; // Le texte est affiché
+                    // Pour avancer à l'étape suivante, le clic sera sur le bouton Penser
+                    dialogueBox.removeEventListener('click', handleDialogueClick);
+                    dialogueBox.addEventListener('click', skipText); // Permet de cliquer pour cacher la boîte (Clic 4)
+                });
+            } else if (dialogueStage === 1) {
+                // Clic 4 : Fait disparaître la boîte pour révéler le bouton
+                dialogueBox.style.display = 'none';
+                thinkButton.style.display = 'block'; // Afficher le bouton Penser
+                dialogueStage = 2; // Passe à l'étape du bouton
+                dialogueBox.removeEventListener('click', skipText); // Nettoyage
+            }
+        }
+
+        // Fonction d'urgence si l'utilisateur clique pendant l'écriture
+        function skipText() {
+            // Affiche tout le texte d'un coup
+            dialogueTextElement.innerHTML = initialText;
+            dialogueTextElement.style.borderRight = 'none';
+            dialogueStage = 1; // Marque le texte comme affiché
+        }
+
+
         // --- FONCTION MACHINE À ÉCRIRE ---
+        // (Légèrement modifiée pour être plus simple)
+        let typingInterval;
         function typeWriter(text, targetElement, callback) {
             targetElement.innerHTML = '';
-            targetElement.style.borderRight = '0.15em solid white'; // Affiche le curseur
+            // On s'assure que le curseur est géré manuellement
+            targetElement.classList.add('cursor-active'); 
             let i = 0;
 
-            function typing() {
+            typingInterval = setInterval(() => {
                 if (i < text.length) {
                     targetElement.innerHTML += text.charAt(i);
                     i++;
-                    setTimeout(typing, 30); // Vitesse d'écriture (30ms/caractère)
                 } else {
-                    targetElement.style.borderRight = 'none'; // Cache le curseur à la fin
+                    clearInterval(typingInterval);
+                    targetElement.classList.remove('cursor-active'); // Cache le curseur à la fin
                     if (callback) callback();
                 }
-            }
-            typing();
+            }, 30);
         }
 
-        // --- GESTION DES ÉTAPES DU DIALOGUE ---
-        function nextStage() {
-            if (dialogueStage === 0) {
-                // 1. Terminer le dialogue initial (clic sur la boîte de dialogue)
-                dialogueBox.style.display = 'none';
-                thinkButton.style.display = 'block'; // Afficher le bouton Penser
-                dialogueStage = 1; // Passe à l'étape du bouton
-            } 
-            // Les clics suivants sur le bouton de réflexion seront gérés par showThought()
-        }
-
+        // --- GESTION DES ÉTAPES DU BOUTON ET DE LA PENSÉE ---
         function showThought() {
-            if (dialogueStage === 1) {
-                // 2. Clic sur le bouton Penser
-                thinkButton.style.display = 'none'; // Cacher le bouton
-                thoughtBox.style.display = 'block'; // Afficher la boîte de pensée
+            if (dialogueStage === 2) {
+                // Clic sur le bouton Penser (Clic 5)
+                thinkButton.style.display = 'none';
+                thoughtBox.style.display = 'block';
                 
                 // Affichage du texte de pensée avec l'effet machine à écrire
                 typeWriter(thoughtText, thoughtTextElement, () => {
-                    dialogueStage = 2; // Passe à l'étape finale pour le prochain clic
+                    dialogueStage = 3; // La pensée est affichée
+                    // Prêt pour la suite (ordinateur portable)
                 });
-            } else if (dialogueStage === 2) {
-                // 3. Clic pour passer à la prochaine scène (sera le lien vers Zone 2)
-                console.log("Passage à l'étape suivante (Zone 2) !");
-                // *** ICI SERA TON CODE POUR CHANGER DE PAGE PLUS TARD ***
-                // window.location.href = 'zone2.html'; 
+            } else if (dialogueStage === 3) {
+                // Clic pour passer à la scène suivante (Clic 6, non implémenté ici)
+                thoughtBox.style.display = 'none';
+                console.log("Passage à l'ordinateur portable !");
+                // *** ICI VIENDRA LE CODE DE L'ORDINATEUR PORTABLE ***
             }
         }
-
-        // --- Lancement au chargement de la page ---
-        window.onload = function() {
-            typeWriter(initialText, dialogueTextElement);
-        }
-
     </script>
     
 </body>
