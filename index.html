@@ -7,7 +7,6 @@
     <style>
         /* ---------------------------------------------------- */
         /* POLICE PIXEL : Assurez-vous que le fichier est disponible */
-        /* Pour un test rapide, nous utilisons 'Press Start 2P' (disponible Google Fonts) */
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
         /* ---------------------------------------------------- */
@@ -15,9 +14,9 @@
         body {
             /* Le GIF de fond */
             background-image: url('https://c.tenor.com/3wGip25Y5agAAAAd/tenor.gif');
-            background-size: cover; /* Couvre tout l'écran */
+            background-size: cover;
             background-repeat: no-repeat;
-            background-attachment: fixed; /* Fixe le fond pour un effet immersif */
+            background-attachment: fixed;
             background-position: center center;
             
             margin: 0;
@@ -28,26 +27,45 @@
             align-items: center;
             height: 100vh;
             color: white;
-            font-family: 'Press Start 2P', monospace; /* Utilisation de la police Pixel Art */
-            overflow: hidden; /* Empêche les barres de défilement */
+            font-family: 'Press Start 2P', monospace;
+            overflow: hidden;
         }
         
         /* ---------------------------------------------------- */
-        /* STYLES DU TITRE PRINCIPAL (La résurrection d'Alice) */
-        .title {
-            font-size: 3em; /* Grande taille pour l'effet jeu vidéo */
-            text-align: center;
-            margin-bottom: 50px;
-            /* Ombre pour un meilleur contraste sur le GIF */
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-            
-            /* Animation pour venir du haut */
-            animation: dropTitle 2s ease-out forwards;
-            position: relative;
-            top: -100px; /* Commence en haut, hors écran */
+        /* Overlay et Titre */
+        #menu-container {
+            display: none; /* Caché au début */
+            display: flex; /* Utilise Flexbox pour le centrage */
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* Définition de l'animation de chute */
+        #intro-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            cursor: pointer;
+            font-size: 1.5em;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.3);
+            text-align: center;
+        }
+
+        /* ---------------------------------------------------- */
+        /* STYLES DU TITRE PRINCIPAL (La résurrection d'Alice) */
+        .title {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 50px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            animation: dropTitle 2s ease-out forwards;
+            position: relative;
+            top: -100px;
+        }
+
         @keyframes dropTitle {
             from { top: -100px; opacity: 0; }
             to { top: 0; opacity: 1; }
@@ -58,34 +76,55 @@
         .start-text {
             font-size: 1em;
             text-align: center;
-            cursor: pointer; /* Indique que c'est cliquable */
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-            
-            /* Animation de clignotement */
+            text-decoration: none;
+            color: white;
             animation: blinker 1s linear infinite;
         }
 
-        /* Définition de l'animation de clignotement */
         @keyframes blinker {
             50% { opacity: 0; }
         }
     </style>
 </head>
 <body>
+    
+    <audio id="background-music" loop>
+        <source src="https://dl.dropboxusercontent.com/scl/fi/vl60up21z0bbf1bcbh3fz/OMORI-OST-002-WHITE-SPACE.mp3?rlkey=2z08gh7n4kq18j4hodzefj6ap&st=lder669u&dl=0" type="audio/mpeg">
+        Ton navigateur ne supporte pas l’audio HTML5.
+    </audio>
 
-    <div class="title">
-        La résurrection d'Alice
+    <div id="intro-overlay">
+        Cliquer pour entrer dans l'espace partagé
     </div>
 
-   <a href="zone1.html" class="start-text">
-        Commencer l'histoire
-    </a>
+    <div id="menu-container">
+        <div class="title">
+            La résurrection d'Alice
+        </div>
 
-    <!-- MUSIQUE DE FOND -->
-<audio id="background-music" autoplay loop>
-  <source src="https://dl.dropboxusercontent.com/scl/fi/vl60up21z0bbf1bcbh3fz/OMORI-OST-002-WHITE-SPACE.mp3?rlkey=2z08gh7n4kq18j4hodzefj6ap&st=lder669u&dl=0" type="audio/mpeg">
-  Ton navigateur ne supporte pas l’audio HTML5.
-</audio>
+        <a href="zone1.html" class="start-text">
+            Commencer l'histoire
+        </a>
+    </div>
 
+    <script>
+        // Fonction déclenchée par le clic sur l'overlay
+        document.getElementById('intro-overlay').addEventListener('click', function() {
+            const audio = document.getElementById('background-music');
+            
+            // 1. Lance la musique
+            audio.play().catch(error => {
+                // Si la lecture échoue (encore bloquée), on ignore l'erreur
+            });
+
+            // 2. Cache l'overlay
+            this.style.display = 'none';
+
+            // 3. Affiche le contenu principal (le titre et le bouton clignotant)
+            document.getElementById('menu-container').style.display = 'flex';
+        });
+    </script>
+    
 </body>
 </html>
