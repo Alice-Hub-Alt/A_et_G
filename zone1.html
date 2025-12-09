@@ -5,12 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zone 1 : La Grotte Illusoire</title>
     <style>
-        /* ---------------------------------------------------- */
-        /* POLICE PIXEL */
+        /* ... Styles CSS (Inchangés) ... */
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
-        /* ---------------------------------------------------- */
-        /* STYLES DE BASE ET FOND (Inchangés) */
         body {
             background-image: url('https://i.pinimg.com/originals/ed/88/da/ed88da8c757d74f6255717ffc7a78154.gif');
             background-size: cover;
@@ -32,8 +29,6 @@
             background-blend-mode: darken;
         }
 
-        /* ---------------------------------------------------- */
-        /* OVERLAY D'INTRODUCTION (Inchangé) */
         #intro-overlay-zone1 {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -49,8 +44,6 @@
             text-align: center;
         }
 
-        /* ---------------------------------------------------- */
-        /* BOÎTE DE DIALOGUE (Inchangée) */
         #dialogue-box {
             display: none;
             width: 90%;
@@ -76,7 +69,6 @@
             height: 100%;
         }
         
-        /* CURSEUR (Inchangé) */
         .cursor-active {
             border-right: 0.15em solid white;
             animation: blink-cursor 0.5s step-end infinite;
@@ -86,8 +78,6 @@
             50% { border-color: white; }
         }
 
-        /* ---------------------------------------------------- */
-        /* BOUTON DE RÉFLEXION (Inchangé) */
         #think-button {
             display: none;
             padding: 15px 30px;
@@ -106,7 +96,6 @@
         }
         #think-button:hover { background-color: #880000; }
 
-        /* BOÎTE DE PENSÉE (Inchangée) */
         #thought-box {
             display: none;
             width: 90%;
@@ -126,7 +115,6 @@
             line-height: 1.5;
         }
 
-        /* NOUVEL ÉLÉMENT POUR CAPTURER LE CLIC DE LA PAGE (Inchangé) */
         #page-click-handler {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -134,7 +122,6 @@
             cursor: pointer;
         }
 
-        /* IMAGE DISCORD (Inchangée) */
         #discord-screen {
             display: none;
             opacity: 0;
@@ -192,6 +179,9 @@
         
         let typingInterval;
         let isTyping = false;
+        
+        // NOUVEAU FLAG GLOBAL : Pour gérer l'audio d'ambiance de frappe
+        let isTypingAudioPlaying = false; 
 
         const dialogueBox = document.getElementById('dialogue-box');
         const dialogueTextElement = document.getElementById('dialogue-text');
@@ -201,13 +191,21 @@
         const zoneAudio = document.getElementById('zone-audio');
         const typeSound = document.getElementById('type-sound'); 
         const clickSound = document.getElementById('click-sound'); 
-        const discordSfx = document.getElementById('discord-sfx'); // NOUVEAU SFX
+        const discordSfx = document.getElementById('discord-sfx'); 
         const discordMusic = document.getElementById('discord-music'); 
         const overlay = document.getElementById('intro-overlay-zone1');
         const pageClickHandler = document.getElementById('page-click-handler');
         const discordScreen = document.getElementById('discord-screen');
+        
+        // Volume ajusté pour le son de frappe afin qu'il soit subtil
+        typeSound.volume = 0.5;
 
         // --- FONCTIONS CLÉS ---
+
+        // Fonction pour jouer le son de clic (réutilisable)
+        function playClickSound() {
+            clickSound.cloneNode(true).play().catch(e => {}); 
+        }
 
         // Clic 1 : Démarrer la scène (Musique + Révélation du fond)
         overlay.addEventListener('click', function() {
@@ -226,11 +224,10 @@
             });
         }, { once: true });
 
-        // Clic 3 : Fait disparaître la boîte pour révéler le bouton "Penser"
+        // Clic 3 : Clic sur la boîte de dialogue (après que le texte soit complet)
         function handleDialogueClick() {
             if (isTyping) return;
-            // Bruit de clic pour la validation (Beep OMORI)
-            clickSound.cloneNode(true).play().catch(e => {}); 
+            playClickSound(); 
 
             dialogueBox.style.display = 'none';
             thinkButton.style.display = 'block'; // Affiche le bouton Penser
@@ -238,8 +235,7 @@
         
         // Clic 4 : Clic sur le bouton "Penser" (Révélation de la Pensée)
         function showThought() {
-            // Bruit de clic pour le bouton (Beep OMORI)
-            clickSound.cloneNode(true).play().catch(e => {}); 
+            playClickSound();
             
             thinkButton.style.display = 'none';
             thoughtBox.style.display = 'block';
@@ -255,7 +251,7 @@
              dialogueBox.style.display = 'block'; // Affiche la boîte principale à nouveau
              
              typeWriter(discordIntroText, dialogueTextElement, () => {
-                // NOUVEAU : Bruitage de notification Discord (Omori SFX)
+                // Bruitage de notification Discord (Omori SFX)
                 discordSfx.cloneNode(true).play().catch(e => {});
                 dialogueBox.addEventListener('click', showDiscordImage, { once: true }); // Active le Clic 6
              });
@@ -265,6 +261,7 @@
         function showDiscordImage() {
             if (isTyping) return;
             
+            playClickSound();
             dialogueBox.style.display = 'none';
             
             zoneAudio.pause(); // Arrête l'ancienne musique
@@ -278,11 +275,11 @@
 
             // Active le Clic 7 pour la suite
             discordScreen.addEventListener('click', nextScene, { once: true }); 
-            console.log("Image Discord révélée. Prêt pour la suite (Clic 7).");
         }
         
         // Clic 7 : Clic sur l'Image (Transition vers la Zone 2 ou la suite)
         function nextScene() {
+             playClickSound();
              discordMusic.pause(); // Arrête la musique de transition
              // Lance le fondu de disparition
              discordScreen.style.opacity = 0;
@@ -295,29 +292,39 @@
         }
 
 
-        // --- FONCTION MACHINE À ÉCRIRE (Avec bruitage) ---
+        // --- FONCTION MACHINE À ÉCRIRE (CORRIGÉE : Joue le son 1 fois et l'arrête) ---
         function typeWriter(text, targetElement, callback) {
             if(typingInterval) clearInterval(typingInterval);
             
+            // 1. ARRÊTER le son s'il jouait (pour éviter les superpositions entre dialogues)
+            if (isTypingAudioPlaying) {
+                typeSound.pause();
+                typeSound.currentTime = 0;
+                isTypingAudioPlaying = false;
+            }
+
             isTyping = true;
             targetElement.innerHTML = '';
             targetElement.classList.add('cursor-active');
             let i = 0;
 
+            // 2. DÉMARRER le son au début du texte
+            typeSound.play().catch(e => {}); 
+            isTypingAudioPlaying = true;
+
+
             typingInterval = setInterval(() => {
                 if (i < text.length) {
                     targetElement.innerHTML += text.charAt(i);
                     i++;
-                    
-                    // Bruit de frappe : utiliser cloneNode(true) pour ne pas interrompre l'ancien son
-                    try {
-                        let soundClone = typeSound.cloneNode(true);
-                        soundClone.volume = 0.3; 
-                        soundClone.play();
-                    } catch (e) { }
-
                 } else {
                     clearInterval(typingInterval);
+                    
+                    // 3. ARRÊTER le son à la fin du texte
+                    typeSound.pause();
+                    typeSound.currentTime = 0; // Remet au début pour le prochain dialogue
+                    isTypingAudioPlaying = false;
+                    
                     targetElement.classList.remove('cursor-active');
                     isTyping = false;
                     if (callback) callback();
