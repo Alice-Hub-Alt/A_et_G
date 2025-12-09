@@ -160,6 +160,12 @@
         Ton navigateur ne supporte pas l'audio HTML5.
     </audio>
 
+    <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/71m48m1v9z9y4v7d2q9e3/Typewriter-Sound.mp3?rlkey=2n9i2f9g0i70f1g7q9s8q8o6k&st=m6w2b3v6&dl=0"></audio>
+
+    <audio id="click-sound" src="https://dl.dropboxusercontent.com/scl/fi/o28z5d2yv3x9f4j0m2c7h/Confirm-Click-Sound.mp3?rlkey=1c4x4t8t0j8n0d8p9p7p3p3v6&st=u9i4c0g4&dl=0"></audio>
+
+    <audio id="discord-music" loop src="https://dl.dropboxusercontent.com/scl/fi/8w03j8k7h1p5d8j2r2t8u/Cyberpunk-Uplifting-Track.mp3?rlkey=4m6j5k9j5l8p7n6r3q0h1w9e4&st=n0g7v0r9&dl=0"></audio>
+
     <div id="intro-overlay-zone1">
         Zone 1 : La Grotte Illusoire <br><br> (Cliquer pour continuer)
     </div>
@@ -194,6 +200,9 @@
         const thoughtBox = document.getElementById('thought-box');
         const thoughtTextElement = document.getElementById('thought-text');
         const zoneAudio = document.getElementById('zone-audio');
+        const typeSound = document.getElementById('type-sound'); // NOUVEAU
+        const clickSound = document.getElementById('click-sound'); // NOUVEAU
+        const discordMusic = document.getElementById('discord-music'); // NOUVEAU
         const overlay = document.getElementById('intro-overlay-zone1');
         const pageClickHandler = document.getElementById('page-click-handler');
         const discordScreen = document.getElementById('discord-screen');
@@ -202,7 +211,7 @@
 
         // Clic 1 : Démarrer la scène (Musique + Révélation du fond)
         overlay.addEventListener('click', function() {
-            zoneAudio.play().catch(error => { console.log("Audio bloqué."); });
+            zoneAudio.play().catch(error => { console.log("Audio zone 1 bloqué."); });
             overlay.style.display = 'none';
             pageClickHandler.style.display = 'block'; // Active le Clic 2
         }, { once: true });
@@ -220,6 +229,7 @@
         // Clic 3 : Fait disparaître la boîte pour révéler le bouton "Penser"
         function handleDialogueClick() {
             if (isTyping) return;
+            clickSound.play().catch(e => {}); // Bruit de clic pour la validation
 
             dialogueBox.style.display = 'none';
             thinkButton.style.display = 'block'; // Affiche le bouton Penser
@@ -227,6 +237,8 @@
         
         // Clic 4 : Clic sur le bouton "Penser" (Révélation de la Pensée)
         function showThought() {
+            clickSound.play().catch(e => {}); // Bruit de clic pour le bouton
+            
             thinkButton.style.display = 'none';
             thoughtBox.style.display = 'block';
             
@@ -245,15 +257,17 @@
              });
         }
 
-        // Clic 6 : Clic sur l'Annonce Discord (Révélation de l'Image en fondu)
+        // Clic 6 : Clic sur l'Annonce Discord (Révélation de l'Image en fondu et CHANGEMENT DE MUSIQUE)
         function showDiscordImage() {
             if (isTyping) return;
             
             dialogueBox.style.display = 'none';
             
+            zoneAudio.pause(); // Arrête l'ancienne musique
+            discordMusic.play().catch(e => {}); // Démarre la nouvelle ambiance
+
             // Révélation de l'image
             discordScreen.style.display = 'block';
-            // Lancement du fondu
             setTimeout(() => {
                 discordScreen.style.opacity = 1;
             }, 50); 
@@ -265,6 +279,7 @@
         
         // Clic 7 : Clic sur l'Image (Transition vers la Zone 2 ou la suite)
         function nextScene() {
+             discordMusic.pause(); // Arrête la musique de transition
              // Lance le fondu de disparition
              discordScreen.style.opacity = 0;
              setTimeout(() => {
@@ -276,7 +291,7 @@
         }
 
 
-        // --- FONCTION MACHINE À ÉCRIRE ---
+        // --- FONCTION MACHINE À ÉCRIRE (Avec bruitage) ---
         function typeWriter(text, targetElement, callback) {
             if(typingInterval) clearInterval(typingInterval);
             
@@ -289,6 +304,14 @@
                 if (i < text.length) {
                     targetElement.innerHTML += text.charAt(i);
                     i++;
+                    
+                    // NOUVEAU : Bruit de frappe
+                    try {
+                        let soundClone = typeSound.cloneNode(true);
+                        soundClone.volume = 0.3; 
+                        soundClone.play();
+                    } catch (e) { }
+
                 } else {
                     clearInterval(typingInterval);
                     targetElement.classList.remove('cursor-active');
