@@ -59,6 +59,10 @@
             transform: translateX(-50%);
             z-index: 10;
         }
+        /* Curseur de clic activé lorsque le texte est complet */
+        .dialogue-ready {
+            cursor: pointer;
+        }
 
         #dialogue-text {
             font-size: 0.8em;
@@ -101,7 +105,7 @@
             border: 2px dashed #ff00ff;
             padding: 15px;
             box-sizing: border-box;
-            cursor: pointer; /* Curseur de clic ajouté */
+            cursor: pointer; 
             position: fixed;
             bottom: 30px;
             left: 50%;
@@ -179,6 +183,9 @@
         let typingInterval;
         let isTyping = false;
         let isTypingAudioPlaying = false; 
+        
+        // NOUVELLE VARIABLE : Pour gérer l'interruption de la frappe
+        let skipRequested = false; 
 
         const dialogueBox = document.getElementById('dialogue-box');
         const dialogueTextElement = document.getElementById('dialogue-text');
@@ -198,11 +205,12 @@
 
         // --- FONCTIONS CLÉS ---
 
-        // Fonction pour jouer le son de clic/validation (OMORI)
         function playClickSound() {
             clickSound.cloneNode(true).play().catch(e => {}); 
         }
 
+        // --- GESTIONNAIRES D'ÉVÉNEMENTS GÉNÉRAUX ---
+        
         // Clic 1 : Démarrer la scène 
         overlay.addEventListener('click', function() {
             zoneAudio.play().catch(error => { console.log("Audio zone 1 bloqué."); });
@@ -215,7 +223,10 @@
             pageClickHandler.style.display = 'none';
             dialogueBox.style.display = 'block';
             
-            typeWriter(initialText, dialogueTextElement, false, () => { // false = PAS silencieux
+            // On attache un écouteur de clic pour le skip, qu'on va retirer après
+            dialogueBox.addEventListener('click', skipText, false); 
+
+            typeWriter(initialText, dialogueTextElement, false, () => { 
                 dialogueBox.addEventListener('click', handleDialogueClick, { once: true }); 
             });
         }, { once: true });
@@ -223,32 +234,33 @@
         // Clic 3 : Clic sur la boîte de dialogue (VALIDE le texte, révèle le bouton)
         function handleDialogueClick() {
             if (isTyping) return;
-            // PAS DE SON ICI
-
             dialogueBox.style.display = 'none';
             thinkButton.style.display = 'block'; 
         }
         
         // Clic 4 : Clic sur le bouton "Penser" (Révélation de la Pensée)
         function showThought() {
-            playClickSound(); // <-- SON UNIQUEMENT AU CLIC SUR LE BOUTON
+            playClickSound(); // SON UNIQUEMENT AU CLIC SUR LE BOUTON
             
             thinkButton.style.display = 'none';
             thoughtBox.style.display = 'block';
             
-            typeWriter(thoughtText, thoughtTextElement, true, () => { // true = SILENCIEUX
+            thoughtBox.addEventListener('click', skipText, false); // Active le skip sur la pensée
+
+            typeWriter(thoughtText, thoughtTextElement, true, () => { // SILENCIEUX
                 thoughtBox.addEventListener('click', continueToDiscord, { once: true }); // Active le Clic 5
             });
         }
 
         // Clic 5 : Clic sur la Pensée (Annonce Discord)
         function continueToDiscord() {
-             // CORRIGÉ : PAS DE SON ICI. L'idée ou la pensée se termine en silence.
-
+             // PAS DE SON ICI
              thoughtBox.style.display = 'none';
              dialogueBox.style.display = 'block'; 
              
-             typeWriter(discordIntroText, dialogueTextElement, false, () => { // false = PAS silencieux
+             dialogueBox.addEventListener('click', skipText, false); // Active le skip sur l'annonce Discord
+
+             typeWriter(discordIntroText, dialogueTextElement, false, () => { // Pas silencieux
                 dialogueBox.addEventListener('click', showDiscordImage, { once: true }); // Active le Clic 6
              });
         }
@@ -276,24 +288,54 @@
         
         // Clic 7 : Clic sur l'Image (Transition vers la Zone 2 ou la suite)
         function nextScene() {
-             // PAS DE SON ICI
              discordMusic.pause(); 
-             // Lance le fondu de disparition
              discordScreen.style.opacity = 0;
              setTimeout(() => {
                  discordScreen.style.display = 'none';
-                 // *** ICI COMMENCE LA ZONE 2 ***
                  console.log("Fondu de l'image terminé. Passage à la suite.");
                  // window.location.href = 'zone2.html'; 
              }, 2000); 
         }
 
+        // --- NOUVELLE FONCTION DE SKIP ---
+        function skipText(event) {
+            // Vérifie si l'animation est en cours (isTyping est true)
+            if (isTyping) {
+                skipRequested = true;
+                // Empêche le clic de déclencher le handleDialogueClick / continueToDiscord juste après
+                event.stopPropagation();
+            }
+        }
 
-        // --- FONCTION MACHINE À ÉCRIRE (Mise à jour pour gérer le silence) ---
+
+        // --- FONCTION MACHINE À ÉCRIRE (Mise à jour pour gérer le silence ET le skip) ---
         function typeWriter(text, targetElement, isSilent, callback) {
             if(typingInterval) clearInterval(typingInterval);
             
-            // 1. Gérer le son s'il est actif
+            // Réinitialiser le flag de skip
+            skipRequested = false;
+            
+            // Fonction pour finaliser l'affichage
+            const finalizeTyping = () => {
+                clearInterval(typingInterval);
+                
+                // Arrêter le son si actif
+                if (isTypingAudioPlaying) {
+                    typeSound.pause();
+                    typeSound.currentTime = 0; 
+                    isTypingAudioPlaying = false;
+                }
+                
+                // Nettoyer les écouteurs de skip
+                dialogueBox.removeEventListener('click', skipText, false);
+                thoughtBox.removeEventListener('click', skipText, false);
+
+                targetElement.classList.remove('cursor-active');
+                isTyping = false;
+                if (callback) callback();
+            };
+
+            // Gérer le son s'il est actif
             if (isTypingAudioPlaying) {
                 typeSound.pause();
                 typeSound.currentTime = 0;
@@ -305,29 +347,27 @@
             targetElement.classList.add('cursor-active');
             let i = 0;
 
-            // 2. DÉMARRER le son UNIQUEMENT si isSilent n'est PAS VRAI
+            // DÉMARRER le son UNIQUEMENT si !isSilent
             if (!isSilent) {
                 typeSound.play().catch(e => {}); 
                 isTypingAudioPlaying = true;
             }
 
             typingInterval = setInterval(() => {
+                // 1. Logique de Skip
+                if (skipRequested) {
+                    targetElement.innerHTML = text; // Affiche tout le texte
+                    finalizeTyping();
+                    return;
+                }
+                
+                // 2. Logique de Frappe normale
                 if (i < text.length) {
                     targetElement.innerHTML += text.charAt(i);
                     i++;
                 } else {
-                    clearInterval(typingInterval);
-                    
-                    // 3. ARRÊTER le son s'il était actif
-                    if (isTypingAudioPlaying) {
-                        typeSound.pause();
-                        typeSound.currentTime = 0; 
-                        isTypingAudioPlaying = false;
-                    }
-                    
-                    targetElement.classList.remove('cursor-active');
-                    isTyping = false;
-                    if (callback) callback();
+                    targetElement.innerHTML = text; // Affichage final (sécurité)
+                    finalizeTyping();
                 }
             }, 30);
         }
