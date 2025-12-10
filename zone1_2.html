@@ -112,12 +112,21 @@
         <span id="dialogue-text"></span>
     </div>
     
-    <img id="screen1" class="conv-screen" src="https://i.imgur.com/QBa0Hkv.png" alt="Screen 1">
-    <img id="screen2" class="conv-screen" src="https://i.imgur.com/DAcEnVA.png" alt="Screen 2">
-    <img id="screen3" class="conv-screen" src="https://i.imgur.com/sjenGQe.png" alt="Screen 3">
-    <img id="screen4" class="conv-screen" src="https://i.imgur.com/4OMCAbt.png" alt="Screen 4">
-    <img id="screen5" class="conv-screen" src="https://i.imgur.com/Ll5DcFY.png" alt="Screen 5 - Meilleur ami 1">
-    <img id="screen6" class="conv-screen" src="https://i.imgur.com/Ug7Zv5N.png" alt="Screen 6 - Meilleur ami 2">
+    <img id="screen_a1" class="conv-screen" src="https://i.imgur.com/XA7ud3Z.png" alt="Screen 1 (Evolution)">
+    <img id="screen_a2" class="conv-screen" src="https://i.imgur.com/AW3Nnom.png" alt="Screen 2 (Evolution)">
+    <img id="screen_a3" class="conv-screen" src="https://i.imgur.com/aValYxk.png" alt="Screen 3 (Evolution)">
+    
+    <img id="screen_b1" class="conv-screen" src="https://i.imgur.com/4zgNYwT.png" alt="Screen Soucis">
+    <img id="screen_c1" class="conv-screen" src="https://i.imgur.com/3One5eE.png" alt="Screen Condition 1">
+    <img id="screen_c2" class="conv-screen" src="https://i.imgur.com/TU3SW7O.png" alt="Screen Condition 2">
+
+    <img id="screen_d1" class="conv-screen" src="https://i.imgur.com/QBa0Hkv.png" alt="Screen Passions 1">
+    <img id="screen_d2" class="conv-screen" src="https://i.imgur.com/DAcEnVA.png" alt="Screen Passions 2">
+    <img id="screen_d3" class="conv-screen" src="https://i.imgur.com/sjenGQe.png" alt="Screen Passions 3">
+
+    <img id="screen_e1" class="conv-screen" src="https://i.imgur.com/Ll5DcFY.png" alt="Screen Meilleur ami 1">
+    <img id="screen_e2" class="conv-screen" src="https://i.imgur.com/Ug7Zv5N.png" alt="Screen Meilleur ami 2">
+    <img id="screen_e3" class="conv-screen" src="https://i.imgur.com/4OMCAbt.png" alt="Screen Meilleur ami 3">
 
 
     <script>
@@ -125,15 +134,40 @@
         const dialogueSequence = [
             { text: "Mais au fil du temps, Alice compris.", type: "narrator", action: "dialogue" },
             { text: "Ce n'était pas quelqu'un comme les autres, il avais quelque chose d'unique en lui.", type: "narrator", action: "dialogue" },
-            { image: "screen1", action: "show_image_click_to_continue" },
-            { image: "screen2", action: "show_image_click_to_continue" },
-            { image: "screen3", action: "show_image_click_to_continue" },
-            { text: "Il s'intéressais vraiment à elle", type: "narrator", action: "dialogue" },
+            
+            // Screens d'évolution (XA7ud3Z, AW3Nnom, aValYxk)
+            { image: "screen_a1", action: "show_image_click_to_continue" },
+            { image: "screen_a2", action: "show_image_click_to_continue" },
+            { image: "screen_a3", action: "show_image_click_to_continue" },
+            
+            { text: "Il s'intéressais vraiment à elle.", type: "narrator", action: "dialogue" },
+            { text: "Et il se souciais d'elle", type: "narrator", action: "dialogue" },
+            
+            // Screen Soucis (4zgNYwT)
+            { image: "screen_b1", action: "show_image_click_to_continue" },
+
+            { text: "Et il acceptais même ses conditions d'amitié absolument invraisemblable (comme ne jamais se rencontrée, qu'elle ne révèle jamais sa voix, ne montre jamais son visage, ou d'autres trucs objectivement absurde)", type: "narrator", action: "dialogue" },
+            
+            // Screens Condition (3One5eE, TU3SW7O)
+            { image: "screen_c1", action: "show_image_click_to_continue" },
+            { image: "screen_c2", action: "show_image_click_to_continue" },
+
             { text: "Petit à Petit, Alice cessa d'être renfermé sur elle même (enfin, en vrais si elle l'était toujours, mais carrément moins !)", type: "narrator", action: "dialogue" },
-            { image: "screen4", action: "show_image_click_to_continue" },
-            { text: "Puis un beau jour, elle cessa d'être seule", type: "narrator", action: "dialogue" },
-            { image: "screen5", action: "show_image_click_to_continue" },
-            { image: "screen6", action: "show_image_click_to_continue" },
+
+            { text: "Ils partagèrent les mêmes passions.", type: "narrator", action: "dialogue" },
+            
+            // Screens Passions (QBa0Hkv, DAcEnVA, sjenGQe)
+            { image: "screen_d1", action: "show_image_click_to_continue" },
+            { image: "screen_d2", action: "show_image_click_to_continue" },
+            { image: "screen_d3", action: "show_image_click_to_continue" },
+
+            { text: "Puis un beau jour, elle cessa d'être seule.", type: "narrator", action: "dialogue" },
+            
+            // Screens Meilleur Ami (Ll5DcFY, Ug7Zv5N, 4OMCAbt)
+            { image: "screen_e1", action: "show_image_click_to_continue" },
+            { image: "screen_e2", action: "show_image_click_to_continue" },
+            { image: "screen_e3", action: "show_image_click_to_continue" }, // Note : C'était l'ancien screen 4
+            
             { text: "FIN PROVISOIRE DE LA ZONE. (Cliquez pour Zone 2)", type: "narrator", action: "end" }
         ];
 
@@ -153,7 +187,7 @@
         
         typeSound.volume = 0.5;
 
-        // --- FONCTIONS DE BASE (reprises et simplifiées) ---
+        // --- FONCTIONS DE BASE ---
         
         function skipText(event) {
             if (isTyping) {
@@ -162,9 +196,7 @@
             }
         }
         
-        // Fonction de machine à écrire (seul le Narrateur fait du bruit ici)
         function typeWriter(text, targetElement, isSilent, callback) {
-            // ... (Fonction typeWriter complète de la zone1.html) ...
             if(typingInterval) clearInterval(typingInterval);
             
             skipRequested = false;
@@ -218,13 +250,12 @@
             }, 30);
         }
 
-        // --- NOUVELLE LOGIQUE DE SCÈNE ---
+        // --- LOGIQUE DE SCÈNE ---
 
         // Masque l'image précédente si elle existe
         function hideActiveImage(callback) {
             if (activeImageElement) {
                 activeImageElement.style.opacity = 0;
-                // Attend la fin de la transition pour cacher complètement
                 setTimeout(() => {
                     activeImageElement.style.display = 'none';
                     activeImageElement = null;
@@ -242,7 +273,6 @@
                 imageElement.style.display = 'block';
                 activeImageElement = imageElement;
                 
-                // Révélation progressive
                 setTimeout(() => {
                     imageElement.style.opacity = 1;
                     imageElement.addEventListener('click', advanceSequence, { once: true });
@@ -254,7 +284,6 @@
         function advanceSequence() {
             if (isTyping) return;
 
-            // Masque la boîte de dialogue si elle est affichée (utile après une séquence dialogue)
             dialogueBox.style.display = 'none';
 
             if (currentSequenceIndex >= dialogueSequence.length) {
@@ -271,7 +300,7 @@
                     dialogueBox.style.display = 'block';
                     dialogueBox.addEventListener('click', skipText, false);
 
-                    const isSilent = currentEvent.type !== "narrator"; // Seul le narrateur est bruyant
+                    const isSilent = currentEvent.type !== "narrator"; 
                     
                     typeWriter(currentEvent.text, dialogueTextElement, isSilent, () => {
                         dialogueBox.addEventListener('click', advanceSequence, { once: true });
@@ -286,7 +315,7 @@
                 hideActiveImage(() => {
                     dialogueBox.style.display = 'block';
                     typeWriter(currentEvent.text, dialogueTextElement, false, () => {
-                        // On pourrait mettre une redirection ici, mais pour l'instant on reste sur la page.
+                        // Fin de zone, on pourrait mettre une redirection future ici
                     });
                 });
             }
@@ -294,15 +323,11 @@
 
         // Clic 0 : Démarrage initial de la zone
         overlay.addEventListener('click', function() {
-            // Lancement de la musique de Guilian
             zoneAudio.play().catch(error => { console.warn("L'audio de fond a été bloqué.", error); });
             
             overlay.style.display = 'none';
-            // Le premier dialogue se lance directement après la disparition du calque
             advanceSequence(); 
         }, { once: true });
-
-        // Démarrage : l'overlay est le seul élément visible, on attend le clic 0.
     </script>
 </body>
 </html>
