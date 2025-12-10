@@ -24,7 +24,6 @@
             height: 100vh;
             color: white;
             font-family: 'Press Start 2P', monospace;
-            /* On laisse la possibilité de scroll si vraiment un élément est trop grand */
             background-color: rgba(0, 0, 0, 0.5); 
             background-blend-mode: darken;
             cursor: default; 
@@ -82,7 +81,7 @@
         .clickable-door {
             position: absolute;
             width: auto; 
-            height: 200px; /* Taille plus grande, comme tu le voulais */
+            height: 200px; 
             cursor: pointer;
             z-index: 5;
             image-rendering: pixelated; 
@@ -94,26 +93,26 @@
 
         /* Porte de sortie */
         #door-exit {
-            top: 30%; /* Légèrement plus bas pour laisser de la place aux portes du haut */
+            top: 30%; 
             left: 50%;
             transform: translate(-50%, 0);
             width: 300px;
             height: 450px;
         }
         
-        /* Disposition en Arche / Étalement Maximal basé sur les cercles */
+        /* Disposition : ESPACEMENT MAXIMAL */
         
         /* GAUCHE */
-        #door-1 { top: 10%; left: 5%; }    /* Haut gauche */
-        #door-2 { top: 30%; left: 1%; }    /* Milieu haut gauche */
-        #door-3 { top: 50%; left: 1%; }    /* Milieu bas gauche */
-        #door-4 { top: 70%; left: 5%; }    /* Bas gauche */
+        #door-1 { top: 10%; left: 0%; }    /* Très haut, tout à gauche */
+        #door-2 { top: 35%; left: 3%; }    /* Décalé */
+        #door-3 { top: 60%; left: 3%; }    /* Décalé */
+        #door-4 { top: 85%; left: 0%; }    /* Très bas, tout à gauche */
 
         /* DROITE */
-        #door-5 { top: 10%; right: 5%; }   /* Haut droit */
-        #door-6 { top: 30%; right: 1%; }   /* Milieu haut droit */
-        #door-7 { top: 50%; right: 1%; }   /* Milieu bas droit */
-        #door-8 { top: 70%; right: 5%; }   /* Bas droit */
+        #door-5 { top: 10%; right: 0%; }   /* Très haut, tout à droite */
+        #door-6 { top: 35%; right: 3%; }   /* Décalé */
+        #door-7 { top: 60%; right: 3%; }   /* Décalé */
+        #door-8 { top: 85%; right: 0%; }   /* Très bas, tout à droite */
 
     </style>
 </head>
@@ -122,7 +121,7 @@
     <audio id="zone-audio" loop>
         <source src="votre_lien_audio_zone2.mp3" type="audio/mpeg"> 
     </audio>
-    <audio id="thought-sound" src="https://www.dropbox.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=upbycyus&dl=0" loop></audio>
+    <audio id="thought-sound" src="https://www.dropbox.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=upbycyus&dl=0"></audio>
 
     <div id="intro-overlay-zone2">
         <span id="overlay-text"></span>
@@ -176,7 +175,7 @@
             }
         }
         
-        // Typewriter pour les boîtes de PENSÉE (SON JOUÉ EN BOUCLE SIMULANT LA PAROLE)
+        // Typewriter pour les boîtes de PENSÉE (SON GÉRÉ EN JS)
         function typeWriterThought(text, targetElement, useSound, callback) {
             if(typingInterval) clearInterval(typingInterval);
             skipRequested = false;
@@ -187,7 +186,7 @@
                 targetElement.classList.remove('cursor-active');
                 isTyping = false;
                 if (useSound) {
-                    // Arrêt du son de parole
+                    // Arrêt et réinitialisation du son de parole
                     thoughtSound.pause();
                     thoughtSound.currentTime = 0; 
                 }
@@ -200,9 +199,10 @@
             let i = 0;
 
             if (useSound) {
-                // Lancement du son de parole en boucle avant de commencer la frappe
+                // Lancement du son de parole en boucle
+                thoughtSound.loop = true; // On gère la boucle ici
                 thoughtSound.play().catch(e => { 
-                    console.warn("Le son de pensée n'a pas pu être joué (Bloqué ou Problème de lien).", e); 
+                    console.warn("Le son de pensée n'a pas pu être joué (Bloqué).", e); 
                 }); 
             }
 
