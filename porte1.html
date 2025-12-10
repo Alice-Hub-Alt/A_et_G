@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Visionneuse Livre</title>
+<title>Visionneuse</title>
 
 <style>
     body {
@@ -21,160 +21,185 @@
         font-size: 40px;
         color: red;
         cursor: pointer;
-        z-index: 10;
         user-select: none;
+        z-index: 1000;
     }
 
     /* Gif cliquable */
-    .book-gif {
+    .open-viewer {
         position: absolute;
-        bottom: 20px;
+        bottom: 30px;
         left: 50%;
         transform: translateX(-50%);
-        width: 230px; /* taille GRANDE */
+        width: 260px;        /* augmenté */
+        height: auto;
         cursor: pointer;
-        z-index: 5;
+        z-index: 50;
     }
 
     /* Boite de pensée */
     .thought-box {
         position: absolute;
-        bottom: 150px;
+        bottom: 140px;
         left: 50%;
         transform: translateX(-50%);
-        background: rgba(255, 150, 200, 0.8);
-        padding: 20px 25px;
-        border-radius: 20px;
-        width: 60%;
-        font-size: 22px;
+        background: rgba(255, 150, 220, 0.85);
+        border: 3px solid pink;
+        padding: 20px;
+        width: 380px;
+        font-size: 20px;
+        border-radius: 10px;
         text-align: center;
-        animation: fadeIn 0.7s ease;
-        z-index: 20;
+        color: white;
+        animation: pop 0.3s ease-out;
+        z-index: 200;
     }
 
-    /* Visionneuse */
-    .viewer {
+    @keyframes pop {
+        from { transform: scale(0.7) translateX(-50%); opacity: 0; }
+        to   { transform: scale(1) translateX(-50%); opacity: 1; }
+    }
+
+    /* Overlay visionneuse (sans fond noir) */
+    .viewer-overlay {
         position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 65%;
-        height: 65%;
+        top: 0; left: 0;
+        width: 100%;
+        height: 100%;
         display: none;
         justify-content: center;
         align-items: center;
-        z-index: 50;
+        z-index: 999;
     }
 
-    /* Fond opaque + image */
+    /* Contenu de la visionneuse */
     .viewer-content {
         position: relative;
-        width: 100%;
-        height: 100%;
+        width: 60%;                      /* réduit */
+        max-width: 750px;                /* réduit */
         background-image: url("https://img.itch.zone/aW1hZ2UvMjkwMzEwMC8xNzM2NzE1My5wbmc=/original/dK58Rm.png");
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
+        padding: 60px 40px 60px 40px;
         display: flex;
-        align-items: center;
-        padding: 40px;
+        gap: 40px;
+        pointer-events: auto;
     }
 
-    /* IMAGE dans la visionneuse — déplacée à droite & agrandie */
+    /* Image dans la visionneuse */
     .viewer-image {
-        width: 48%;  
-        margin-left: 90px; /* plus à droite */
-        margin-top: 10px;
+        max-width: 55%;                 /* plus grande */
+        margin-left: 50px;              /* plus à droite */
     }
 
-    /* TEXTE — plus large & plus à droite */
+    /* Texte */
     .viewer-text {
-        width: 45%;
-        font-size: 26px;
         color: white;
-        margin-left: 60px;
-        white-space: pre-line;
-        text-shadow: 2px 2px 4px black;
+        font-size: 24px;
+        width: 50%;                     /* plus large */
+        margin-left: 30px;              /* plus d'espace */
+        margin-top: 20px;
+        white-space: pre-line;          /* retour à la ligne */
     }
 
-    /* Flèche suivante */
-    .next-arrow {
+    /* Flèche droite */
+    .arrow-right {
         position: absolute;
-        right: 20px;
+        right: -50px;
         top: 50%;
         transform: translateY(-50%);
-        font-size: 55px;
+        font-size: 60px;
         color: red;
         cursor: pointer;
         user-select: none;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translate(-50%, -40%); }
-        to { opacity: 1; transform: translate(-50%, -50%); }
     }
 </style>
 </head>
 
 <body>
 
-<!-- Bouton retour -->
-<div class="back-button" onclick="location.href='zone2_1.html'">←</div>
+    <div class="back-button" onclick="window.location.href='zone2_1.html'">⮜</div>
 
-<!-- Gif cliquable -->
-<img src="https://media.tenor.com/wgmpvhHPSkkAAAAj/book-trophy-pixel-art.gif" class="book-gif" onclick="openViewer()">
+    <img src="https://media.tenor.com/wgmpvhHPSkkAAAAj/book-trophy-pixel-art.gif"
+         class="open-viewer"
+         id="openBook">
 
-<!-- Boite pensée d’arrivée -->
-<div id="introThought" class="thought-box">Oh tient un livre, dommage que je soit illettré !</div>
+    <div class="thought-box" id="thought1">Oh tient un livre, dommage que je soit illettré !</div>
 
-<!-- Visionneuse d’images -->
-<div class="viewer" id="viewer" onclick="clickOutside(event)">
-    <div class="viewer-content" id="viewerBox">
-        <img id="viewerImage" class="viewer-image">
-        <div id="viewerText" class="viewer-text"></div>
-        <div class="next-arrow" onclick="nextImage(event)">→</div>
+    <!-- Visionneuse -->
+    <div class="viewer-overlay" id="viewerOverlay">
+
+        <div class="viewer-content" id="viewerContent">
+
+            <img id="viewerImage" class="viewer-image" src="">
+
+            <div id="viewerText" class="viewer-text"></div>
+
+            <div class="arrow-right" id="nextArrow">⮞</div>
+
+        </div>
+
     </div>
-</div>
 
 <script>
-    let images = [
-        { src: "https://i.imgur.com/qmbKHzv.png", text: "On s'en fou\nVraiment c'est nul !" },
-        { src: "https://i.imgur.com/xzZ06bS.png", text: "Mais quand même on sais pas\nEt ça reste triste." }
-    ];
+let images = [
+    "https://i.imgur.com/qmbKHzv.png",
+    "https://i.imgur.com/xzZ06bS.png"
+];
 
-    let currentIndex = 0;
+let texts = [
+    "On s'en fou\nVraiment c'est nul !",
+    "Mais quand même on sais pas"
+];
 
-    function openViewer() {
-        document.getElementById("introThought").style.display = "none";
+let index = 0;
 
-        let box = document.createElement("div");
-        box.className = "thought-box";
-        box.textContent = "Espérons qu'il y ai des images !";
-        document.body.appendChild(box);
+const overlay = document.getElementById("viewerOverlay");
+const content = document.getElementById("viewerContent");
 
-        setTimeout(() => box.remove(), 1800);
+document.getElementById("openBook").addEventListener("click", () => {
+    showThought("Espérons qu'il y ai des images !");
+    setTimeout(() => {
+        overlay.style.display = "flex";
+        loadImage();
+    }, 600);
+});
 
-        updateViewer();
-        document.getElementById("viewer").style.display = "flex";
+document.getElementById("nextArrow").addEventListener("click", () => {
+    index = (index + 1) % images.length;
+    loadImage();
+});
+
+/* Fermer si on clique en dehors du PNG */
+overlay.addEventListener("click", (e) => {
+    if (!content.contains(e.target)) {
+        overlay.style.display = "none";
     }
+});
 
-    function updateViewer() {
-        document.getElementById("viewerImage").src = images[currentIndex].src;
-        document.getElementById("viewerText").textContent = images[currentIndex].text;
-    }
+function loadImage() {
+    document.getElementById("viewerImage").src = images[index];
+    document.getElementById("viewerText").textContent = texts[index];
+}
 
-    function nextImage(event) {
-        event.stopPropagation();
-        currentIndex = (currentIndex + 1) % images.length;
-        updateViewer();
-    }
+/* Système boîte de pensée */
+function showThought(txt) {
+    let box = document.createElement("div");
+    box.className = "thought-box";
+    box.textContent = txt;
+    document.body.appendChild(box);
 
-    function clickOutside(event) {
-        let viewerBox = document.getElementById("viewerBox");
-        if (!viewerBox.contains(event.target)) {
-            document.getElementById("viewer").style.display = "none";
-        }
-    }
+    playSound();
+
+    setTimeout(() => box.remove(), 1800);
+}
+
+function playSound() {
+    let audio = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_efea2536c1.mp3");
+    audio.volume = 0.3;
+    audio.play();
+}
 </script>
 
 </body>
