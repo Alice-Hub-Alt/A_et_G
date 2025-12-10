@@ -33,11 +33,11 @@ body{
 
 /* Livre cliquable */
 #book-btn{
-  width:220px;     /* taille augmentée comme demandé */
+  width:320px;
   height:auto;
   cursor:pointer;
   image-rendering:pixelated;
-  margin-bottom:18px;
+  margin-bottom:22px;
   transition:transform .18s;
   z-index:10;
 }
@@ -86,8 +86,8 @@ body{
   top:50%;
   left:50%;
   transform:translate(-50%, -50%);
-  width:950px;          /* taille fixe, stable */
-  height:530px;
+  width:900px;
+  height:500px;
   background:url('https://img.itch.zone/aW1hZ2UvMjkwMzEwMC8xNzM2NzE1My5wbmc=/original/dK58Rm.png')
              center/contain no-repeat;
   display:none;
@@ -95,7 +95,7 @@ body{
   pointer-events:auto;
 }
 
-/* Empêche les clics d'être captés par le fond */
+/* Zone invisible autour pour fermer */
 #viewer-bg-block{
   position:fixed;
   top:0; left:0;
@@ -105,7 +105,7 @@ body{
   z-index:4000;
 }
 
-/* Bouton retour (flèche rouge) */
+/* Bouton retour */
 #back-btn{
   position:fixed;
   top:14px;
@@ -116,42 +116,40 @@ body{
   z-index:6000;
 }
 
-/* Contenu interne de la visionneuse */
+/* CONTENU visionneuse, désormais libre */
 #viewer-content{
   position:absolute;
   top:0;
   left:0;
   width:100%;
   height:100%;
-  display:flex;
-  padding:28px;
-  box-sizing:border-box;
 }
 
-/* Image dans la visionneuse */
+/* IMAGE LIBREMENT POSITIONNABLE */
 #viewer-img{
-  height:350px;        /* taille réduite */
-  width:auto;
+  position:absolute;
+  top:110px;     /* CHANGE ICI pour la hauteur */
+  left:70px;     /* CHANGE ICI pour la position horizontale */
+  width:430px;   /* CHANGE ICI pour la taille */
+  height:auto;
   image-rendering:pixelated;
-  flex-shrink:0;
 }
 
-/* Zone de texte dans la visionneuse */
+/* TEXTE LIBREMENT POSITIONNABLE */
 #viewer-text{
-  margin-left:50px;     /* bon espacement image/texte */
+  position:absolute;
+  top:110px;     /* CHANGE ICI pour la hauteur du texte */
+  left:540px;    /* CHANGE ICI pour sa position horizontale */
+  width:320px;
   font-size:0.9em;
   color:white;
-  width:340px;
   line-height:1.6;
-  display:flex;
-  align-items:flex-start;    /* aligne le texte en haut */
-  padding-top:6px;           /* calage précis */
 }
 
-/* Flèche de navigation */
+/* Flèche suivante */
 #next-arrow{
   position:absolute;
-  right:20px;
+  right:30px;
   top:50%;
   transform:translateY(-50%);
   font-size:42px;
@@ -175,7 +173,7 @@ body{
      src="https://media.tenor.com/wgmpvhHPSkkAAAAj/book-trophy-pixel-art.gif"
      alt="Livre">
 
-<!-- Zone grise cliquable pour fermer la visionneuse -->
+<!-- Zone invisible autour pour fermer -->
 <div id="viewer-bg-block"></div>
 
 <!-- Visionneuse -->
@@ -240,7 +238,7 @@ dialogueBox.addEventListener("click", ()=>{
   dialogueBox.style.display="none";
 });
 
-/* Premier message au chargement */
+/* Premier message */
 window.onload = ()=>{
   typeWriter("Oh tient un livre, dommage que je soit illettré !");
 };
@@ -259,39 +257,39 @@ const images=[
 
 let index=0;
 
-/* Ouvrir */
+/* Ouvrir la visionneuse */
 document.getElementById("book-btn").addEventListener("click", ()=>{
   typeWriter("Espérons qu'il y ai des images !");
   index=0;
   openViewer();
 });
 
-/* Met à jour image + texte */
+/* Actualiser */
 function refreshViewer(){
   viewerImg.src = images[index].img;
   viewerText.innerHTML = images[index].text;
 }
 
-/* Ouvre */
+/* Ouvrir */
 function openViewer(){
   refreshViewer();
   viewer.style.display="block";
   viewerBlock.style.display="block";
 }
 
-/* Ferme */
+/* Fermer */
 function closeViewer(){
   viewer.style.display="none";
   viewerBlock.style.display="none";
 }
 
-/* Flèche suivante */
+/* Suivant */
 nextArrow.addEventListener("click", ()=>{
   index=(index+1)%images.length;
   refreshViewer();
 });
 
-/* Clic à l’extérieur */
+/* Clic extérieur */
 viewerBlock.addEventListener("click", closeViewer);
 </script>
 
