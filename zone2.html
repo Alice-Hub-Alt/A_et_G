@@ -41,17 +41,17 @@
             z-index: 1000;
             cursor: pointer;
             font-size: 1.1em;
-            color: #ff00ff; /* Rose de la pensée */
+            color: #ff00ff;
             text-shadow: 2px 2px 4px rgba(255, 0, 255, 0.3);
             text-align: center;
         }
 
-        /* --- BOÎTE DE PENSÉE (Remplace la boîte de dialogue blanche) --- */
+        /* --- BOÎTE DE PENSÉE --- */
         #thought-box {
             width: 80%;
             height: 20vh;
             background-color: rgba(0, 0, 0, 0.7);
-            border: 3px dashed #ff00ff; /* Contour de pensée */
+            border: 3px dashed #ff00ff;
             padding: 20px;
             box-sizing: border-box;
             position: fixed;
@@ -59,14 +59,14 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
-            display: none; /* Cachée par défaut */
+            display: none;
             cursor: pointer;
         }
 
         #thought-text {
             font-size: 0.8em;
             line-height: 1.5;
-            color: #ff00ff; /* Texte de pensée */
+            color: #ff00ff;
         }
 
         .cursor-active {
@@ -82,7 +82,7 @@
         .clickable-door {
             position: absolute;
             width: auto; 
-            height: 200px; 
+            height: 150px; /* RÉDUCTION DE LA TAILLE ICI ! */
             cursor: pointer;
             z-index: 5;
             image-rendering: pixelated; 
@@ -101,19 +101,19 @@
             height: 450px;
         }
         
-        /* Disposition en Arche (Demi-Cercle) */
+        /* Disposition en Arche (Demi-Cercle) - Ajustement des positions Y suite au redimensionnement */
         
         /* GAUCHE */
-        #door-1 { top: 10%; left: 10%; }
+        #door-1 { top: 15%; left: 10%; }
         #door-2 { top: 35%; left: 5%; }
-        #door-3 { top: 60%; left: 5%; }
-        #door-4 { top: 85%; left: 10%; }
+        #door-3 { top: 55%; left: 5%; }
+        #door-4 { top: 75%; left: 10%; }
 
         /* DROITE */
-        #door-5 { top: 10%; right: 10%; }
+        #door-5 { top: 15%; right: 10%; }
         #door-6 { top: 35%; right: 5%; }
-        #door-7 { top: 60%; right: 5%; }
-        #door-8 { top: 85%; right: 10%; }
+        #door-7 { top: 55%; right: 5%; }
+        #door-8 { top: 75%; right: 10%; }
 
     </style>
 </head>
@@ -122,7 +122,7 @@
     <audio id="zone-audio" loop>
         <source src="votre_lien_audio_zone2.mp3" type="audio/mpeg"> 
     </audio>
-    <audio id="thought-sound" src="https://www.dropbox.com/scl/fi/uvpro4u58k9jpemt7oc3y/pickupCoin.wav?rlkey=gfyz1jmxoql4wk2grfw334ch8&st=q6tdy3em&dl=0"></audio>
+    <audio id="thought-sound" src="https://www.dropbox.com/s/uvpro4u58k9jpemt7oc3y/pickupCoin.wav?dl=1"></audio>
 
     <div id="intro-overlay-zone2">
         <span id="overlay-text"></span>
@@ -157,7 +157,7 @@
         const thoughtTextElement = document.getElementById('thought-text');
         const overlay = document.getElementById('intro-overlay-zone2');
         const overlayTextElement = document.getElementById('overlay-text');
-        const thoughtSound = document.getElementById('thought-sound'); // NOUVEAU SON
+        const thoughtSound = document.getElementById('thought-sound'); 
         const zoneAudio = document.getElementById('zone-audio');
         
         const allDoors = document.querySelectorAll('.clickable-door');
@@ -199,9 +199,6 @@
             let i = 0;
 
             if (useSound) {
-                // Pour que le son soit joué à chaque caractère (effet machine à écrire)
-                // C'est souvent mieux de le jouer une seule fois pour les petits textes de pensée. 
-                // Je le joue une seule fois ici pour éviter la saturation du son.
                 thoughtSound.play().catch(e => {}); 
             }
 
@@ -243,9 +240,7 @@
             thoughtBox.style.display = 'block';
             thoughtBox.addEventListener('click', skipText, false);
             
-            // Le son est joué (useSound = true)
             typeWriterThought(message, thoughtTextElement, true, () => {
-                // Attendre le clic pour cacher la boîte de pensée
                 thoughtBox.addEventListener('click', () => { 
                     thoughtBox.style.display = 'none'; 
                     if (callback) callback();
@@ -296,7 +291,6 @@
                         overlay.style.display = 'none';
                         // 3. Lancer l'audio et afficher le premier message sur la porte
                         zoneAudio.play().catch(e => console.error("Audio blocked"));
-                        // On lance directement la première pensée, car initialDoorMessageShown est faux au départ
                         showThought(initialDoorMessage, () => {
                             initialDoorMessageShown = true;
                         });
