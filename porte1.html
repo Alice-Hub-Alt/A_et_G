@@ -116,42 +116,34 @@ body{
   z-index:6000;
 }
 
-/* Visionneuse d’images */
-#viewer-container{
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%, -50%);
-  width:900px; /* Taille du conteneur du livre ouvert */
-  height:500px;
-  background:url('https://img.itch.zone/aW1hZ2UvMjkwMzEwMC8xNzM2NzE1My5wbmc=/original/dK58Rm.png')
-             center/contain no-repeat;
-  display:none;
-  z-index:5000;
-  pointer-events:auto;
+/* CONTENU visionneuse, désormais libre */
+#viewer-content{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
 }
 
 /* IMAGE LIBREMENT POSITIONNABLE */
 #viewer-img{
-  position:absolute;
-  top:100px;     /* Positionnée un peu plus bas */
-  right:100px;   /* Décalée à droite (à 100px du bord droit du conteneur) */
-  left: unset;   /* Annule l'ancienne valeur left:10px */
-  width:250px;   /* BEAUCOUP plus petite */
-  height:auto;
-  image-rendering:pixelated;
+  position:absolute;
+  top:110px;     /* CHANGE ICI pour la hauteur */
+  left:70px;     /* CHANGE ICI pour la position horizontale */
+  width:430px;   /* CHANGE ICI pour la taille */
+  height:auto;
+  image-rendering:pixelated;
 }
 
 /* TEXTE LIBREMENT POSITIONNABLE */
 #viewer-text{
-  position:absolute;
-  top:360px;     /* BEAUCOUP plus bas que l'image pour servir de légende */
-  right:120px;   /* Décalé à droite */
-  left: unset;   /* Annule l'ancienne valeur left:10px */
-  width:220px;   /* Réduit la largeur pour s'aligner sous l'image */
-  font-size:0.9em;
-  color:white;
-  line-height:1.6;
+  position:absolute;
+  top:110px;     /* CHANGE ICI pour la hauteur du texte */
+  left:540px;    /* CHANGE ICI pour sa position horizontale */
+  width:320px;
+  font-size:0.9em;
+  color:white;
+  line-height:1.6;
 }
 
 /* Flèche suivante */
