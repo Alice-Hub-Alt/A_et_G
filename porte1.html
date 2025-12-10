@@ -10,110 +10,74 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 :root{
-  --pink:#ff66ff;
-  --pink-strong:#ff00ff;
+  --pink:#ff66ff;
+  --pink-strong:#ff00ff;
 }
 
 html,body{
-  margin:0;
-  padding:0;
-  height:100%;
-  font-family:'Press Start 2P', monospace;
-  overflow:hidden;
+  margin:0;
+  padding:0;
+  height:100%;
+  font-family:'Press Start 2P', monospace;
+  overflow:hidden;
 }
 
 /* Fond principal */
 body{
-  background:url('https://blog-eyc.pages.dev/vid/fire/fire.gif') center center no-repeat;
-  background-size:cover;
-  display:flex;
-  align-items:flex-end;
-  justify-content:center;
+  background:url('https://blog-eyc.pages.dev/vid/fire/fire.gif') center center no-repeat;
+  background-size:cover;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
 }
 
 /* Livre cliquable */
 #book-btn{
-  width:320px;
-  height:auto;
-  cursor:pointer;
-  image-rendering:pixelated;
-  margin-bottom:22px;
-  transition:transform .18s;
-  z-index:10;
+  width:320px;
+  height:auto;
+  cursor:pointer;
+  image-rendering:pixelated;
+  margin-bottom:22px;
+  transition:transform .18s;
+  z-index:10;
 }
 #book-btn:hover{
-  transform:scale(1.1);
+  transform:scale(1.1);
 }
 
 /* Dialogue box (pensées) */
 #dialogue-box{
-  position:fixed;
-  left:50%;
-  bottom:26px;
-  transform:translateX(-50%);
-  width:84%;
-  min-height:14vh;
-  max-height:28vh;
-  background:rgba(0,0,0,0.55);
-  border:3px solid var(--pink-strong);
-  padding:18px;
-  color:var(--pink);
-  display:none;
-  z-index:9000;
-  text-shadow:0 0 6px rgba(255,0,255,0.2);
-  overflow:auto;
+  position:fixed;
+  left:50%;
+  bottom:26px;
+  transform:translateX(-50%);
+  width:84%;
+  min-height:14vh;
+  max-height:28vh;
+  background:rgba(0,0,0,0.55);
+  border:3px solid var(--pink-strong);
+  padding:18px;
+  color:var(--pink);
+  display:none;
+  z-index:9000;
+  text-shadow:0 0 6px rgba(255,0,255,0.2);
+  overflow:auto;
 }
 
 #dialogue-text{
-  font-size:0.86em;
-  line-height:1.45;
+  font-size:0.86em;
+  line-height:1.45;
 }
 
 .cursor-active{
-  border-right:0.15em solid var(--pink);
-  animation:blink 0.5s steps(1) infinite;
-  padding-right:6px;
+  border-right:0.15em solid var(--pink);
+  animation:blink 0.5s steps(1) infinite;
+  padding-right:6px;
 }
 
 @keyframes blink{
-  0%,100%{border-color:transparent;}
-  50%{border-color:var(--pink);}
-}
-
-/* Visionneuse d’images */
-#viewer-container{
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%, -50%);
-  width:900px;
-  height:500px;
-  background:url('https://img.itch.zone/aW1hZ2UvMjkwMzEwMC8xNzM2NzE1My5wbmc=/original/dK58Rm.png')
-             center/contain no-repeat;
-  display:none;
-  z-index:5000;
-  pointer-events:auto;
-}
-
-/* Zone invisible autour pour fermer */
-#viewer-bg-block{
-  position:fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  background:transparent;
-  display:none;
-  z-index:4000;
-}
-
-/* Bouton retour */
-#back-btn{
-  position:fixed;
-  top:14px;
-  left:14px;
-  font-size:32px;
-  color:red;
-  cursor:pointer;
-  z-index:6000;
+  0%,100%{border-color:transparent;}
+  50%{border-color:var(--pink);}
 }
 
 /* Visionneuse d’images */
@@ -122,7 +86,7 @@ body{
   top:50%;
   left:50%;
   transform:translate(-50%, -50%);
-  width:900px; /* Taille du conteneur du livre ouvert */
+  width:900px;
   height:500px;
   background:url('https://img.itch.zone/aW1hZ2UvMjkwMzEwMC8xNzM2NzE1My5wbmc=/original/dK58Rm.png')
              center/contain no-repeat;
@@ -131,13 +95,46 @@ body{
   pointer-events:auto;
 }
 
+/* Zone invisible autour pour fermer */
+#viewer-bg-block{
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:transparent;
+  display:none;
+  z-index:4000;
+}
+
+/* Bouton retour */
+#back-btn{
+  position:fixed;
+  top:14px;
+  left:14px;
+  font-size:32px;
+  color:red;
+  cursor:pointer;
+  z-index:6000;
+}
+
+/* CONTENU visionneuse, désormais libre */
+#viewer-content{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+}
+
+/* ********************************************* */
+/* ********** ZONES CORRIGÉES CI-DESSOUS ********* */
+/* ********************************************* */
+
 /* IMAGE LIBREMENT POSITIONNABLE */
 #viewer-img{
   position:absolute;
-  top:100px;     /* Positionnée un peu plus bas */
-  right:100px;   /* Décalée à droite (à 100px du bord droit du conteneur) */
-  left: unset;   /* Annule l'ancienne valeur left:10px */
-  width:250px;   /* BEAUCOUP plus petite */
+  top:100px;     /* Déplacé vers le bas */
+  right:120px;   /* Déplacé vers la droite */
+  width:250px;   /* BEAUCOUP plus petite */
   height:auto;
   image-rendering:pixelated;
 }
@@ -145,10 +142,9 @@ body{
 /* TEXTE LIBREMENT POSITIONNABLE */
 #viewer-text{
   position:absolute;
-  top:360px;     /* BEAUCOUP plus bas que l'image pour servir de légende */
-  right:120px;   /* Décalé à droite */
-  left: unset;   /* Annule l'ancienne valeur left:10px */
-  width:220px;   /* Réduit la largeur pour s'aligner sous l'image */
+  top:380px;     /* Déplacé encore plus bas, sous l'image */
+  right:100px;   /* Décalé vers la droite, légèrement plus à gauche que l'image */
+  width:300px;   /* Permet un peu plus de largeur de texte */
   font-size:0.9em;
   color:white;
   line-height:1.6;
@@ -156,44 +152,38 @@ body{
 
 /* Flèche suivante */
 #next-arrow{
-  position:absolute;
-  right:30px;
-  top:50%;
-  transform:translateY(-50%);
-  font-size:42px;
-  color:red;
-  cursor:pointer;
-  user-select:none;
+  position:absolute;
+  right:30px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:42px;
+  color:red;
+  cursor:pointer;
+  user-select:none;
 }
 </style>
 </head>
 
 <body>
 
-<!-- Dialogue -->
 <div id="dialogue-box"><div id="dialogue-text"></div></div>
 
-<!-- Retour -->
 <div id="back-btn" onclick="location.href='zone2_1.html'">⬅</div>
 
-<!-- Livre cliquable -->
 <img id="book-btn"
-     src="https://media.tenor.com/wgmpvhHPSkkAAAAj/book-trophy-pixel-art.gif"
-     alt="Livre">
+     src="https://media.tenor.com/wgmpvhHPSkkAAAAj/book-trophy-pixel-art.gif"
+     alt="Livre">
 
-<!-- Zone invisible autour pour fermer -->
 <div id="viewer-bg-block"></div>
 
-<!-- Visionneuse -->
 <div id="viewer-container">
-  <div id="viewer-content">
-    <img id="viewer-img" src="">
-    <div id="viewer-text"></div>
-    <div id="next-arrow">➡</div>
-  </div>
+  <div id="viewer-content">
+    <img id="viewer-img" src="">
+    <div id="viewer-text"></div>
+    <div id="next-arrow">➡</div>
+  </div>
 </div>
 
-<!-- Audio -->
 <audio id="type-sound"
 src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=0">
 </audio>
@@ -208,47 +198,47 @@ let isTyping=false;
 let skip=false;
 
 function stopSound(){
-  try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){}
+  try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){}
 }
 
 function typeWriter(text){
-  if(isTyping) return;
-  skip=false;
-  isTyping=true;
-  dialogueText.innerHTML="";
-  dialogueBox.style.display="block";
-  dialogueText.classList.add("cursor-active");
-  try{ typeSound.play().catch(()=>{});}catch(e){}
+  if(isTyping) return;
+  skip=false;
+  isTyping=true;
+  dialogueText.innerHTML="";
+  dialogueBox.style.display="block";
+  dialogueText.classList.add("cursor-active");
+  try{ typeSound.play().catch(()=>{});}catch(e){}
 
-  let i=0;
-  let interval=setInterval(()=>{
-    if(skip){
-      dialogueText.innerHTML=text;
-      clearInterval(interval);
-      dialogueText.classList.remove("cursor-active");
-      stopSound();
-      isTyping=false;
-      return;
-    }
-    if(i<text.length){
-      dialogueText.innerHTML+=text.charAt(i++);
-    } else {
-      clearInterval(interval);
-      dialogueText.classList.remove("cursor-active");
-      stopSound();
-      isTyping=false;
-    }
-  },28);
+  let i=0;
+  let interval=setInterval(()=>{
+    if(skip){
+      dialogueText.innerHTML=text;
+      clearInterval(interval);
+      dialogueText.classList.remove("cursor-active");
+      stopSound();
+      isTyping=false;
+      return;
+    }
+    if(i<text.length){
+      dialogueText.innerHTML+=text.charAt(i++);
+    } else {
+      clearInterval(interval);
+      dialogueText.classList.remove("cursor-active");
+      stopSound();
+      isTyping=false;
+    }
+  },28);
 }
 
 dialogueBox.addEventListener("click", ()=>{
-  if(isTyping){ skip=true; return; }
-  dialogueBox.style.display="none";
+  if(isTyping){ skip=true; return; }
+  dialogueBox.style.display="none";
 });
 
 /* Premier message */
 window.onload = ()=>{
-  typeWriter("Oh tient un livre, dommage que je soit illettré !");
+  typeWriter("Oh tient un livre, dommage que je soit illettré !");
 };
 
 /* Visionneuse */
@@ -259,42 +249,42 @@ const viewerText = document.getElementById("viewer-text");
 const nextArrow = document.getElementById("next-arrow");
 
 const images=[
-  {img:"https://i.imgur.com/qmbKHzv.png", text:"On s'en fou !<br>Vraiment c'est nul !"},
-  {img:"https://i.imgur.com/xzZ06bS.png", text:"Mais quand même on sais pas<br>Et c'est triste"}
+  {img:"https://i.imgur.com/qmbKHzv.png", text:"On s'en fou !<br>Vraiment c'est nul !"},
+  {img:"https://i.imgur.com/xzZ06bS.png", text:"Mais quand même on sais pas<br>Et c'est triste"}
 ];
 
 let index=0;
 
 /* Ouvrir la visionneuse */
 document.getElementById("book-btn").addEventListener("click", ()=>{
-  typeWriter("Espérons qu'il y ai des images !");
-  index=0;
-  openViewer();
+  typeWriter("Espérons qu'il y ai des images !");
+  index=0;
+  openViewer();
 });
 
 /* Actualiser */
 function refreshViewer(){
-  viewerImg.src = images[index].img;
-  viewerText.innerHTML = images[index].text;
+  viewerImg.src = images[index].img;
+  viewerText.innerHTML = images[index].text;
 }
 
 /* Ouvrir */
 function openViewer(){
-  refreshViewer();
-  viewer.style.display="block";
-  viewerBlock.style.display="block";
+  refreshViewer();
+  viewer.style.display="block";
+  viewerBlock.style.display="block";
 }
 
 /* Fermer */
 function closeViewer(){
-  viewer.style.display="none";
-  viewerBlock.style.display="none";
+  viewer.style.display="none";
+  viewerBlock.style.display="none";
 }
 
 /* Suivant */
 nextArrow.addEventListener("click", ()=>{
-  index=(index+1)%images.length;
-  refreshViewer();
+  index=(index+1)%images.length;
+  refreshViewer();
 });
 
 /* Clic extérieur */
