@@ -8,7 +8,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
         body {
-            /* NOUVEAU FOND PIXEL ART */
+            /* FOND PIXEL ART */
             background-image: url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2tmam1wYzlkYzRpZzR3cmt3Mno4MGdrYmkwaDZpcmpzYTc5azdnNiZlcH12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/NANml9RASmTDU9tA5s/giphy.gif'); 
             background-size: cover;
             background-repeat: no-repeat;
@@ -30,7 +30,7 @@
             cursor: default; 
         }
 
-        /* --- OVERLAY INITIAL (Maintenu pour la transition) --- */
+        /* --- OVERLAY INITIAL --- */
         #intro-overlay-zone2 {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -82,7 +82,7 @@
         .clickable-door {
             position: absolute;
             width: auto; 
-            height: 150px; /* RÉDUCTION DE LA TAILLE ICI ! */
+            height: 200px; /* TAILLE NORMALE RÉTABLIE */
             cursor: pointer;
             z-index: 5;
             image-rendering: pixelated; 
@@ -101,19 +101,19 @@
             height: 450px;
         }
         
-        /* Disposition en Arche (Demi-Cercle) - Ajustement des positions Y suite au redimensionnement */
+        /* Disposition en Arche - POSITIONNEMENT RAPPROCHÉ */
         
-        /* GAUCHE */
-        #door-1 { top: 15%; left: 10%; }
-        #door-2 { top: 35%; left: 5%; }
-        #door-3 { top: 55%; left: 5%; }
-        #door-4 { top: 75%; left: 10%; }
+        /* GAUCHE (Rapproché de la porte centrale) */
+        #door-1 { top: 10%; left: 15%; } /* Plus loin */
+        #door-2 { top: 35%; left: 10%; } /* Plus proche */
+        #door-3 { top: 60%; left: 10%; } /* Plus proche */
+        #door-4 { top: 85%; left: 15%; } /* Plus loin */
 
-        /* DROITE */
-        #door-5 { top: 15%; right: 10%; }
-        #door-6 { top: 35%; right: 5%; }
-        #door-7 { top: 55%; right: 5%; }
-        #door-8 { top: 75%; right: 10%; }
+        /* DROITE (Rapproché de la porte centrale) */
+        #door-5 { top: 10%; right: 15%; } /* Plus loin */
+        #door-6 { top: 35%; right: 10%; } /* Plus proche */
+        #door-7 { top: 60%; right: 10%; } /* Plus proche */
+        #door-8 { top: 85%; right: 15%; } /* Plus loin */
 
     </style>
 </head>
@@ -176,17 +176,13 @@
             }
         }
         
-        // Typewriter pour les boîtes de PENSÉE (avec le nouveau son)
+        // Typewriter pour les boîtes de PENSÉE (SON JOUÉ UNE SEULE FOIS AU DÉBUT)
         function typeWriterThought(text, targetElement, useSound, callback) {
             if(typingInterval) clearInterval(typingInterval);
             skipRequested = false;
             
             const finalizeTyping = () => {
                 clearInterval(typingInterval);
-                if (useSound && thoughtSound.currentTime > 0) {
-                    thoughtSound.pause();
-                    thoughtSound.currentTime = 0; 
-                }
                 thoughtBox.removeEventListener('click', skipText, false);
                 targetElement.classList.remove('cursor-active');
                 isTyping = false;
@@ -198,8 +194,10 @@
             targetElement.classList.add('cursor-active');
             let i = 0;
 
+            // NOUVEAU : On joue le son une seule fois avant de commencer à taper
             if (useSound) {
-                thoughtSound.play().catch(e => {}); 
+                thoughtSound.currentTime = 0;
+                thoughtSound.play().catch(e => { console.warn("Le son de pensée n'a pas pu être joué."); }); 
             }
 
             typingInterval = setInterval(() => {
@@ -240,6 +238,7 @@
             thoughtBox.style.display = 'block';
             thoughtBox.addEventListener('click', skipText, false);
             
+            // Le son est joué par la fonction de frappe elle-même (useSound = true)
             typeWriterThought(message, thoughtTextElement, true, () => {
                 thoughtBox.addEventListener('click', () => { 
                     thoughtBox.style.display = 'none'; 
