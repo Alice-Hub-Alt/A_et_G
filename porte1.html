@@ -80,21 +80,15 @@ body{
   50%{border-color:var(--pink);}
 }
 
-/* Visionneuse d’images */
+/* Visionneuse d’images (aucun fond) */
 #viewer-container{
   position:fixed;
   top:50%;
   left:50%;
   transform:translate(-50%, -50%);
-  width:900px;
-  height:500px;
-  background-color:black;
   display:none;
   z-index:5000;
-  cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  pointer-events:auto;
 }
 
 /* Zone invisible autour pour fermer */
@@ -118,11 +112,27 @@ body{
   z-index:6000;
 }
 
-/* Image de la visionneuse */
+/* Image dans la visionneuse */
 #viewer-img{
+  position:relative;
   max-width:90%;
   max-height:90%;
   image-rendering:pixelated;
+  display:block;
+  margin:0 auto;
+}
+
+/* Flèche suivante */
+#next-arrow{
+  position:absolute;
+  right:20px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:42px;
+  color:red;
+  cursor:pointer;
+  user-select:none;
+  z-index:5001;
 }
 </style>
 </head>
@@ -146,6 +156,7 @@ body{
 <!-- Visionneuse -->
 <div id="viewer-container">
   <img id="viewer-img" src="">
+  <div id="next-arrow">➡</div>
 </div>
 
 <!-- Audio -->
@@ -210,6 +221,7 @@ window.onload = ()=>{
 const viewer = document.getElementById("viewer-container");
 const viewerBlock = document.getElementById("viewer-bg-block");
 const viewerImg = document.getElementById("viewer-img");
+const nextArrow = document.getElementById("next-arrow");
 
 const images=[
   "https://img.itch.zone/aW1hZ2UvMjkwMzEwMC8xNzM2NzE1My5wbmc=/original/dK58Rm.png",
@@ -226,7 +238,7 @@ document.getElementById("book-btn").addEventListener("click", ()=>{
   openViewer();
 });
 
-/* Actualiser */
+/* Actualiser image */
 function refreshViewer(){
   viewerImg.src = images[index];
 }
@@ -234,7 +246,7 @@ function refreshViewer(){
 /* Ouvrir */
 function openViewer(){
   refreshViewer();
-  viewer.style.display="flex";
+  viewer.style.display="block";
   viewerBlock.style.display="block";
 }
 
@@ -244,9 +256,10 @@ function closeViewer(){
   viewerBlock.style.display="none";
 }
 
-/* Clic pour passer à l'image suivante dans la visionneuse */
-viewer.addEventListener("click", ()=>{
-  index = (index+1)%images.length;
+/* Flèche suivante */
+nextArrow.addEventListener("click", (e)=>{
+  e.stopPropagation(); // empêche de fermer la visionneuse si on clique sur la flèche
+  index=(index+1)%images.length;
   refreshViewer();
 });
 
