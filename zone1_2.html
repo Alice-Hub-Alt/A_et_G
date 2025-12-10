@@ -139,6 +139,7 @@
     <img id="screen_e3" class="conv-screen" src="https://i.imgur.com/4OMCAbt.png" alt="Screen Meilleur ami 3">
 
     <script>
+        // --- Données de la séquence ---
         const dialogueSequence = [
             { text: "Mais au fil du temps, Alice compris.", type: "narrator", action: "dialogue" },
             { text: "Ce n'était pas quelqu'un comme les autres, il avais quelque chose d'unique en lui.", type: "narrator", action: "dialogue" },
@@ -162,7 +163,7 @@
             { image: "screen_e1", action: "show_image_click_to_continue" },
             { image: "screen_e2", action: "show_image_click_to_continue" },
             { image: "screen_e3", action: "show_image_click_to_continue" },
-            { text: "FIN DE CETTE PÉRIODE. (Cliquer pour continuer)", type: "narrator", action: "end_redirect" }
+            { action: "show_end_button" } // ici le bouton remplace complètement le texte final
         ];
 
         let currentSequenceIndex = 0;
@@ -170,7 +171,6 @@
         let typingInterval;
         let isTyping = false;
         let skipRequested = false;
-        let typeSoundPlaying = false;
 
         const dialogueBox = document.getElementById('dialogue-box');
         const dialogueTextElement = document.getElementById('dialogue-text');
@@ -183,6 +183,24 @@
 
         typeSound.volume = 0.5;
         typeSoundThought.volume = 0.5;
+
+        // --- Bouton final ---
+        const endButton = document.createElement('button');
+        endButton.textContent = "Se sentir aimé";
+        endButton.style.padding = "15px 30px";
+        endButton.style.fontSize = "1.2em";
+        endButton.style.backgroundColor = "#550000";
+        endButton.style.color = "white";
+        endButton.style.border = "3px solid #ff00ff";
+        endButton.style.cursor = "pointer";
+        endButton.style.textShadow = "1px 1px 2px black";
+        endButton.style.position = "fixed";
+        endButton.style.top = "50%";
+        endButton.style.left = "50%";
+        endButton.style.transform = "translate(-50%, -50%)";
+        endButton.style.zIndex = "50";
+        endButton.style.display = "none";
+        document.body.appendChild(endButton);
 
         function skipText(e){
             if(isTyping){
@@ -199,7 +217,7 @@
             targetElement.classList.add('cursor-active');
 
             let soundEl = isThought ? typeSoundThought : typeSound;
-            if(soundEl) { soundEl.currentTime=0; soundEl.play().catch(()=>{}); }
+            if(soundEl){ soundEl.currentTime=0; soundEl.play().catch(()=>{}); }
 
             let i=0;
             typingInterval = setInterval(()=>{
@@ -271,6 +289,7 @@
             if(currentSequenceIndex>=dialogueSequence.length) return;
 
             const evt=dialogueSequence[currentSequenceIndex++];
+
             if(evt.action==="dialogue"){
                 hideActiveImage(()=>{
                     dialogueBox.style.display='block';
@@ -283,15 +302,15 @@
                 showThought(evt.text);
             } else if(evt.action==="show_image_click_to_continue"){
                 showImageAndAwaitClick(evt.image);
-            } else if(evt.action==="end_redirect"){
+            } else if(evt.action==="show_end_button"){
                 hideActiveImage(()=>{
-                    dialogueBox.style.display='block';
-                    typeWriter(evt.text, dialogueTextElement,false, ()=>{
-                        dialogueBox.addEventListener('click', ()=>{
-                            zoneAudio.pause();
-                            window.location.href='zone2.html';
-                        }, {once:true});
-                    });
+                    dialogueBox.style.display='none';
+                    thoughtBox.style.display='none';
+                    endButton.style.display='block';
+                    endButton.addEventListener('click', ()=>{
+                        zoneAudio.pause();
+                        window.location.href='zone2.html';
+                    }, {once:true});
                 });
             }
         }
