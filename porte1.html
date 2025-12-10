@@ -14,21 +14,21 @@ html, body{
   font-family:'Press Start 2P', monospace;
   overflow:hidden;
   background:url('https://c.tenor.com/8dhganuRvoYAAAAd/tenor.gif') center/cover no-repeat;
-  display:flex;
-  align-items:flex-end;
-  justify-content:center;
 }
 
 /* Livre cliquable */
 #book-btn{
-  width:320px; height:auto;
+  position:fixed;
+  left:50%;
+  bottom:22px;
+  transform:translateX(-50%);
+  width:320px;
+  height:auto;
   cursor:pointer;
   image-rendering:pixelated;
-  margin-bottom:22px;
   transition:transform .18s;
   z-index:10;
 }
-#book-btn:hover{ transform:scale(1.1); }
 
 /* Dialogue */
 #dialogue-box{
