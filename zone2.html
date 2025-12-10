@@ -4,12 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zone 2 : Le Labyrinthe de la Connexion</title>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
+        
         body {
-            background-image: url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2tmam1wYzlkYzRpZzR3cmt3Mno4MGdrYmkwaDZpcmpzYTc5azdnNiZlcH12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/NANml9RASmTDU9tA5s/giphy.gif'); 
+            background-image: url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2tmam1wYzlkYzRpZzR3cmt3Mno4MGdrYmkwaDZpcmpzYTc5azdnNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/NANml9RASmTDU9tA5s/giphy.gif');
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
@@ -18,57 +17,62 @@
             margin: 0;
             padding: 0;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
 
             color: white;
             font-family: 'Press Start 2P', monospace;
+
+            overflow: hidden;
+            cursor: default;
         }
 
-        /* --- OVERLAY --- */
+        /* --- OVERLAY INITIAL (Pensée rose) --- */
         #intro-overlay-zone2 {
             position: fixed;
-            inset: 0;
-            background: black;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: black;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
+            z-index: 1000;
+            cursor: pointer;
             font-size: 1.1em;
             color: #ff00ff;
+            text-shadow: 2px 2px 4px rgba(255, 0, 255, 0.3);
+            text-align: center;
         }
 
-        /* --- THOUGHT BOX --- */
-        #thought-box {
+        /* --- BOÎTE DE PENSÉE (rose) --- */
+        #dialogue-box {
             width: 80%;
-            min-height: 18vh;
-            background-color: rgba(0, 0, 0, 0.7);
-            border: 3px dashed #ff00ff;
+            height: 20vh;
+            background-color: rgba(0, 0, 0, 0.55);
+            border: 3px solid #ff00ff;
             padding: 20px;
+            box-sizing: border-box;
             position: fixed;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 9000;
-            display: none;
+            z-index: 10;
+            color: #ff66ff;
+            text-shadow: 0 0 6px rgba(255, 0, 255, 0.4);
         }
 
-        #thought-text {
+        #dialogue-text {
             font-size: 0.8em;
             line-height: 1.5;
-            color: #ff00ff;
         }
 
         .cursor-active {
-            border-right: 0.15em solid #ff00ff;
-            animation: blink-cursor 0.4s step-end infinite;
+            border-right: 0.15em solid #ff66ff;
+            animation: blink-cursor 0.5s step-end infinite;
         }
-
         @keyframes blink-cursor {
             from, to { border-color: transparent }
-            50% { border-color: #ff00ff; }
+            50% { border-color: #ff66ff }
         }
 
         /* --- PORTES --- */
@@ -76,52 +80,57 @@
             position: absolute;
             height: 200px;
             cursor: pointer;
+            z-index: 5;
             image-rendering: pixelated;
-            transition: transform 0.15s;
-            z-index: 100;
+            transition: transform 0.2s;
         }
-
         .clickable-door:hover {
-            transform: scale(1.06);
+            transform: scale(1.05);
         }
 
+        /* Grande porte */
         #door-exit {
-            top: 32%;
+            top: 25%;
             left: 50%;
             transform: translateX(-50%);
-            height: 430px;
+            width: 320px;
+            height: 480px;
         }
 
-        /* ESPACEMENT FIXÉ */
-        #door-1 { top: 8%; left: 5%; }
-        #door-2 { top: 32%; left: 8%; }
-        #door-3 { top: 58%; left: 8%; }
-        #door-4 { top: 82%; left: 5%; }
+        /* --- ARCHES DES PORTES --- */
+        body {
+            --arc-radius: 42%;
+        }
 
-        #door-5 { top: 8%; right: 5%; }
-        #door-6 { top: 32%; right: 8%; }
-        #door-7 { top: 58%; right: 8%; }
-        #door-8 { top: 82%; right: 5%; }
+        #door-1 { top: 18%; left: 5%; transform: translateY(calc(-1 * var(--arc-radius))) }
+        #door-2 { top: 33%; left: 3%; }
+        #door-3 { top: 52%; left: 5%; }
+        #door-4 { top: 70%; left: 8%; }
+
+        #door-5 { top: 18%; right: 5%; }
+        #door-6 { top: 33%; right: 3%; }
+        #door-7 { top: 52%; right: 5%; }
+        #door-8 { top: 70%; right: 8%; }
+
     </style>
 </head>
 
 <body>
 
-    <!-- AUDIO FIXÉ (DL=1 pour forcer le chargement) -->
     <audio id="zone-audio" loop>
-        <source src="votre_audio_heberge.mp3" type="audio/mpeg">
+        <source src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?rlkey=q1hljzkfdh6b4qjj89yut92oy&st=8d2bqys3&dl=0">
     </audio>
 
-    <audio id="thought-sound"
-           src="https://www.dropbox.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=1">
+    <audio id="type-sound" 
+           src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?rlkey=q1hljzkfdh6b4qjj89yut92oy&st=8d2bqys3&dl=0">
     </audio>
 
     <div id="intro-overlay-zone2">
         <span id="overlay-text"></span>
     </div>
 
-    <div id="thought-box">
-        <span id="thought-text"></span>
+    <div id="dialogue-box" style="display:none;">
+        <span id="dialogue-text"></span>
     </div>
 
     <img id="door-exit" class="clickable-door" src="https://i.imgur.com/7xp8PkZ.png">
@@ -136,8 +145,133 @@
     <img id="door-8" class="clickable-door" src="https://i.imgur.com/xzZ06bS.png">
 
     <script>
-        /* ... identique à ton JS actuel, ça marche ... */
-        /* Pas besoin de modifier le JS, c’était l’overlay + l’audio qui bloquaient TOUT. */
+        const overlayText = "Hein..? Je suis où là ? Je suis dans ma tête c'est ça ? Pourquoi le narrateur est pas là ?!!!";
+        const initialDoorMessage = "Bon, on dirais que cette grande porte est la sortie";
+        const doorExitLocked = "La porte est verrouillée... on dirait qu'il y a un cadenas avec juste des flèches dessus ?";
+        const genericDoorMessage = "Non, pas maintenant. C’est sûrement pas par là.";
+
+        let initialDoorMessageShown = false;
+
+        const dialogueBox = document.getElementById('dialogue-box');
+        const dialogueTextElement = document.getElementById('dialogue-text');
+        const overlay = document.getElementById('intro-overlay-zone2');
+        const overlayTextElement = document.getElementById('overlay-text');
+        const typeSound = document.getElementById('type-sound');
+        const zoneAudio = document.getElementById('zone-audio');
+        const allDoors = document.querySelectorAll('.clickable-door');
+        const doorExit = document.getElementById('door-exit');
+
+        let typingInterval;
+        let isTyping = false;
+        let skipRequested = false;
+
+        function skipText(event) {
+            if (isTyping) {
+                skipRequested = true;
+                event.stopPropagation();
+            }
+        }
+
+        function typeWriter(text, target, callback) {
+            if (typingInterval) clearInterval(typingInterval);
+            skipRequested = false;
+
+            const finish = () => {
+                clearInterval(typingInterval);
+                typeSound.pause();
+                typeSound.currentTime = 0;
+                target.classList.remove('cursor-active');
+                isTyping = false;
+                if (callback) callback();
+            };
+
+            isTyping = true;
+            target.innerHTML = '';
+            target.classList.add('cursor-active');
+            let i = 0;
+
+            typeSound.play().catch(() => {});
+
+            typingInterval = setInterval(() => {
+                if (skipRequested) {
+                    target.innerHTML = text;
+                    finish();
+                    return;
+                }
+                if (i < text.length) {
+                    target.innerHTML += text.charAt(i++);
+                } else {
+                    finish();
+                }
+            }, 30);
+        }
+
+        function typeWriterSilent(text, target, callback) {
+            target.innerHTML = '';
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i < text.length) {
+                    target.innerHTML += text.charAt(i++);
+                } else {
+                    clearInterval(interval);
+                    if (callback) callback();
+                }
+            }, 40);
+        }
+
+        function showMessage(message, callback) {
+            if (isTyping) return;
+            dialogueBox.style.display = "block";
+            dialogueBox.addEventListener('click', skipText, false);
+
+            typeWriter(message, dialogueTextElement, () => {
+                dialogueBox.addEventListener('click', () => {
+                    dialogueBox.style.display = "none";
+                    if (callback) callback();
+                }, { once: true });
+            });
+        }
+
+        allDoors.forEach(door => {
+            if (door.id !== "door-exit") {
+                door.addEventListener("click", () => {
+                    if (!isTyping) showMessage(genericDoorMessage);
+                });
+            }
+        });
+
+        doorExit.addEventListener("click", () => {
+            if (isTyping) return;
+
+            if (!initialDoorMessageShown) {
+                showMessage(initialDoorMessage, () => {
+                    initialDoorMessageShown = true;
+                });
+            } else {
+                showMessage(doorExitLocked, () => {
+                    zoneAudio.pause();
+                    window.location.href = "zone3_2.html";
+                });
+            }
+        });
+
+        function startScene() {
+            typeWriterSilent(overlayText, overlayTextElement, () => {
+                overlay.addEventListener("click", () => {
+                    overlay.style.opacity = 0;
+                    setTimeout(() => {
+                        overlay.style.display = "none";
+                        zoneAudio.play().catch(() => {});
+                        showMessage(initialDoorMessage, () => {
+                            initialDoorMessageShown = true;
+                        });
+                    }, 1000);
+                }, { once: true });
+            });
+        }
+
+        startScene();
     </script>
+
 </body>
 </html>
