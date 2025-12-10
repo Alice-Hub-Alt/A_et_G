@@ -4,124 +4,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zone 2 : Le Labyrinthe de la Connexion</title>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-        
+
         body {
-            /* FOND PIXEL ART */
-            background-image: url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2tmam1wYzlkYzRpZzR3cmt3Mno4MGdrYmkwaDZpcmpzYTc5azdnNiZlcH12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/NANml9RASmTDU9tA5s/giphy.gif'); 
+            background-image: url('https://media2.giphy.com/media/NANml9RASmTDU9tA5s/giphy.gif');
             background-size: cover;
-            background-repeat: no-repeat;
             background-attachment: fixed;
-            background-position: center center;
-            
+            background-position: center;
             margin: 0;
             padding: 0;
+            height: 100vh;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            color: white;
             font-family: 'Press Start 2P', monospace;
-            background-color: rgba(0, 0, 0, 0.5); 
-            background-blend-mode: darken;
-            cursor: default; 
+            color: white;
         }
 
-        /* --- OVERLAY INITIAL --- */
+        /* CONTENEUR ENTIÈREMENT RESPONSIVE */
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* OVERLAY */
         #intro-overlay-zone2 {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: black; 
-            display: flex; 
+            inset: 0;
+            background-color: black;
+            display: flex;
             justify-content: center;
             align-items: center;
+            color: #ff00ff;
             z-index: 1000;
             cursor: pointer;
-            font-size: 1.1em;
-            color: #ff00ff;
-            text-shadow: 2px 2px 4px rgba(255, 0, 255, 0.3);
-            text-align: center;
         }
 
-        /* --- BOÎTE DE PENSÉE --- */
+        /* BOX DE TEXTES */
         #thought-box {
             width: 80%;
-            height: 20vh;
             background-color: rgba(0, 0, 0, 0.7);
             border: 3px dashed #ff00ff;
             padding: 20px;
-            box-sizing: border-box;
             position: fixed;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 10;
             display: none;
-            cursor: pointer;
+            z-index: 50;
         }
 
         #thought-text {
             font-size: 0.8em;
-            line-height: 1.5;
             color: #ff00ff;
         }
 
         .cursor-active {
             border-right: 0.15em solid #ff00ff;
-            animation: blink-cursor 0.5s step-end infinite;
+            animation: blink 0.5s infinite;
         }
-        @keyframes blink-cursor {
-            from, to { border-color: transparent }
+
+        @keyframes blink {
+            0%, 100% { border-color: transparent; }
             50% { border-color: #ff00ff; }
         }
 
-        /* --- ÉLÉMENTS INTERACTIFS (Les Portes) --- */
+        /* PORTES */
         .clickable-door {
             position: absolute;
-            width: auto; 
-            height: 200px; 
+            height: 200px;
             cursor: pointer;
-            z-index: 5;
-            image-rendering: pixelated; 
+            image-rendering: pixelated;
             transition: transform 0.2s;
         }
+
         .clickable-door:hover {
             transform: scale(1.05);
         }
 
-        /* Porte de sortie */
         #door-exit {
-            top: 30%; 
-            left: 50%;
-            transform: translate(-50%, 0);
-            width: 300px;
             height: 450px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
         }
-        
-        /* Disposition : ESPACEMENT MAXIMAL */
-        
-        /* GAUCHE */
-        #door-1 { top: 10%; left: 0%; }    /* Très haut, tout à gauche */
-        #door-2 { top: 35%; left: 3%; }    /* Décalé */
-        #door-3 { top: 60%; left: 3%; }    /* Décalé */
-        #door-4 { top: 85%; left: 0%; }    /* Très bas, tout à gauche */
 
-        /* DROITE */
-        #door-5 { top: 10%; right: 0%; }   /* Très haut, tout à droite */
-        #door-6 { top: 35%; right: 3%; }   /* Décalé */
-        #door-7 { top: 60%; right: 3%; }   /* Décalé */
-        #door-8 { top: 85%; right: 0%; }   /* Très bas, tout à droite */
+        /* ESPACEMENT AMÉLIORÉ */
+        #door-1 { left: 5%; top: 10%; }
+        #door-2 { left: 5%; top: 35%; }
+        #door-3 { left: 5%; top: 60%; }
+        #door-4 { left: 5%; top: 85%; transform: translateY(-100%); }
 
+        #door-5 { right: 5%; top: 10%; }
+        #door-6 { right: 5%; top: 35%; }
+        #door-7 { right: 5%; top: 60%; }
+        #door-8 { right: 5%; top: 85%; transform: translateY(-100%); }
     </style>
 </head>
 
 <body>
+
     <audio id="zone-audio" loop>
-        <source src="votre_lien_audio_zone2.mp3" type="audio/mpeg"> 
+        <source src="votre_lien_audio_zone2.mp3" type="audio/mpeg">
     </audio>
-    <audio id="thought-sound" src="https://www.dropbox.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=upbycyus&dl=0"></audio>
+
+    <!-- Lien audio réparé -->
+    <audio id="thought-sound"
+        src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3">
+    </audio>
 
     <div id="intro-overlay-zone2">
         <span id="overlay-text"></span>
@@ -131,181 +124,113 @@
         <span id="thought-text"></span>
     </div>
 
-    <img id="door-exit" class="clickable-door" src="https://i.imgur.com/7xp8PkZ.png" alt="Grande Porte de Sortie">
-    
-    <img id="door-1" class="clickable-door" src="https://i.imgur.com/OSOCKnQ.png" alt="Porte 1">
-    <img id="door-2" class="clickable-door" src="https://i.imgur.com/mTg0Zm6.png" alt="Porte 2">
-    <img id="door-3" class="clickable-door" src="https://i.imgur.com/WKgSmFP.png" alt="Porte 3">
-    <img id="door-4" class="clickable-door" src="https://i.imgur.com/HY94Buw.png" alt="Porte 4">
-    <img id="door-5" class="clickable-door" src="https://i.imgur.com/gQgJFUN.png" alt="Porte 5">
-    <img id="door-6" class="clickable-door" src="https://i.imgur.com/7vIHXUp.png" alt="Porte 6">
-    <img id="door-7" class="clickable-door" src="https://i.imgur.com/qmbKHzv.png" alt="Porte 7">
-    <img id="door-8" class="clickable-door" src="https://i.imgur.com/xzZ06bS.png" alt="Porte 8">
+    <div id="game-container">
+
+        <img id="door-exit" class="clickable-door" src="https://i.imgur.com/7xp8PkZ.png">
+
+        <img id="door-1" class="clickable-door" src="https://i.imgur.com/OSOCKnQ.png">
+        <img id="door-2" class="clickable-door" src="https://i.imgur.com/mTg0Zm6.png">
+        <img id="door-3" class="clickable-door" src="https://i.imgur.com/WKgSmFP.png">
+        <img id="door-4" class="clickable-door" src="https://i.imgur.com/HY94Buw.png">
+
+        <img id="door-5" class="clickable-door" src="https://i.imgur.com/gQgJFUN.png">
+        <img id="door-6" class="clickable-door" src="https://i.imgur.com/7vIHXUp.png">
+        <img id="door-7" class="clickable-door" src="https://i.imgur.com/qmbKHzv.png">
+        <img id="door-8" class="clickable-door" src="https://i.imgur.com/xzZ06bS.png">
+
+    </div>
+
 
     <script>
-        // --- DONNÉES DE JEU ---
         const overlayText = "Hein..? Je suis où là ? Je suis dans ma tête c'est ça ? Pourquoi le narrateur est pas là ?!!!";
         const initialDoorMessage = "Bon, on dirais que cette grande porte est la sortie";
-        const doorExitLocked = "La porte est verrouillé, on dirais qu'il y a un cadenas mais c'est étrange, il y a seulement des flèches dessus";
+        const doorExitLocked = "La porte est verrouillée... y’a un cadenas avec seulement des flèches dessus.";
         const genericDoorMessage = "Je ne pense pas que ce soit une bonne idée d'y aller pour le moment.";
-        
-        let initialDoorMessageShown = false; 
 
-        // --- ÉLÉMENTS ---
-        const thoughtBox = document.getElementById('thought-box');
-        const thoughtTextElement = document.getElementById('thought-text');
-        const overlay = document.getElementById('intro-overlay-zone2');
-        const overlayTextElement = document.getElementById('overlay-text');
-        const thoughtSound = document.getElementById('thought-sound'); 
-        const zoneAudio = document.getElementById('zone-audio');
-        
-        const allDoors = document.querySelectorAll('.clickable-door');
-        const doorExit = document.getElementById('door-exit');
+        let initialDoorMessageShown = false;
 
-        // --- FONCTIONS TYPEWRITER / MESSAGES (Adaptées à la Pensée) ---
+        const thoughtBox = document.getElementById("thought-box");
+        const thoughtTextElement = document.getElementById("thought-text");
+        const thoughtSound = document.getElementById("thought-sound");
 
-        let typingInterval;
+        const zoneAudio = document.getElementById("zone-audio");
+
+        const overlay = document.getElementById("intro-overlay-zone2");
+        const overlayTextElement = document.getElementById("overlay-text");
+
         let isTyping = false;
-        let skipRequested = false; 
-        
-        function skipText(event) {
-            if (isTyping) {
-                skipRequested = true;
-                event.stopPropagation();
-            }
-        }
-        
-        // Typewriter pour les boîtes de PENSÉE (SON GÉRÉ EN JS)
-        function typeWriterThought(text, targetElement, useSound, callback) {
-            if(typingInterval) clearInterval(typingInterval);
-            skipRequested = false;
-            
-            const finalizeTyping = () => {
-                clearInterval(typingInterval);
-                thoughtBox.removeEventListener('click', skipText, false);
-                targetElement.classList.remove('cursor-active');
-                isTyping = false;
-                if (useSound) {
-                    // Arrêt et réinitialisation du son de parole
-                    thoughtSound.pause();
-                    thoughtSound.currentTime = 0; 
-                }
-                if (callback) callback();
-            };
+        let skipText = false;
 
+        function typeWriter(text, el, callback) {
             isTyping = true;
-            targetElement.innerHTML = '';
-            targetElement.classList.add('cursor-active');
+            skipText = false;
+            el.innerHTML = "";
             let i = 0;
 
-            if (useSound) {
-                // Lancement du son de parole en boucle
-                thoughtSound.loop = true; // On gère la boucle ici
-                thoughtSound.play().catch(e => { 
-                    console.warn("Le son de pensée n'a pas pu être joué (Bloqué).", e); 
-                }); 
-            }
+            thoughtSound.currentTime = 0;
+            thoughtSound.play().catch(()=>{});
 
-            typingInterval = setInterval(() => {
-                if (skipRequested) {
-                    targetElement.innerHTML = text;
-                    finalizeTyping();
-                    return;
-                }
-                
-                if (i < text.length) {
-                    targetElement.innerHTML += text.charAt(i);
-                    i++;
-                } else {
-                    targetElement.innerHTML = text; 
-                    finalizeTyping();
-                }
-            }, 30);
-        }
+            el.classList.add("cursor-active");
 
-        // Typewriter pour l'overlay ROSE (SANS bruit de frappe, plus rapide)
-        function typeWriterSilent(text, targetElement, callback) {
-            targetElement.innerHTML = '';
-            let i = 0;
             const interval = setInterval(() => {
+                if (skipText) {
+                    el.innerHTML = text;
+                    clearInterval(interval);
+                    end();
+                }
+
                 if (i < text.length) {
-                    targetElement.innerHTML += text.charAt(i);
+                    el.innerHTML += text.charAt(i);
                     i++;
                 } else {
                     clearInterval(interval);
-                    if (callback) callback();
+                    end();
                 }
-            }, 50); 
+
+            }, 25);
+
+            function end() {
+                el.classList.remove("cursor-active");
+                thoughtSound.pause();
+                thoughtSound.currentTime = 0;
+                isTyping = false;
+                if (callback) callback();
+            }
         }
-        
-        function showThought(message, callback) {
+
+        function showThought(msg, callback) {
             if (isTyping) return;
-            
-            thoughtBox.style.display = 'block';
-            thoughtBox.addEventListener('click', skipText, false);
-            
-            typeWriterThought(message, thoughtTextElement, true, () => {
-                thoughtBox.addEventListener('click', () => { 
-                    thoughtBox.style.display = 'none'; 
+
+            thoughtBox.style.display = "block";
+
+            typeWriter(msg, thoughtTextElement, () => {
+                thoughtBox.onclick = () => {
+                    thoughtBox.style.display = "none";
                     if (callback) callback();
-                }, { once: true });
+                };
             });
         }
 
-        // --- GESTION DES CLICS ---
-        
-        // Clic sur une porte d'indice (les 8 petites)
-        allDoors.forEach(door => {
-            if (door.id !== 'door-exit') {
-                door.addEventListener('click', () => {
-                    if (isTyping) return;
-                    showThought(genericDoorMessage);
-                });
-            }
+        overlay.addEventListener("click", () => {
+            overlay.style.opacity = 0;
+            setTimeout(() => {
+                overlay.style.display = "none";
+                zoneAudio.play().catch(()=>{});
+                showThought(initialDoorMessage, () => initialDoorMessageShown = true);
+            }, 800);
         });
 
-        // Clic sur la porte de sortie (la grande)
-        doorExit.addEventListener('click', () => {
-            if (isTyping) return;
-
-            if (!initialDoorMessageShown) {
-                // Premier clic : message d'observation
-                showThought(initialDoorMessage, () => {
-                    initialDoorMessageShown = true;
-                });
+        let silentIndex = 0;
+        overlayTextElement.innerHTML = "";
+        const silentInterval = setInterval(() => {
+            if (silentIndex < overlayText.length) {
+                overlayTextElement.innerHTML += overlayText.charAt(silentIndex++);
             } else {
-                // Second clic : message d'indice + redirection immédiate
-                showThought(doorExitLocked, () => {
-                    // C'est ici que l'on redirige
-                    zoneAudio.pause();
-                    window.location.href = 'zone3_2.html';
-                });
+                clearInterval(silentInterval);
             }
-        });
+        }, 40);
 
-        // --- DÉMARRAGE DE LA SCÈNE ---
-        
-        function startScene() {
-            // 1. Afficher l'overlay et lancer le monologue rose
-            typeWriterSilent(overlayText, overlayTextElement, () => {
-                // 2. Attendre le clic pour faire disparaître l'overlay
-                overlay.addEventListener('click', () => {
-                    overlay.style.opacity = 0;
-                    setTimeout(() => {
-                        overlay.style.display = 'none';
-                        // 3. Lancer l'audio et afficher le premier message sur la porte
-                        zoneAudio.play().catch(e => console.error("Audio blocké"));
-                        showThought(initialDoorMessage, () => {
-                            initialDoorMessageShown = true;
-                        });
-                    }, 1000); 
-                }, { once: true });
-            });
-        }
-        
-        // Lancement initial de la scène
-        startScene();
+        document.querySelectorAll(".clickable-door").forEach(door => {
 
-    </script>
-</body>
-</html>
+            if (door.id !== "door-exit") {
+                door.onclick
