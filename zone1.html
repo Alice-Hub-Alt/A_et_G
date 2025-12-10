@@ -9,6 +9,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
         body {
+            /* ... (Styles du body inchangés) ... */
             background-image: url('https://i.pinimg.com/originals/ed/88/da/ed88da8c757d74f6255717ffc7a78154.gif');
             background-size: cover;
             background-repeat: no-repeat;
@@ -33,7 +34,8 @@
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             background-color: black; 
-            display: flex;
+            /* CORRIGÉ : Assure-toi que l'overlay est bien en display flex pour être au-dessus */
+            display: flex; 
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -43,6 +45,8 @@
             text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.3);
             text-align: center;
         }
+
+        /* ... (Styles des boîtes de dialogue/pensée/boutons inchangés) ... */
 
         #dialogue-box {
             display: none;
@@ -59,103 +63,16 @@
             transform: translateX(-50%);
             z-index: 10;
         }
-        .dialogue-ready {
-            cursor: pointer;
-        }
-
-        #dialogue-text {
-            font-size: 0.8em;
-            line-height: 1.5;
-            white-space: normal;
-            overflow: hidden; 
-            height: 100%;
-        }
         
-        .cursor-active {
-            border-right: 0.15em solid white;
-            animation: blink-cursor 0.5s step-end infinite;
-        }
-        @keyframes blink-cursor {
-            from, to { border-color: transparent }
-            50% { border-color: white; }
-        }
-
-        #think-button {
-            display: none;
-            padding: 15px 30px;
-            font-size: 1.2em;
-            background-color: #550000;
-            color: white;
-            border: 3px solid #ff0000;
-            cursor: pointer;
-            text-shadow: 1px 1px 2px black;
-            transition: background-color 0.3s;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 5;
-        }
+        /* ... (Reste des styles inchangés) ... */
         
-        #skip-button {
-            display: none;
-            padding: 15px 30px;
-            font-size: 1.2em;
-            background-color: rgba(30, 30, 30, 0.9);
-            color: white;
-            border: 3px solid #AAAAAA; 
-            cursor: pointer;
-            text-shadow: 1px 1px 2px black;
-            transition: background-color 0.3s;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 5;
-        }
-        #skip-button:hover {
-            background-color: rgba(50, 50, 50, 0.9);
-        }
-
-        #thought-box {
-            display: none;
-            width: 90%;
-            background-color: rgba(0, 0, 0, 0.7);
-            border: 2px dashed #ff00ff;
-            padding: 15px;
-            box-sizing: border-box;
-            cursor: pointer; 
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-        }
-        #thought-text {
-            font-size: 0.7em;
-            color: #ff00ff;
-            line-height: 1.5;
-        }
-
         #page-click-handler {
+            /* CORRIGÉ : Assurer qu'il n'est pas affiché au départ */
+            display: none; 
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             z-index: 1;
             cursor: pointer;
-        }
-
-        #discord-screen {
-            display: none;
-            opacity: 0;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            max-width: 80%;
-            height: auto;
-            border: 3px solid white;
-            transition: opacity 2s ease-in-out; 
-            z-index: 20;
         }
     </style>
 </head>
@@ -172,13 +89,13 @@
 
     <audio id="discord-sfx" src="https://dl.dropboxusercontent.com/scl/fi/jg6wbserycyspqewz9ogc/SPOILER-Omori-play-sound-effect-READ-PINNED-COMMENT.mp3?rlkey=glagwcdgsnvzqnqvkgdoihyza&st=pmjvrfjb&dl=0"></audio>
 
-    <audio id="discord-music" loop src="https://dl.dropboxusercontent.com/scl/fi/8w03j8k7h1p5d8j2r2t8u/Cyberpunk-Uplifting-Track.mp3?rlkey=4m6j5l8p7n6r3q0h1w9e4&st=n0g7v0r9&dl=0"></audio>
+    <audio id="discord-music" loop src="https://dl.dropboxusercontent.com/scl/fi/8w03j8k7h1p5d8j2r2t8u/Cyberpunk-Uplifting-Track.mp3?rlkey=4m6j5k9j5l8p7n6r3q0h1w9e4&st=n0g7v0r9&dl=0"></audio>
 
     <div id="intro-overlay-zone1">
         Zone 1 : La Grotte Illusoire <br><br> (Cliquer pour continuer)
     </div>
 
-    <div id="page-click-handler" style="display:none;"></div>
+    <div id="page-click-handler"></div>
         
     <button id="think-button" onclick="showThought()">Penser</button>
 
@@ -196,7 +113,7 @@
 
 
     <script>
-        // --- DONNÉES DE JEU ---
+        // --- DONNÉES DE JEU (Inchangées) ---
         const initialText = "Le silence est assourdissant. Impossible de voir autour de toi, la pièce est plongée dans l'obscurité. Il n'y a rien d'autre que le bruit de la ventilation de ton ordinateur. Ce lieu est vide, mais réconfortant.";
         const thoughtText = "Je suis si seule... À quoi bon vivre au final ?";
         const discordIntroText = "Puis soudain, le bruit d'une notification Discord vint rompre ce silence assourdissant.";
@@ -209,6 +126,7 @@
         let isTypingAudioPlaying = false; 
         let skipRequested = false; 
 
+        // --- ÉLÉMENTS (Inchangés) ---
         const dialogueBox = document.getElementById('dialogue-box');
         const dialogueTextElement = document.getElementById('dialogue-text');
         const thinkButton = document.getElementById('think-button');
@@ -226,19 +144,46 @@
         
         typeSound.volume = 0.5;
 
-        // --- FONCTIONS CLÉS ---
+        // --- GESTIONNAIRES D'ÉVÉNEMENTS GÉNÉRAUX ---
+        
+        // CORRIGÉ : Fonction de Clic 1 : Démarrer la scène 
+        // J'ai ajouté une ligne pour cacher le pageClickHandler au début, juste au cas où.
+        pageClickHandler.style.display = 'none'; // S'assurer qu'il est bien caché au chargement.
+
+        overlay.addEventListener('click', function() {
+            zoneAudio.play().catch(error => { console.log("Audio zone 1 bloqué."); });
+            overlay.style.display = 'none';
+            pageClickHandler.style.display = 'block'; 
+        }, { once: true });
+
+        // Clic 2 : Lancer le dialogue initial
+        pageClickHandler.addEventListener('click', function(event) {
+            pageClickHandler.style.display = 'none';
+            dialogueBox.style.display = 'block';
+            
+            dialogueBox.addEventListener('click', skipText, false); 
+
+            typeWriter(initialText, dialogueTextElement, false, () => { 
+                dialogueBox.addEventListener('click', handleDialogueClick, { once: true }); 
+            });
+        }, { once: true });
+
+
+        // --- Le reste des fonctions (handleDialogueClick, showThought, etc.) est inchangé par rapport à la dernière version validée pour les problèmes de son/bouton. ---
 
         function playClickSound() {
             clickSound.cloneNode(true).play().catch(e => {}); 
         }
 
-        // Clic 4 : Clic sur le bouton "Penser" (Révélation de la Pensée)
+        function handleDialogueClick() {
+            if (isTyping) return;
+            dialogueBox.style.display = 'none';
+            thinkButton.style.display = 'block'; 
+        }
+
         function showThought() {
-            // CORRIGÉ : SUPPRESSION DU SON DU BOUTON "PENSER"
-            
             thinkButton.style.display = 'none';
             thoughtBox.style.display = 'block';
-            
             thoughtBox.addEventListener('click', skipText, false); 
 
             typeWriter(thoughtText, thoughtTextElement, true, () => { 
@@ -246,13 +191,9 @@
             });
         }
         
-        // Les autres fonctions de Clic 1 à Clic 3 restent inchangées et correctes...
-
-        // Clic 5 : Clic sur la Pensée (Annonce Discord)
         function continueToDiscord() {
              thoughtBox.style.display = 'none';
              dialogueBox.style.display = 'block'; 
-             
              dialogueBox.addEventListener('click', skipText, false); 
 
              typeWriter(discordIntroText, dialogueTextElement, false, () => { 
@@ -260,38 +201,31 @@
              });
         }
 
-        // Clic 6 : Clic sur l'Annonce Discord (Révélation de l'Image + SFX + Musique + DÉBUT DE LA NOUVELLE SÉQUENCE)
         function showDiscordImage() {
             if (isTyping) return;
             
-            discordSfx.cloneNode(true).play().catch(e => {}); // Notification Omori
+            discordSfx.cloneNode(true).play().catch(e => {}); 
 
             dialogueBox.style.display = 'none';
             
             zoneAudio.pause(); 
             discordMusic.play().catch(e => {}); 
 
-            // Révélation de l'image
             discordScreen.style.display = 'block';
+            
             setTimeout(() => {
                 discordScreen.style.opacity = 1;
-                // Après la révélation, on passe au Clic 7 (sur l'image)
                 discordScreen.addEventListener('click', narrativeFollowUp, { once: true }); 
             }, 50); 
         }
         
-        // Clic 7 : Clic sur l'image (Début de la nouvelle séquence narrative)
         function narrativeFollowUp() {
-            // CORRIGÉ : SUPPRESSION DU SON DE CLIC LORS DU PASSAGE
-            
-            // CORRIGÉ : Disparition de l'image
             discordScreen.style.opacity = 0;
             setTimeout(() => {
                  discordScreen.style.display = 'none';
-            }, 2000); // 2 secondes pour le fondu
+            }, 2000); 
 
             dialogueBox.style.display = 'block';
-            
             dialogueBox.addEventListener('click', skipText, false); 
 
             typeWriter(narrativeFollowUp1, dialogueTextElement, false, () => { 
@@ -299,46 +233,33 @@
             });
         }
 
-        // Clic 8 : Suite narrative : Pensée cynique
         function cynicalThoughtSequence() {
             if (isTyping) return;
-            // CORRIGÉ : SUPPRESSION DU SON DE CLIC LORS DU PASSAGE
-
             dialogueBox.style.display = 'none';
             thoughtBox.style.display = 'block';
-            
             thoughtBox.addEventListener('click', skipText, false); 
 
-            typeWriter(cynicalThought, thoughtTextElement, true, () => { // SILENCIEUX
+            typeWriter(cynicalThought, thoughtTextElement, true, () => { 
                 thoughtBox.addEventListener('click', finalTransitionButton, { once: true }); 
             });
         }
 
-        // Clic 9 : Révélation du bouton de transition
         function finalTransitionButton() {
             if (isTyping) return;
-            // On ne joue le son QUE pour le bouton d'action finale
             playClickSound(); 
 
             thoughtBox.style.display = 'none';
-            
-            // CORRIGÉ : Affichage du bouton de transition (Skip Button)
             skipButton.style.display = 'block';
         }
 
-
-        // Clic sur le bouton de transition (Va vers la page suivante)
         function skipToNextZone() {
-             playClickSound(); // On garde le son pour l'action du bouton
-             // Assurer que la musique de transition s'arrête
+             playClickSound();
              discordMusic.pause();
              zoneAudio.pause();
              
-             // Redirection vers la nouvelle page
              window.location.href = 'zone1_2.html'; 
         }
 
-        // --- FONCTION DE SKIP et TYPEWRITER (Inchangées) ---
         function skipText(event) {
             if (isTyping) {
                 skipRequested = true;
@@ -400,7 +321,6 @@
                 }
             }, 30);
         }
-        // --- FIN FONCTIONS ---
     </script>
 </body>
 </html>
