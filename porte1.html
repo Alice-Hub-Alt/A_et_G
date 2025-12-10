@@ -127,7 +127,9 @@ const typeSound = document.getElementById("type-sound");
 
 let isTyping=false, skip=false;
 
-function stopSound(){ try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){} }
+function stopSound(){
+  try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){}
+}
 
 function typeWriter(text){
   if(isTyping) return;
@@ -139,14 +141,43 @@ function typeWriter(text){
   try{ typeSound.play().catch(()=>{});}catch(e){}
   let i=0;
   let interval=setInterval(()=>{
-    if(skip){ dialogueText.innerHTML=text; clearInterval(interval); dialogueText.classList.remove("cursor-active"); stopSound(); isTyping=false; return; }
-    if(i<text.length){ dialogueText.innerHTML+=text.charAt(i++); } 
-    else{ clearInterval(interval); dialogueText.classList.remove("cursor-active"); stopSound(); isTyping=false; }
+    if(skip){
+      dialogueText.innerHTML=text;
+      clearInterval(interval);
+      dialogueText.classList.remove("cursor-active");
+      stopSound();
+      isTyping=false;
+      return;
+    }
+    if(i<text.length){
+      dialogueText.innerHTML+=text.charAt(i++);
+    } else {
+      clearInterval(interval);
+      dialogueText.classList.remove("cursor-active");
+      stopSound();
+      isTyping=false;
+    }
   },28);
 }
-dialogueBox.addEventListener("click", ()=>{ if(isTyping){ skip=true; return; } dialogueBox.style.display="none"; });
 
-window.onload = ()=>{ typeWriter("Oh, c'est assez appaisant ici !"); }
+let postViewerStep = 0;
+
+dialogueBox.addEventListener("click", ()=>{
+  if(isTyping){
+    skip = true;
+    return;
+  }
+  dialogueBox.style.display = "none";
+
+  if(postViewerStep === 1){
+    postViewerStep = 2;
+    typeWriter("Peut être qu'inspecter la porte de la pièce m'aidera ? Ouai c'est vraiment désespéré...");
+  }
+});
+
+window.onload = ()=>{
+  typeWriter("Oh, c'est assez appaisant ici !");
+}
 
 /* Visionneuse */
 const viewer = document.getElementById("viewer-container");
@@ -170,8 +201,22 @@ document.getElementById("book-btn").addEventListener("click", ()=>{
 });
 
 function refreshViewer(){ viewerImg.src = images[index]; }
-function openViewer(){ refreshViewer(); viewer.style.display="block"; viewerBlock.style.display="block"; }
-function closeViewer(){ viewer.style.display="none"; viewerBlock.style.display="none"; }
+
+function openViewer(){
+  refreshViewer();
+  viewer.style.display="block";
+  viewerBlock.style.display="block";
+}
+
+function closeViewer(){
+  viewer.style.display="none";
+  viewerBlock.style.display="none";
+
+  if(postViewerStep === 0){
+    postViewerStep = 1;
+    typeWriter("Quelque chose me dit qu'une de ces flèches m'est directement destiné, plus que les autres...");
+  }
+}
 
 nextArrow.addEventListener("click", (e)=>{
   e.stopPropagation();
