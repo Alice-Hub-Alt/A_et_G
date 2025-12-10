@@ -1,1 +1,334 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zone 2 : Le Labyrinthe de la Connexion</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            /* FOND PIXEL ART (TEMPORAIRE) */
+            background-image: url('https://i.pinimg.com/originals/24/09/cc/2409cc3e811f59239845b497f1f92e44.gif'); 
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center center;
+            
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+            font-family: 'Press Start 2P', monospace;
+            overflow: hidden;
+            background-color: rgba(0, 0, 0, 0.5); 
+            background-blend-mode: darken;
+            /* Le curseur doit être par défaut, car la saisie se fait au clavier */
+            cursor: default; 
+        }
+        
+        /* ... (Styles dialogue-box, dialogue-text, cursor-active inchangés) ... */
 
+        #dialogue-box {
+            width: 80%;
+            height: 20vh;
+            background-color: rgba(0, 0, 0, 0.85);
+            border: 3px solid white;
+            padding: 20px;
+            box-sizing: border-box;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        #dialogue-text {
+            font-size: 0.8em;
+            line-height: 1.5;
+        }
+
+        .cursor-active {
+            border-right: 0.15em solid white;
+            animation: blink-cursor 0.5s step-end infinite;
+        }
+        @keyframes blink-cursor {
+            from, to { border-color: transparent }
+            50% { border-color: white; }
+        }
+
+        /* --- ÉLÉMENTS INTERACTIFS --- */
+        .clickable-object {
+            position: absolute;
+            width: 150px; 
+            height: 250px; 
+            background: rgba(255, 0, 0, 0.4); 
+            border: 2px solid red;
+            cursor: pointer;
+            z-index: 5;
+            text-align: center;
+            line-height: 250px;
+            font-size: 0.8em;
+            transition: all 0.5s; 
+        }
+        
+        /* Les flèches pour indiquer la saisie du code */
+        #code-indicator {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.2em;
+            color: rgba(255, 255, 255, 0.3); /* Presque invisible au début */
+            z-index: 15;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+        }
+
+        /* Porte de sortie (Verrou) */
+        #door-exit {
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 400px;
+            background: rgba(100, 100, 100, 0.6);
+            border: 3px solid #AAAAAA;
+            line-height: 400px;
+        }
+        
+        /* Portes/Indices - Positionnées pour l'exploration */
+        #door-1 { top: 60%; left: 10%; background: rgba(0, 0, 255, 0.4); border: 2px solid blue; }
+        #door-2 { top: 60%; right: 10%; background: rgba(0, 255, 0, 0.4); border: 2px solid green; }
+        #door-3 { top: 20%; left: 10%; background: rgba(255, 255, 0, 0.4); border: 2px solid yellow; }
+        #door-4 { top: 20%; right: 10%; background: rgba(255, 0, 255, 0.4); border: 2px solid magenta; } /* 4ème question ajoutée */
+        
+    </style>
+</head>
+
+<body>
+    <audio id="zone-audio" loop>
+        <source src="votre_lien_audio_zone2.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?rlkey=q1hljzkfdh6b4qjj89yut92oy&st=8d2bqys3&dl=0"></audio>
+
+    <div id="code-indicator">SÉQUENCE : </div>
+
+    <div id="dialogue-box">
+        <span id="dialogue-text"></span>
+    </div>
+
+    <div id="door-exit" class="clickable-object">PORTE DE SORTIE</div>
+    
+    <div id="door-1" class="clickable-object">PORTE 1 (Romance)</div>
+    <div id="door-2" class="clickable-object">PORTE 2 (RPG)</div>
+    <div id="door-3" class="clickable-object">PORTE 3 (Isekai)</div>
+    <div id="door-4" class="clickable-object">PORTE 4 (Indé)</div>
+
+    <script>
+        // --- DONNÉES DE JEU ---
+        const initialMonologue = "Ok, c'est étrange. Je suis dans ma tête ou quoi ? Il faut que je sorte de là. J'imagine que le silence du narrateur est ma seule compagnie maintenant.";
+        const doorExitLocked = "La porte est verrouillée. Un cadenas étrange, seulement des flèches gravées... Quatre d'entre elles. Il faut que je me concentre, je suis sûre que la solution est autour de moi.";
+        const codeFailed = "Non, la séquence est incorrecte. J'ai dû me tromper d'ordre ou de souvenir...";
+        const codeSuccess = "Le cadenas s'ouvre ! Je crois qu'on peut enfin sortir.";
+        
+        // Le code correct (Haut, Bas, Droite, Gauche selon notre tableau de travail)
+        const finalCode = ["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft"]; 
+        let currentCode = [];
+        let typingInterval;
+        let isTyping = false;
+        
+        // --- ÉLÉMENTS ---
+        const dialogueBox = document.getElementById('dialogue-box');
+        const dialogueTextElement = document.getElementById('dialogue-text');
+        const zoneAudio = document.getElementById('zone-audio');
+        const typeSound = document.getElementById('type-sound'); 
+        const codeIndicator = document.getElementById('code-indicator');
+        
+        // --- FONCTIONS TYPEWRITER (Reprise) ---
+
+        function skipText(event) {
+            if (isTyping) {
+                // ... (Logique de skip) ...
+                skipRequested = true;
+                event.stopPropagation();
+            }
+        }
+        
+        function typeWriter(text, targetElement, callback) {
+            // ... (Fonction typeWriter complète de Zone 1.html) ...
+            if(typingInterval) clearInterval(typingInterval);
+            skipRequested = false;
+            
+            const finalizeTyping = () => {
+                clearInterval(typingInterval);
+                if (isTypingAudioPlaying) {
+                    typeSound.pause();
+                    typeSound.currentTime = 0; 
+                    isTypingAudioPlaying = false;
+                }
+                dialogueBox.removeEventListener('click', skipText, false);
+                targetElement.classList.remove('cursor-active');
+                isTyping = false;
+                if (callback) callback();
+            };
+
+            if (isTypingAudioPlaying) {
+                typeSound.pause();
+                typeSound.currentTime = 0;
+                isTypingAudioPlaying = false;
+            }
+
+            isTyping = true;
+            targetElement.innerHTML = '';
+            targetElement.classList.add('cursor-active');
+            let i = 0;
+
+            typeSound.play().catch(e => {}); 
+            isTypingAudioPlaying = true;
+
+            typingInterval = setInterval(() => {
+                if (skipRequested) {
+                    targetElement.innerHTML = text;
+                    finalizeTyping();
+                    return;
+                }
+                
+                if (i < text.length) {
+                    targetElement.innerHTML += text.charAt(i);
+                    i++;
+                } else {
+                    targetElement.innerHTML = text; 
+                    finalizeTyping();
+                }
+            }, 30);
+        }
+
+        // --- LOGIQUE DE SAISIE MANUELLE DU CODE ---
+        
+        function updateCodeIndicator() {
+            // Affichage des directions sous forme de flèches ou de lettres
+            const directionsMap = {
+                "ArrowUp": "▲", "ArrowDown": "▼", "ArrowLeft": "◀", "ArrowRight": "▶"
+            };
+            const codeString = currentCode.map(dir => directionsMap[dir] || '?').join(' ');
+            codeIndicator.innerHTML = "SÉQUENCE : " + codeString;
+            
+            // Si la séquence est complète, on vérifie !
+            if (currentCode.length === finalCode.length) {
+                checkCode();
+            }
+        }
+
+        function checkCode() {
+            // On désactive l'écoute le temps de la vérification
+            document.removeEventListener('keydown', handleKeyPress); 
+            
+            let success = true;
+            for (let i = 0; i < finalCode.length; i++) {
+                if (currentCode[i] !== finalCode[i]) {
+                    success = false;
+                    break;
+                }
+            }
+            
+            if (success) {
+                showMessage(codeSuccess, '#00FF00', () => {
+                    // SUCCÈS : Redirection vers la zone 3
+                    setTimeout(() => {
+                        zoneAudio.pause();
+                        window.location.href = 'zone3.html';
+                    }, 1500);
+                });
+            } else {
+                showMessage(codeFailed, '#FF0000', () => {
+                    // ÉCHEC : On réinitialise et réactive l'écoute
+                    currentCode = [];
+                    updateCodeIndicator();
+                    document.addEventListener('keydown', handleKeyPress); 
+                });
+            }
+        }
+        
+        function handleKeyPress(event) {
+            // On ne gère que les flèches du clavier
+            const allowedKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+            if (allowedKeys.includes(event.key)) {
+                event.preventDefault(); // Empêche le défilement de la page avec les flèches
+                
+                if (currentCode.length < finalCode.length) {
+                    currentCode.push(event.key);
+                    updateCodeIndicator();
+                }
+            }
+        }
+
+        function showMessage(message, color, callback) {
+            dialogueBox.style.display = 'block';
+            dialogueBox.style.border = `3px solid ${color}`; 
+            typeWriter(message, dialogueTextElement, () => {
+                 dialogueBox.addEventListener('click', () => { 
+                     dialogueBox.style.display = 'none'; 
+                     dialogueBox.style.border = '3px solid white';
+                     if (callback) callback();
+                 }, { once: true });
+            });
+        }
+        
+        // --- GESTION DE LA NAVIGATION ---
+        
+        document.getElementById('door-exit').addEventListener('click', () => {
+            if (isTyping) return;
+            showMessage(doorExitLocked, 'white');
+        });
+        
+        document.getElementById('door-1').addEventListener('click', () => {
+            if (isTyping) return;
+            zoneAudio.pause();
+            window.location.href = 'zone2_q1.html';
+        });
+        
+        document.getElementById('door-2').addEventListener('click', () => {
+            if (isTyping) return;
+            zoneAudio.pause();
+            window.location.href = 'zone2_q2.html';
+        });
+        
+        document.getElementById('door-3').addEventListener('click', () => {
+            if (isTyping) return;
+            zoneAudio.pause();
+            window.location.href = 'zone2_q3.html';
+        });
+        
+        document.getElementById('door-4').addEventListener('click', () => {
+            if (isTyping) return;
+            zoneAudio.pause();
+            window.location.href = 'zone2_q4.html';
+        });
+
+
+        // --- DÉMARRAGE ---
+        function startScene() {
+            zoneAudio.play().catch(e => console.error("Audio blocked"));
+            document.addEventListener('keydown', handleKeyPress); // Active l'écoute du clavier
+            
+            // Lancement du monologue initial
+            dialogueBox.style.display = 'block';
+            typeWriter(initialMonologue, dialogueTextElement, () => {
+                dialogueBox.addEventListener('click', () => { 
+                    dialogueBox.style.display = 'none'; 
+                }, { once: true });
+            });
+        }
+        
+        // Démarrage de la scène
+        startScene();
+
+    </script>
+</body>
+</html>
