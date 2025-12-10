@@ -95,27 +95,27 @@
     width:auto;
   }
 
-/* --- ARCHES PROPREMENT ARRANGÉES --- */
-/* Taille de la courbe */
+/* --- ARCHES INVERSÉES (le creux vers le centre) --- */
 :root {
-  --offsetX: 3%;
-  --top1: 12%;
-  --top2: 28%;
-  --top3: 46%;
-  --top4: 66%;
+  --left-edge: 2%;     /* bord gauche */
+  --right-edge: 2%;    /* bord droit */
+  --top-start: 12%;    /* première porte en haut */
+  --top-gap: 24%;      /* espacement vertical entre portes */
+  --inset-max: 8%;     /* décalage maximum vers l’intérieur */
 }
 
-/* Côté gauche : une vraie courbe */
-#door-1 { left: var(--offsetX); top: var(--top1); }
-#door-2 { left: calc(var(--offsetX) + 2%); top: var(--top2); }
-#door-3 { left: calc(var(--offsetX) + 4%); top: var(--top3); }
-#door-4 { left: calc(var(--offsetX) + 2%); top: var(--top4); }
+/* --- CÔTÉ GAUCHE --- */
+#door-1 { top: var(--top-start); left: calc(var(--left-edge) + var(--inset-max)); }
+#door-2 { top: calc(var(--top-start) + var(--top-gap)); left: calc(var(--left-edge) + var(--inset-max) * 0.5); }
+#door-3 { top: calc(var(--top-start) + var(--top-gap) * 2); left: var(--left-edge); }
+#door-4 { top: calc(var(--top-start) + var(--top-gap) * 3); left: calc(var(--left-edge) + var(--inset-max) * 0.5); }
 
-/* Côté droit : miroir parfait */
-#door-5 { right: var(--offsetX); top: var(--top1); }
-#door-6 { right: calc(var(--offsetX) + 2%); top: var(--top2); }
-#door-7 { right: calc(var(--offsetX) + 4%); top: var(--top3); }
-#door-8 { right: calc(var(--offsetX) + 2%); top: var(--top4); }
+/* --- CÔTÉ DROIT (miroir) --- */
+#door-5 { top: var(--top-start); right: calc(var(--right-edge) + var(--inset-max)); }
+#door-6 { top: calc(var(--top-start) + var(--top-gap)); right: calc(var(--right-edge) + var(--inset-max) * 0.5); }
+#door-7 { top: calc(var(--top-start) + var(--top-gap) * 2); right: var(--right-edge); }
+#door-8 { top: calc(var(--top-start) + var(--top-gap) * 3); right: calc(var(--right-edge) + var(--inset-max) * 0.5); }
+
 
 
 
