@@ -95,39 +95,31 @@
     width:auto;
   }
 
-/* --- ARCHES INVERSÉES CENTRÉES (PLACEMENT MIS À JOUR) --- */
-:root {
-  /* Positionnement Vertical (Tout est remonté) */
-  --top-line-1: 5%;       /* Extrémités hautes */
-  --top-line-2: 25%;     /* Milieu haut */
-  --top-line-3: 45%;     /* Milieu bas */
-  --top-line-4: 65%;     /* Extrémités basses */
-  
-  /* Positionnement Horizontal */
-  --horizontal-inner: 30%; /* Ligne intérieure (2, 3, 6, 7) - plus près du centre */
-  --horizontal-outer: 10%; /* Ligne extérieure (1, 4, 5, 8) - plus près des bords */
-}
+/* --- ARCHES INVERSÉES CENTRÉES (CORRIGÉ, SANS VARIABLES CSS INTERNES) --- */
 
-/* --- CÔTÉ GAUCHE --- */
-/* Porte 1 (Extrême) */
-#door-1 { top: var(--top-line-1); left: var(--horizontal-outer); }
-/* Porte 2 (Milieu haut) - Aligné avec 3 */
-#door-2 { top: var(--top-line-2); left: var(--horizontal-inner); }
-/* Porte 3 (Milieu bas) - Aligné avec 2 */
-#door-3 { top: var(--top-line-3); left: var(--horizontal-inner); }
-/* Porte 4 (Extrême) - Aligné avec 1 (Horizontalement) */
-#door-4 { top: var(--top-line-4); left: var(--horizontal-outer); }
+/* Décalage horizontal pour l'effet d'arche */
+/* Ligne intérieure (2, 3, 6, 7) plus près du centre (e.g., 30% du bord) */
+/* Ligne extérieure (1, 4, 5, 8) plus près des bords (e.g., 10% du bord) */
 
-/* --- CÔTÉ DROIT (Miroir) --- */
-/* Porte 5 (Extrême) */
-#door-5 { top: var(--top-line-1); right: var(--horizontal-outer); }
-/* Porte 6 (Milieu haut) - Aligné avec 7 */
-#door-6 { top: var(--top-line-2); right: var(--horizontal-inner); }
-/* Porte 7 (Milieu bas) - Aligné avec 6 */
-#door-7 { top: var(--top-line-3); right: var(--horizontal-inner); }
-/* Porte 8 (Extrême) - Aligné avec 5 (Horizontalement) */
-#door-8 { top: var(--top-line-4); right: var(--horizontal-outer); }
+/* GAUCHE */
+/* Porte 1 (Extrême haute) */
+#door-1 { top: 5%; left: 10%; }
+/* Porte 2 (Milieu haut) - Aligné verticalement avec 3 */
+#door-2 { top: 25%; left: 30%; }
+/* Porte 3 (Milieu bas) - Aligné verticalement avec 2 */
+#door-3 { top: 45%; left: 30%; }
+/* Porte 4 (Extrême basse) - Remonté, aligné horizontalement avec 1 */
+#door-4 { top: 65%; left: 10%; }
 
+/* DROIT (Miroir) */
+/* Porte 5 (Extrême haute) */
+#door-5 { top: 5%; right: 10%; }
+/* Porte 6 (Milieu haut) - Aligné verticalement avec 7 */
+#door-6 { top: 25%; right: 30%; }
+/* Porte 7 (Milieu bas) - Aligné verticalement avec 6 */
+#door-7 { top: 45%; right: 30%; }
+/* Porte 8 (Extrême basse) - Remonté, aligné horizontalement avec 5 */
+#door-8 { top: 65%; right: 10%; }
 
 
   /* protection responsive : reduire la taille des portes si l'écran est petit */
