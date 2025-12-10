@@ -13,7 +13,7 @@ html, body{
   margin:0; padding:0; height:100%;
   font-family:'Press Start 2P', monospace;
   overflow:hidden;
-  background:url('https://blog-eyc.pages.dev/vid/fire/fire.gif') center/cover no-repeat;
+  background:url('https://c.tenor.com/8dhganuRvoYAAAAd/tenor.gif') center/cover no-repeat;
   display:flex;
   align-items:flex-end;
   justify-content:center;
@@ -146,7 +146,7 @@ function typeWriter(text){
 }
 dialogueBox.addEventListener("click", ()=>{ if(isTyping){ skip=true; return; } dialogueBox.style.display="none"; });
 
-window.onload = ()=>{ typeWriter("Oh tient un livre, dommage que je soit illettré !"); }
+window.onload = ()=>{ typeWriter("Oh, c'est assez appaisant ici !"); }
 
 /* Visionneuse */
 const viewer = document.getElementById("viewer-container");
@@ -164,7 +164,7 @@ const images=[
 let index=0;
 
 document.getElementById("book-btn").addEventListener("click", ()=>{
-  typeWriter("Espérons qu'il y ai des images !");
+  typeWriter("Hum, on dirais une sorte de livre d'or des animes.. Et c'est quoi ces flèches ? Un indice pour la sortie ?");
   index=0;
   openViewer();
 });
