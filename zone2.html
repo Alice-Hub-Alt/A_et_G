@@ -95,45 +95,25 @@
     width:auto;
   }
 
-  /* --- ARCHE INVERSÉE CENTRÉE (CORRECTION FINALE) --- */
-
-/* Décalages Verticaux, remontés et espacés */
-:root {
-  /* 75% max pour que la porte basse soit visible au-dessus de la boîte de dialogue */
-  --top-high: 5%;     /* Extrémités Hautes (1 & 5) */
-  --top-mid-high: 25%;   /* Milieu Haut (2 & 6) */
-  --top-mid-low: 45%;   /* Milieu Bas (3 & 7) - Aligné verticalement avec mid-high */
-  --top-low: 65%;     /* Extrémités Basses (4 & 8) - Aligné verticalement avec high */
-  
-  /* Décalages Horizontaux */
-  --horizontal-inner: 30%; /* Ligne intérieure (2, 3, 6, 7) */
-  --horizontal-outer: 10%; /* Ligne extérieure (1, 4, 5, 8) - Aligné horizontalement avec inner */
-}
-
-
-/* --- CÔTÉ GAUCHE --- */
+/* --- ARCHE GAUCHE --- */
 /* Porte 1 (Extrême haute) */
-#door-1 { top: var(--top-high); left: var(--horizontal-outer); transform:none; }
+#door-1 { top: 5%; left: 10%; transform:none; }
 /* Porte 2 (Milieu haut) - Aligné verticalement avec 3 */
-#door-2 { top: var(--top-mid-high); left: var(--horizontal-inner); transform:none; }
+#door-2 { top: 25%; left: 30%; transform:none; }
 /* Porte 3 (Milieu bas) - Aligné verticalement avec 2 */
-#door-3 { top: var(--top-mid-low); left: var(--horizontal-inner); transform:none; }
+#door-3 { top: 45%; left: 30%; transform:none; }
 /* Porte 4 (Extrême basse) - Remonté, aligné horizontalement avec 1 */
-#door-4 { top: var(--top-low); left: var(--horizontal-outer); transform:none; }
+#door-4 { top: 65%; left: 10%; transform:none; }
 
-/* --- CÔTÉ DROIT (Miroir) --- */
+/* --- ARCHE DROITE (Miroir) --- */
 /* Porte 5 (Extrême haute) */
-#door-5 { top: var(--top-high); right: var(--horizontal-outer); transform:none; }
+#door-5 { top: 5%; right: 10%; transform:none; }
 /* Porte 6 (Milieu haut) - Aligné verticalement avec 7 */
-#door-6 { top: var(--top-mid-high); right: var(--horizontal-inner); transform:none; }
+#door-6 { top: 25%; right: 30%; transform:none; }
 /* Porte 7 (Milieu bas) - Aligné verticalement avec 6 */
-#door-7 { top: var(--top-mid-low); right: var(--horizontal-inner); transform:none; }
+#door-7 { top: 45%; right: 30%; transform:none; }
 /* Porte 8 (Extrême basse) - Remonté, aligné horizontalement avec 5 */
-#door-8 { top: var(--top-low); right: var(--horizontal-outer); transform:none; }
-  <!-- Audio : zone ambiant (laisser tel quel si tu as ton mp3) -->
-  <audio id="zone-audio" loop>
-    <source src="votre_lien_audio_zone2.mp3" type="audio/mpeg">
-  </audio>
+#door-8 { top: 65%; right: 10%; transform:none; }
 
   <!-- Son de "dialogue" demandé (exact link fourni) -->
  <audio id="type-sound"
