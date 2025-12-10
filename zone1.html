@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zone 1 : La Grotte Illusoire</title>
     <style>
-        /* ... Styles CSS (Inchangés, y compris les couleurs et la position des éléments) ... */
-        @import url('https://fonts.com/css2?family=Press+Start+2P&display=swap');
+        /* CORRIGÉ : L'URL du font a été réparée pour garantir la police pixel */
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
         body {
             background-image: url('https://i.pinimg.com/originals/ed/88/da/ed88da8c757d74f6255717ffc7a78154.gif');
@@ -59,6 +59,23 @@
             z-index: 10;
         }
         
+        #dialogue-text {
+            font-size: 0.8em;
+            line-height: 1.5;
+            white-space: normal;
+            overflow: hidden; 
+            height: 100%;
+        }
+        
+        .cursor-active {
+            border-right: 0.15em solid white;
+            animation: blink-cursor 0.5s step-end infinite;
+        }
+        @keyframes blink-cursor {
+            from, to { border-color: transparent }
+            50% { border-color: white; }
+        }
+
         #think-button {
             padding: 15px 30px;
             font-size: 1.2em;
@@ -105,6 +122,12 @@
             z-index: 10;
         }
 
+        #thought-text {
+            font-size: 0.7em;
+            color: #ff00ff;
+            line-height: 1.5;
+        }
+        
         #page-click-handler {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -141,35 +164,29 @@
 
     <audio id="discord-sfx" src="https://dl.dropboxusercontent.com/scl/fi/jg6wbserycyspqewz9ogc/SPOILER-Omori-play-sound-effect-READ-PINNED-COMMENT.mp3?rlkey=glagwcdgsnvzqnqvkgdoihyza&st=pmjvrfjb&dl=0"></audio>
 
-    <audio id="discord-music" loop src="https://dl.dropboxusercontent.com/scl/fi/8w03j8k7h1p5d8j2r2t8u/Cyberpunk-Uplifting-Track.mp3?rlkey=4m6j5k9j5l8p7n6r3q0h1w9e4&st=n0g7v0r9&dl=0"></audio>
+    <audio id="discord-music" loop src="https://dl.dropboxusercontent.com/scl/fi/8w03j8k7h1p5d8j2r2t8u/Cyberpunk-Uplifting-Track.mp3?rlkey=4m6j5l8p7n6r3q0h1w9e4&st=n0g7v0r9&dl=0"></audio>
 
     <div id="intro-overlay-zone1">
         Zone 1 : La Grotte Illusoire <br><br> (Cliquer pour continuer)
     </div>
 
     <div id="page-click-handler" style="display:none;"></div>
-        
     <button id="think-button" onclick="showThought()" style="display:none;">Penser</button>
-
     <button id="skip-button" onclick="skipToNextZone()" style="display:none;">Laisser passer le temps</button>
-
     <div id="dialogue-box" style="display:none;">
         <span id="dialogue-text"></span>
     </div>
-
     <div id="thought-box" style="display:none;">
         <span id="thought-text"></span>
     </div>
-
     <img id="discord-screen" src="https://i.imgur.com/DTmG30l.png" alt="Capture d'écran Discord avec un message de Guilian" style="display:none;">
 
 
     <script>
-        // --- DONNÉES DE JEU (Inchangées) ---
+        // --- DONNÉES DE JEU ---
         const initialText = "Le silence est assourdissant. Impossible de voir autour de toi, la pièce est plongée dans l'obscurité. Il n'y a rien d'autre que le bruit de la ventilation de ton ordinateur. Ce lieu est vide, mais réconfortant.";
         const thoughtText = "Je suis si seule... À quoi bon vivre au final ?";
         const discordIntroText = "Puis soudain, le bruit d'une notification Discord vint rompre ce silence assourdissant.";
-        
         const narrativeFollowUp1 = "Au début Alice n'y fit pas vraiment attention";
         const cynicalThought = "Bon ben un mec de plus qui s'intéresse à moi juste car j'ai des seins";
         
@@ -178,7 +195,7 @@
         let isTypingAudioPlaying = false; 
         let skipRequested = false; 
 
-        // --- ÉLÉMENTS (Inchangés) ---
+        // --- ÉLÉMENTS ---
         const dialogueBox = document.getElementById('dialogue-box');
         const dialogueTextElement = document.getElementById('dialogue-text');
         const thinkButton = document.getElementById('think-button');
@@ -196,23 +213,21 @@
         
         typeSound.volume = 0.5;
 
-        // --- GESTIONNAIRES D'ÉVÉNEMENTS GÉNÉRAUX ---
+        // --- FONCTIONS CLÉS ---
         
+        // CORRIGÉ : La fonction playClickSound() n'est plus appelée.
         function playClickSound() {
-            // Le .cloneNode(true) permet de jouer le son sans attendre la fin du précédent
             clickSound.cloneNode(true).play().catch(e => {}); 
         }
 
-        // Clic 1 : Démarrer la scène (LANCEMENT DE L'AUDIO CRITIQUE)
+
+        // Clic 1 : Démarrer la scène (Lancement de l'audio)
         overlay.addEventListener('click', function() {
-            // Tente de lancer la musique de fond
             zoneAudio.play().catch(error => { 
                 console.warn("L'audio de fond (zoneAudio) a été bloqué par le navigateur.", error); 
-                // On pourrait ajouter un fallback ici si c'était pour un jeu réel
             });
             
             overlay.style.display = 'none';
-            // Révèle le click handler pour le Clic 2
             pageClickHandler.style.display = 'block'; 
         }, { once: true });
 
@@ -238,7 +253,6 @@
 
         // Clic 4 : Clic sur le bouton "Penser"
         function showThought() {
-            // Pas de son
             thinkButton.style.display = 'none';
             thoughtBox.style.display = 'block';
             thoughtBox.addEventListener('click', skipText, false); 
@@ -278,7 +292,7 @@
             }, 50); 
         }
         
-        // Clic 7 : Clic sur l'image (Début de la nouvelle séquence narrative)
+        // Clic 7 : Clic sur l'image (Disparition de l'image et suite narrative)
         function narrativeFollowUp() {
             discordScreen.style.opacity = 0;
             setTimeout(() => {
@@ -305,18 +319,17 @@
             });
         }
 
-        // Clic 9 : Révélation du bouton de transition
+        // Clic 9 : Révélation du bouton de transition (SANS SON)
         function finalTransitionButton() {
             if (isTyping) return;
-            playClickSound(); 
-
+            // playClickSound(); // Supprimé
             thoughtBox.style.display = 'none';
             skipButton.style.display = 'block';
         }
 
-        // Clic sur le bouton de transition (Va vers la page suivante)
+        // Clic sur le bouton de transition (Va vers la page suivante) (SANS SON)
         function skipToNextZone() {
-             playClickSound();
+             // playClickSound(); // Supprimé
              discordMusic.pause();
              zoneAudio.pause();
              
@@ -365,7 +378,6 @@
             let i = 0;
 
             if (!isSilent) {
-                // Tente de jouer le son de frappe
                 typeSound.play().catch(e => {}); 
                 isTypingAudioPlaying = true;
             }
