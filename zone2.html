@@ -284,9 +284,9 @@ doorExit.addEventListener('click', ()=>{
   }
 });
 
-/* démarrage scène : overlay + click pour enlever */
+/* démarrage scène : overlay + click pour enlever, avec son de dialogue rose */
 function startScene(){
-  typeWriterSilent(overlayText, overlayTextElement, ()=>{
+  typeWriter(overlayText, overlayTextElement, ()=>{  // <-- on utilise typeWriter avec son
     overlay.addEventListener('click', ()=>{
       overlay.style.transition = 'opacity .6s';
       overlay.style.opacity = 0;
