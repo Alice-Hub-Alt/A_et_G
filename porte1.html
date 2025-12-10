@@ -57,7 +57,7 @@
     left: 50%;
     transform: translateX(-50%);
     cursor: pointer;
-    width: 100px;
+    width: 200px; /* agrandi */
     z-index: 100;
   }
 
@@ -71,15 +71,14 @@
     align-items: center;
     justify-content: center;
     background: url('https://img.itch.zone/aW1hZ2UvMjkwMzEwMC8xNzM2NzE1My5wbmc=/original/dK58Rm.png') center center / cover no-repeat;
-    border: 2px solid var(--pink-strong);
     display: none;
     z-index: 999;
   }
 
   #viewer-content {
     display: flex;
-    width: 80%;
-    height: 70%;
+    width: 60%; /* réduit de 25% */
+    height: 50%; /* réduit */
     background: rgba(0,0,0,0.85);
     padding: 20px;
     box-sizing: border-box;
@@ -89,15 +88,15 @@
   }
 
   #viewer-image {
-    width: 45%;
+    width: 35%; /* réduit l'image */
     object-fit: contain;
   }
 
   #viewer-text {
-    width: 50%;
+    width: 60%;
     color: var(--pink);
     font-size: 1em;
-    margin-left: 20px;
+    margin-left: 40px; /* espacé du texte */
     line-height: 1.5em;
   }
 
@@ -199,7 +198,7 @@ window.addEventListener('load', ()=>{
 
 // images et textes
 const images = [
-  {src:"https://i.imgur.com/qmbKHzv.png", text:"On s'en fou"},
+  {src:"https://i.imgur.com/qmbKHzv.png", text:"On s'en fou !\nVraiment c'est nul !"},
   {src:"https://i.imgur.com/xzZ06bS.png", text:"Mais quand même on sais pas"}
 ];
 
@@ -229,10 +228,9 @@ nextButton.addEventListener('click', ()=>{
   updateViewer();
 });
 
-// permettre de cliquer sur la pensée pour skip
+// empêcher la boîte de dialogue d'apparaître sur le visionneur
 thoughtBox.addEventListener('click', ()=>{ skipRequested=true; });
 </script>
 
 </body>
 </html>
-
