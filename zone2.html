@@ -95,17 +95,23 @@
     width:auto;
   }
 
-  /* ARCHE GAUCHE - positions décalées et espacées, garanties inside-screen */
-  #door-1{ left:12%; top:72%; transform:none; }
-  #door-2{ left:10%; top:30%; transform:none; }
-  #door-3{ left:-10%; top:-30%; transform:none; }
-  #door-4{ left:-12%; top:-72%; transform:none; }
+/* ARCHE GAUCHE - positions corrigées */
+  /* Ligne extérieure (1 & 4) : Plus près du centre (ex: 25% du bord gauche) */
+  #door-1{ left: 25%; top: 5%; transform:none; }   /* Extrémité haute */
+  #door-4{ left: 25%; top: 65%; transform:none; } /* Extrémité basse (Remontée) */
 
-  /* ARCHE DROITE - miroir approximatif */
-  #door-5{ right:12%; top:72%; transform:none; }
-  #door-6{ right:10%; top:30%; transform:none; }
-  #door-7{ right:-10%; top:-30%; transform:none; }
-  #door-8{ right:-12%; top:-72%; transform:none; }
+  /* Ligne intérieure (2 & 3) : Plus loin du centre (ex: 5% du bord gauche) */
+  #door-2{ left: 5%; top: 25%; transform:none; }   /* Milieu haut (Aligné avec 3) */
+  #door-3{ left: 5%; top: 45%; transform:none; }   /* Milieu bas (Aligné avec 2) */
+
+  /* ARCHE DROITE - miroir */
+  /* Ligne extérieure (5 & 8) : Plus près du centre (ex: 25% du bord droit) */
+  #door-5{ right: 25%; top: 5%; transform:none; }   /* Extrémité haute */
+  #door-8{ right: 25%; top: 65%; transform:none; } /* Extrémité basse (Remontée) */
+
+  /* Ligne intérieure (6 & 7) : Plus loin du centre (ex: 5% du bord droit) */
+  #door-6{ right: 5%; top: 25%; transform:none; }   /* Milieu haut (Aligné avec 7) */
+  #door-7{ right: 5%; top: 45%; transform:none; }   /* Milieu bas (Aligné avec 6) */
 
   /* protection responsive : reduire la taille des portes si l'écran est petit */
   @media (max-height:700px){
