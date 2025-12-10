@@ -95,17 +95,59 @@
     width:auto;
   }
 
-  /* ARCHE GAUCHE - positions décalées et espacées, garanties inside-screen */
-  #door-1{ left:6%; top:12%; transform:none; }
-  #door-2{ left:10%; top:30%; transform:none; }
-  #door-3{ left:6%; top:52%; transform:none; }
-  #door-4{ left:12%; top:72%; transform:none; }
+ /* ARC COURBÉ POUR LES PORTES */
 
-  /* ARCHE DROITE - miroir approximatif */
-  #door-5{ right:6%; top:12%; transform:none; }
-  #door-6{ right:10%; top:30%; transform:none; }
-  #door-7{ right:6%; top:52%; transform:none; }
-  #door-8{ right:12%; top:72%; transform:none; }
+/* Taille de l'écran virtuelle (pour une arche proportionnelle) */
+:root {
+    --arc-height: 15%;  /* profondeur de la courbe (plus haut = plus arrondi) */
+    --arc-horizontal: 12%; /* recul horizontal pour les portes les plus hautes */
+}
+
+/* --- COTE GAUCHE --- */
+
+#door-1 { 
+    top: 12%; 
+    left: calc(6% + var(--arc-horizontal)); 
+}
+
+#door-2 { 
+    top: 28%; 
+    left: calc(6% + var(--arc-horizontal) * 0.7); 
+}
+
+#door-3 { 
+    top: 52%; 
+    left: calc(6% + var(--arc-horizontal) * 0.4); 
+}
+
+#door-4 { 
+    top: 76%; 
+    left: 6%; 
+}
+
+
+/* --- COTE DROIT (MIROIR EXACT) --- */
+
+#door-5 { 
+    top: 12%; 
+    right: calc(6% + var(--arc-horizontal)); 
+}
+
+#door-6 { 
+    top: 28%; 
+    right: calc(6% + var(--arc-horizontal) * 0.7); 
+}
+
+#door-7 { 
+    top: 52%; 
+    right: calc(6% + var(--arc-horizontal) * 0.4); 
+}
+
+#door-8 { 
+    top: 76%; 
+    right: 6%; 
+}
+
 
   /* protection responsive : reduire la taille des portes si l'écran est petit */
   @media (max-height:700px){
