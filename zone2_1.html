@@ -33,6 +33,7 @@
     cursor:default;
   }
 
+  /* Dialogue */
   #dialogue-box{
     position:fixed;
     left:50%;
@@ -56,6 +57,7 @@
   .cursor-active{ border-right:0.15em solid var(--pink); animation:blink 0.5s steps(1) infinite; padding-right:6px; }
   @keyframes blink{ 0%,100%{ border-color:transparent } 50%{ border-color:var(--pink) } }
 
+  /* Portes */
   .clickable-door{
     position:absolute;
     height:200px;
@@ -75,14 +77,28 @@
     width:auto;
   }
 
-  #door-1{ left:20%; top:5%; transform:none; }
-  #door-2{ left:10%; top:25%; transform:none; }
-  #door-3{ left:10%; top:50%; transform:none; }
-  #door-4{ left:20%; top:70%; transform:none; }
-  #door-5{ right:20%; top:5%; transform:none; }
-  #door-6{ right:10%; top:25%; transform:none; }
-  #door-7{ right:10%; top:50%; transform:none; }
-  #door-8{ right:20%; top:70%; transform:none; }
+  #door-1{ left:20%; top:5%; }
+  #door-2{ left:10%; top:25%; }
+  #door-3{ left:10%; top:50%; }
+  #door-4{ left:20%; top:70%; }
+  #door-5{ right:20%; top:5%; }
+  #door-6{ right:10%; top:25%; }
+  #door-7{ right:10%; top:50%; }
+  #door-8{ right:20%; top:70%; }
+
+  /* Surbrillance texte au survol */
+  .door-label{
+    position:absolute;
+    padding:6px 10px;
+    background:rgba(0,0,0,0.65);
+    font-size:0.7em;
+    border-radius:4px;
+    white-space:nowrap;
+    pointer-events:none;
+    z-index:200;
+    display:none;
+    text-shadow:0 0 4px black;
+  }
 
   @media (max-height:700px){
     .clickable-door{ height:150px; }
@@ -107,6 +123,18 @@
 
   <div id="dialogue-box"><div id="dialogue-text"></div></div>
 
+  <!-- Surbrillance labels (1 par porte) -->
+  <div id="label-exit" class="door-label" style="color:black;">Sortie ?</div>
+  <div id="label-1" class="door-label" style="color:#4b0082;">Porte 1</div>
+  <div id="label-2" class="door-label" style="color:red;">Porte 2</div>
+  <div id="label-3" class="door-label" style="color:#4b0082;">Porte 3</div>
+  <div id="label-4" class="door-label" style="color:red;">Porte 4</div>
+  <div id="label-5" class="door-label" style="color:#4b0082;">Porte 5</div>
+  <div id="label-6" class="door-label" style="color:red;">Porte 6</div>
+  <div id="label-7" class="door-label" style="color:#4b0082;">Porte 7</div>
+  <div id="label-8" class="door-label" style="color:red;">Porte 8</div>
+
+  <!-- Portes -->
   <img id="door-exit" class="clickable-door" src="https://i.imgur.com/7xp8PkZ.png" alt="Porte sortie">
   <img id="door-1" class="clickable-door" src="https://i.imgur.com/OSOCKnQ.png" alt="Porte 1">
   <img id="door-2" class="clickable-door" src="https://i.imgur.com/mTg0Zm6.png" alt="Porte 2">
@@ -118,19 +146,16 @@
   <img id="door-8" class="clickable-door" src="https://i.imgur.com/xzZ06bS.png" alt="Porte 8">
 
 <script>
+/* Dialogue engine */
 const dialogueBox = document.getElementById('dialogue-box');
 const dialogueTextElement = document.getElementById('dialogue-text');
 const typeSound = document.getElementById('type-sound');
 const zoneAudio = document.getElementById('zone-audio');
 
-const allDoors = document.querySelectorAll('.clickable-door');
-const doorExit = document.getElementById('door-exit');
-
 let typingInterval = null;
 let isTyping = false;
 let skipRequested = false;
 
-/* fonction d'arrêt du son */
 function stopTypeSound(){ try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){} }
 function skipHandler(e){ if(isTyping){ skipRequested=true; e.stopPropagation(); } }
 
@@ -176,17 +201,45 @@ function showMessage(message, callback){
   });
 }
 
-/* play ambiance sonore */
 try{ zoneAudio.play().catch(()=>{}); }catch(e){}
 
-/* gestion portes */
+/* Portes */
+const allDoors = document.querySelectorAll('.clickable-door');
+const doorExit = document.getElementById('door-exit');
+
+/* Affichage des labels */
+function setupDoorLabel(doorId,labelId){
+  const door = document.getElementById(doorId);
+  const label = document.getElementById(labelId);
+
+  door.addEventListener('mouseenter', ()=>{
+    const rect = door.getBoundingClientRect();
+    label.style.left = (rect.left + rect.width/2) + "px";
+    label.style.top = (rect.top - 22) + "px";
+    label.style.transform = "translateX(-50%)";
+    label.style.display = "block";
+  });
+
+  door.addEventListener('mouseleave', ()=>{
+    label.style.display="none";
+  });
+}
+
+setupDoorLabel("door-exit","label-exit");
+setupDoorLabel("door-1","label-1");
+setupDoorLabel("door-2","label-2");
+setupDoorLabel("door-3","label-3");
+setupDoorLabel("door-4","label-4");
+setupDoorLabel("door-5","label-5");
+setupDoorLabel("door-6","label-6");
+setupDoorLabel("door-7","label-7");
+setupDoorLabel("door-8","label-8");
+
 allDoors.forEach(el=>{
   if(el.id==='door-exit'){
     el.addEventListener('click',()=>{
       if(isTyping) return;
-      // premier message
       showMessage("Mince, la sortie est vraiment bloquée.", ()=>{
-        // deuxième message après clic
         showMessage("Je devrais peut-être explorer, peut-être que je trouverais une autre issue, ou un moyen d'ouvrir ce cadenas chelou.");
       });
     });
@@ -198,13 +251,9 @@ allDoors.forEach(el=>{
   }
 });
 
-/* préchargement son dialogue */
-typeSound.addEventListener('canplay',()=>{});
-typeSound.addEventListener('error',()=>{ console.warn('Type sound error or blocked.'); });
-
-/* ---------------- Code secret avec flèches ---------------- */
+/* Code secret */
 document.addEventListener('DOMContentLoaded', function() {
-    const codeSequence = [40, 39, 38, 37, 38, 37, 40, 39]; // bas, droite, haut, gauche, haut, gauche, bas, droite
+    const codeSequence = [40, 39, 38, 37, 38, 37, 40, 39];
     let codeIndex = 0;
 
     document.addEventListener('keydown', function(event) {
@@ -212,19 +261,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if(keyPressed === codeSequence[codeIndex]) {
             codeIndex++;
             if(codeIndex === codeSequence.length) {
-                triggerSecretCode();
+                alert("Code ACCEPTÉ. Une faille s'ouvre dans la réalité...");
+                window.location.href = 'secret_code.html';
                 codeIndex = 0;
             }
         } else {
             codeIndex = 0;
         }
     });
-
-    function triggerSecretCode() {
-        alert("Code ACCEPTÉ. Une faille s'ouvre dans la réalité...");
-        window.location.href = 'secret_code.html';
-    }
 });
 </script>
+
 </body>
 </html>
