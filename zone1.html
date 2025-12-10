@@ -9,7 +9,6 @@
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
         body {
-            /* ... (Styles du body inchangés) ... */
             background-image: url('https://i.pinimg.com/originals/ed/88/da/ed88da8c757d74f6255717ffc7a78154.gif');
             background-size: cover;
             background-repeat: no-repeat;
@@ -34,8 +33,7 @@
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             background-color: black; 
-            /* CORRIGÉ : Assure-toi que l'overlay est bien en display flex pour être au-dessus */
-            display: flex; 
+            display: flex; /* Doit être visible au départ */
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -46,10 +44,8 @@
             text-align: center;
         }
 
-        /* ... (Styles des boîtes de dialogue/pensée/boutons inchangés) ... */
-
         #dialogue-box {
-            display: none;
+            /* Garde le display: none; initial en JS */
             width: 90%;
             height: 20vh;
             background-color: rgba(0, 0, 0, 0.85);
@@ -64,52 +60,109 @@
             z-index: 10;
         }
         
-        /* ... (Reste des styles inchangés) ... */
+        /* ... (Reste des styles inchangés, l'essentiel est dans le HTML et JS) ... */
         
+        #think-button {
+            /* Styles par défaut inchangés */
+            padding: 15px 30px;
+            font-size: 1.2em;
+            background-color: #550000;
+            color: white;
+            border: 3px solid #ff0000;
+            cursor: pointer;
+            text-shadow: 1px 1px 2px black;
+            transition: background-color 0.3s;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+        }
+        
+        #skip-button {
+             /* Styles par défaut inchangés */
+            padding: 15px 30px;
+            font-size: 1.2em;
+            background-color: rgba(30, 30, 30, 0.9);
+            color: white;
+            border: 3px solid #AAAAAA; 
+            cursor: pointer;
+            text-shadow: 1px 1px 2px black;
+            transition: background-color 0.3s;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+        }
+
+        #thought-box {
+            /* Styles par défaut inchangés */
+            width: 90%;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 2px dashed #ff00ff;
+            padding: 15px;
+            box-sizing: border-box;
+            cursor: pointer; 
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
         #page-click-handler {
-            /* CORRIGÉ : Assurer qu'il n'est pas affiché au départ */
-            display: none; 
+             /* Styles par défaut inchangés */
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             z-index: 1;
             cursor: pointer;
         }
+
+        #discord-screen {
+             /* Styles par défaut inchangés */
+            opacity: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 80%;
+            height: auto;
+            border: 3px solid white;
+            transition: opacity 2s ease-in-out; 
+            z-index: 20;
+            cursor: pointer; 
+        }
+
     </style>
 </head>
 
 <body> 
-    <audio id="zone-audio" loop>
-        <source src="https://dl.dropboxusercontent.com/scl/fi/dlinbl4zwtp6fv75m3cbb/Hacker-Archives-Computer-Programming-Cyberpunk-Ambient-Night-Coding-Technology-Sounds-HD.mp3?rlkey=t20c0opoaoddyacmy2tb0eowd&st=01c1gfb7&dl=0" type="audio/mpeg">
-        Ton navigateur ne supporte pas l'audio HTML5.
-    </audio>
-
-    <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?rlkey=q1hljzkfdh6b4qjj89yut92oy&st=8d2bqys3&dl=0"></audio>
-
-    <audio id="click-sound" src="https://dl.dropboxusercontent.com/scl/fi/2wnzok93isvtcv1ztbh2x/Beep-OMORI-SFX.mp3?rlkey=ddgajf6uqlftp4drff77fmsdv&st=crjm5oee&dl=0"></audio>
-
-    <audio id="discord-sfx" src="https://dl.dropboxusercontent.com/scl/fi/jg6wbserycyspqewz9ogc/SPOILER-Omori-play-sound-effect-READ-PINNED-COMMENT.mp3?rlkey=glagwcdgsnvzqnqvkgdoihyza&st=pmjvrfjb&dl=0"></audio>
-
-    <audio id="discord-music" loop src="https://dl.dropboxusercontent.com/scl/fi/8w03j8k7h1p5d8j2r2t8u/Cyberpunk-Uplifting-Track.mp3?rlkey=4m6j5k9j5l8p7n6r3q0h1w9e4&st=n0g7v0r9&dl=0"></audio>
+    <audio id="zone-audio" loop>...</audio>
+    <audio id="type-sound" src="..."></audio>
+    <audio id="click-sound" src="..."></audio>
+    <audio id="discord-sfx" src="..."></audio>
+    <audio id="discord-music" loop src="..."></audio>
 
     <div id="intro-overlay-zone1">
         Zone 1 : La Grotte Illusoire <br><br> (Cliquer pour continuer)
     </div>
 
-    <div id="page-click-handler"></div>
+    <div id="page-click-handler" style="display:none;"></div>
         
-    <button id="think-button" onclick="showThought()">Penser</button>
+    <button id="think-button" onclick="showThought()" style="display:none;">Penser</button>
 
-    <button id="skip-button" onclick="skipToNextZone()">Laisser passer le temps</button>
+    <button id="skip-button" onclick="skipToNextZone()" style="display:none;">Laisser passer le temps</button>
 
-    <div id="dialogue-box">
+    <div id="dialogue-box" style="display:none;">
         <span id="dialogue-text"></span>
     </div>
 
-    <div id="thought-box">
+    <div id="thought-box" style="display:none;">
         <span id="thought-text"></span>
     </div>
 
-    <img id="discord-screen" src="https://i.imgur.com/DTmG30l.png" alt="Capture d'écran Discord avec un message de Guilian">
+    <img id="discord-screen" src="https://i.imgur.com/DTmG30l.png" alt="Capture d'écran Discord avec un message de Guilian" style="display:none;">
 
 
     <script>
@@ -146,20 +199,22 @@
 
         // --- GESTIONNAIRES D'ÉVÉNEMENTS GÉNÉRAUX ---
         
-        // CORRIGÉ : Fonction de Clic 1 : Démarrer la scène 
-        // J'ai ajouté une ligne pour cacher le pageClickHandler au début, juste au cas où.
-        pageClickHandler.style.display = 'none'; // S'assurer qu'il est bien caché au chargement.
+        function playClickSound() {
+            clickSound.cloneNode(true).play().catch(e => {}); 
+        }
 
+        // Clic 1 : Démarrer la scène (Fonctionne maintenant car les autres sont cachés)
         overlay.addEventListener('click', function() {
             zoneAudio.play().catch(error => { console.log("Audio zone 1 bloqué."); });
             overlay.style.display = 'none';
+            // Révèle le click handler pour le Clic 2
             pageClickHandler.style.display = 'block'; 
         }, { once: true });
 
         // Clic 2 : Lancer le dialogue initial
         pageClickHandler.addEventListener('click', function(event) {
-            pageClickHandler.style.display = 'none';
-            dialogueBox.style.display = 'block';
+            pageClickHandler.style.display = 'none'; // Cache le click handler pour éviter les doubles clics
+            dialogueBox.style.display = 'block'; // Révèle la boîte de dialogue
             
             dialogueBox.addEventListener('click', skipText, false); 
 
@@ -169,21 +224,18 @@
         }, { once: true });
 
 
-        // --- Le reste des fonctions (handleDialogueClick, showThought, etc.) est inchangé par rapport à la dernière version validée pour les problèmes de son/bouton. ---
-
-        function playClickSound() {
-            clickSound.cloneNode(true).play().catch(e => {}); 
-        }
-
+        // Clic 3 : Révélation du bouton "Penser"
         function handleDialogueClick() {
             if (isTyping) return;
             dialogueBox.style.display = 'none';
-            thinkButton.style.display = 'block'; 
+            thinkButton.style.display = 'block'; // Révèle le bouton "Penser"
         }
 
+        // Clic 4 : Clic sur le bouton "Penser"
         function showThought() {
+            // Pas de son
             thinkButton.style.display = 'none';
-            thoughtBox.style.display = 'block';
+            thoughtBox.style.display = 'block'; // Révèle la pensée
             thoughtBox.addEventListener('click', skipText, false); 
 
             typeWriter(thoughtText, thoughtTextElement, true, () => { 
@@ -191,6 +243,7 @@
             });
         }
         
+        // Clic 5 : Clic sur la Pensée (Annonce Discord)
         function continueToDiscord() {
              thoughtBox.style.display = 'none';
              dialogueBox.style.display = 'block'; 
@@ -201,6 +254,7 @@
              });
         }
 
+        // Clic 6 : Clic sur l'Annonce Discord (Révélation de l'Image + SFX + Musique)
         function showDiscordImage() {
             if (isTyping) return;
             
@@ -211,7 +265,7 @@
             zoneAudio.pause(); 
             discordMusic.play().catch(e => {}); 
 
-            discordScreen.style.display = 'block';
+            discordScreen.style.display = 'block'; // Révèle l'image
             
             setTimeout(() => {
                 discordScreen.style.opacity = 1;
@@ -219,10 +273,11 @@
             }, 50); 
         }
         
+        // Clic 7 : Clic sur l'image (Début de la nouvelle séquence narrative)
         function narrativeFollowUp() {
             discordScreen.style.opacity = 0;
             setTimeout(() => {
-                 discordScreen.style.display = 'none';
+                 discordScreen.style.display = 'none'; // Cache l'image après fondu
             }, 2000); 
 
             dialogueBox.style.display = 'block';
@@ -233,6 +288,7 @@
             });
         }
 
+        // Clic 8 : Suite narrative : Pensée cynique
         function cynicalThoughtSequence() {
             if (isTyping) return;
             dialogueBox.style.display = 'none';
@@ -244,14 +300,16 @@
             });
         }
 
+        // Clic 9 : Révélation du bouton de transition
         function finalTransitionButton() {
             if (isTyping) return;
             playClickSound(); 
 
             thoughtBox.style.display = 'none';
-            skipButton.style.display = 'block';
+            skipButton.style.display = 'block'; // Révèle le bouton "Laisser passer le temps"
         }
 
+        // Clic sur le bouton de transition (Va vers la page suivante)
         function skipToNextZone() {
              playClickSound();
              discordMusic.pause();
@@ -260,6 +318,7 @@
              window.location.href = 'zone1_2.html'; 
         }
 
+        // --- FONCTION DE SKIP et TYPEWRITER (Inchangées) ---
         function skipText(event) {
             if (isTyping) {
                 skipRequested = true;
