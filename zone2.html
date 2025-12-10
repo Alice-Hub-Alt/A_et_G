@@ -8,8 +8,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
         body {
-            /* FOND PIXEL ART (GIF) */
-            background-image: url('https://i.giphy.com/B3kiRKFDrHvsoX9gdD.webp'); 
+            /* NOUVEAU FOND PIXEL ART */
+            background-image: url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2tmam1wYzlkYzRpZzR3cmt3Mno4MGdrYmkwaDZpcmpzYTc5azdnNiZlcH12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/NANml9RASmTDU9tA5s/giphy.gif'); 
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
@@ -30,7 +30,7 @@
             cursor: default; 
         }
 
-        /* --- OVERLAY INITIAL (Pensée rose) --- */
+        /* --- OVERLAY INITIAL (Maintenu pour la transition) --- */
         #intro-overlay-zone2 {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -41,17 +41,17 @@
             z-index: 1000;
             cursor: pointer;
             font-size: 1.1em;
-            color: #ff00ff; /* Couleur de pensée */
+            color: #ff00ff; /* Rose de la pensée */
             text-shadow: 2px 2px 4px rgba(255, 0, 255, 0.3);
             text-align: center;
         }
 
-        /* --- BOÎTE DE DIALOGUE (Blanc) --- */
-        #dialogue-box {
+        /* --- BOÎTE DE PENSÉE (Remplace la boîte de dialogue blanche) --- */
+        #thought-box {
             width: 80%;
             height: 20vh;
-            background-color: rgba(0, 0, 0, 0.85);
-            border: 3px solid white;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 3px dashed #ff00ff; /* Contour de pensée */
             padding: 20px;
             box-sizing: border-box;
             position: fixed;
@@ -59,37 +59,40 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
+            display: none; /* Cachée par défaut */
+            cursor: pointer;
         }
 
-        #dialogue-text {
+        #thought-text {
             font-size: 0.8em;
             line-height: 1.5;
+            color: #ff00ff; /* Texte de pensée */
         }
 
         .cursor-active {
-            border-right: 0.15em solid white;
+            border-right: 0.15em solid #ff00ff;
             animation: blink-cursor 0.5s step-end infinite;
         }
         @keyframes blink-cursor {
             from, to { border-color: transparent }
-            50% { border-color: white; }
+            50% { border-color: #ff00ff; }
         }
 
         /* --- ÉLÉMENTS INTERACTIFS (Les Portes) --- */
         .clickable-door {
             position: absolute;
             width: auto; 
-            height: 200px; /* Hauteur de base pour toutes les portes */
+            height: 200px; 
             cursor: pointer;
             z-index: 5;
-            image-rendering: pixelated; /* Pour garder l'effet pixel art */
+            image-rendering: pixelated; 
             transition: transform 0.2s;
         }
         .clickable-door:hover {
             transform: scale(1.05);
         }
 
-        /* Porte de sortie (Plus grande) */
+        /* Porte de sortie */
         #door-exit {
             top: 25%;
             left: 50%;
@@ -98,20 +101,19 @@
             height: 450px;
         }
         
-        /* Positionnement des 8 portes d'indices (Séparées Gauche/Droite) */
-        /* Groupes de 4, espacées verticalement */
+        /* Disposition en Arche (Demi-Cercle) */
         
         /* GAUCHE */
-        #door-1 { top: 10%; left: 1%; }
-        #door-2 { top: 35%; left: 1%; }
-        #door-3 { top: 60%; left: 1%; }
-        #door-4 { top: 85%; left: 1%; }
+        #door-1 { top: 10%; left: 10%; }
+        #door-2 { top: 35%; left: 5%; }
+        #door-3 { top: 60%; left: 5%; }
+        #door-4 { top: 85%; left: 10%; }
 
         /* DROITE */
-        #door-5 { top: 10%; right: 1%; }
-        #door-6 { top: 35%; right: 1%; }
-        #door-7 { top: 60%; right: 1%; }
-        #door-8 { top: 85%; right: 1%; }
+        #door-5 { top: 10%; right: 10%; }
+        #door-6 { top: 35%; right: 5%; }
+        #door-7 { top: 60%; right: 5%; }
+        #door-8 { top: 85%; right: 10%; }
 
     </style>
 </head>
@@ -120,14 +122,14 @@
     <audio id="zone-audio" loop>
         <source src="votre_lien_audio_zone2.mp3" type="audio/mpeg"> 
     </audio>
-    <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?rlkey=q1hljzkfdh6b4qjj89yut92oy&st=8d2bqys3&dl=0"></audio>
+    <audio id="thought-sound" src="https://www.dropbox.com/scl/fi/uvpro4u58k9jpemt7oc3y/pickupCoin.wav?rlkey=gfyz1jmxoql4wk2grfw334ch8&st=q6tdy3em&dl=0"></audio>
 
     <div id="intro-overlay-zone2">
         <span id="overlay-text"></span>
     </div>
 
-    <div id="dialogue-box" style="display:none;">
-        <span id="dialogue-text"></span>
+    <div id="thought-box">
+        <span id="thought-text"></span>
     </div>
 
     <img id="door-exit" class="clickable-door" src="https://i.imgur.com/7xp8PkZ.png" alt="Grande Porte de Sortie">
@@ -151,18 +153,17 @@
         let initialDoorMessageShown = false; 
 
         // --- ÉLÉMENTS ---
-        const dialogueBox = document.getElementById('dialogue-box');
-        const dialogueTextElement = document.getElementById('dialogue-text');
+        const thoughtBox = document.getElementById('thought-box');
+        const thoughtTextElement = document.getElementById('thought-text');
         const overlay = document.getElementById('intro-overlay-zone2');
         const overlayTextElement = document.getElementById('overlay-text');
-        const typeSound = document.getElementById('type-sound'); 
+        const thoughtSound = document.getElementById('thought-sound'); // NOUVEAU SON
         const zoneAudio = document.getElementById('zone-audio');
         
-        // Toutes les portes pour l'écoute
         const allDoors = document.querySelectorAll('.clickable-door');
         const doorExit = document.getElementById('door-exit');
 
-        // --- FONCTIONS TYPEWRITER / MESSAGES ---
+        // --- FONCTIONS TYPEWRITER / MESSAGES (Adaptées à la Pensée) ---
 
         let typingInterval;
         let isTyping = false;
@@ -175,18 +176,18 @@
             }
         }
         
-        // Typewriter pour les boîtes de dialogue BLANCHES (avec bruit de frappe)
-        function typeWriter(text, targetElement, callback) {
+        // Typewriter pour les boîtes de PENSÉE (avec le nouveau son)
+        function typeWriterThought(text, targetElement, useSound, callback) {
             if(typingInterval) clearInterval(typingInterval);
             skipRequested = false;
             
             const finalizeTyping = () => {
                 clearInterval(typingInterval);
-                if (typeSound.currentTime > 0) {
-                    typeSound.pause();
-                    typeSound.currentTime = 0; 
+                if (useSound && thoughtSound.currentTime > 0) {
+                    thoughtSound.pause();
+                    thoughtSound.currentTime = 0; 
                 }
-                dialogueBox.removeEventListener('click', skipText, false);
+                thoughtBox.removeEventListener('click', skipText, false);
                 targetElement.classList.remove('cursor-active');
                 isTyping = false;
                 if (callback) callback();
@@ -197,7 +198,12 @@
             targetElement.classList.add('cursor-active');
             let i = 0;
 
-            typeSound.play().catch(e => {}); 
+            if (useSound) {
+                // Pour que le son soit joué à chaque caractère (effet machine à écrire)
+                // C'est souvent mieux de le jouer une seule fois pour les petits textes de pensée. 
+                // Je le joue une seule fois ici pour éviter la saturation du son.
+                thoughtSound.play().catch(e => {}); 
+            }
 
             typingInterval = setInterval(() => {
                 if (skipRequested) {
@@ -218,7 +224,6 @@
 
         // Typewriter pour l'overlay ROSE (SANS bruit de frappe, plus rapide)
         function typeWriterSilent(text, targetElement, callback) {
-            // Logique simplifiée SANS son
             targetElement.innerHTML = '';
             let i = 0;
             const interval = setInterval(() => {
@@ -229,19 +234,20 @@
                     clearInterval(interval);
                     if (callback) callback();
                 }
-            }, 50); // Plus rapide pour l'intro
+            }, 50); 
         }
         
-        function showMessage(message, callback) {
-            if (isTyping) return; // Empêche l'interférence
+        function showThought(message, callback) {
+            if (isTyping) return;
             
-            dialogueBox.style.display = 'block';
-            dialogueBox.addEventListener('click', skipText, false);
+            thoughtBox.style.display = 'block';
+            thoughtBox.addEventListener('click', skipText, false);
             
-            typeWriter(message, dialogueTextElement, () => {
-                // Attendre le clic pour cacher la boîte de dialogue
-                dialogueBox.addEventListener('click', () => { 
-                    dialogueBox.style.display = 'none'; 
+            // Le son est joué (useSound = true)
+            typeWriterThought(message, thoughtTextElement, true, () => {
+                // Attendre le clic pour cacher la boîte de pensée
+                thoughtBox.addEventListener('click', () => { 
+                    thoughtBox.style.display = 'none'; 
                     if (callback) callback();
                 }, { once: true });
             });
@@ -254,7 +260,7 @@
             if (door.id !== 'door-exit') {
                 door.addEventListener('click', () => {
                     if (isTyping) return;
-                    showMessage(genericDoorMessage);
+                    showThought(genericDoorMessage);
                 });
             }
         });
@@ -265,12 +271,12 @@
 
             if (!initialDoorMessageShown) {
                 // Premier clic : message d'observation
-                showMessage(initialDoorMessage, () => {
+                showThought(initialDoorMessage, () => {
                     initialDoorMessageShown = true;
                 });
             } else {
                 // Second clic : message d'indice + redirection immédiate
-                showMessage(doorExitLocked, () => {
+                showThought(doorExitLocked, () => {
                     // C'est ici que l'on redirige
                     zoneAudio.pause();
                     window.location.href = 'zone3_2.html';
@@ -290,10 +296,11 @@
                         overlay.style.display = 'none';
                         // 3. Lancer l'audio et afficher le premier message sur la porte
                         zoneAudio.play().catch(e => console.error("Audio blocked"));
-                        showMessage(initialDoorMessage, () => {
+                        // On lance directement la première pensée, car initialDoorMessageShown est faux au départ
+                        showThought(initialDoorMessage, () => {
                             initialDoorMessageShown = true;
                         });
-                    }, 1000); // Laisse le temps à l'opacité de se terminer
+                    }, 1000); 
                 }, { once: true });
             });
         }
