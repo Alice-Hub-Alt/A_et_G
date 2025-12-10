@@ -24,14 +24,11 @@
             height: 100vh;
             color: white;
             font-family: 'Press Start 2P', monospace;
-            /* CORRECTION: On retire l'interdiction stricte de débordement (overflow: hidden;) */
-            /* overflow: hidden; */
+            /* On laisse la possibilité de scroll si vraiment un élément est trop grand */
             background-color: rgba(0, 0, 0, 0.5); 
             background-blend-mode: darken;
             cursor: default; 
         }
-
-        /* Le reste du CSS (overlays, portes...) n'a pas été modifié */
 
         /* --- OVERLAY INITIAL --- */
         #intro-overlay-zone2 {
@@ -85,7 +82,7 @@
         .clickable-door {
             position: absolute;
             width: auto; 
-            height: 180px; 
+            height: 200px; /* Taille plus grande, comme tu le voulais */
             cursor: pointer;
             z-index: 5;
             image-rendering: pixelated; 
@@ -97,26 +94,26 @@
 
         /* Porte de sortie */
         #door-exit {
-            top: 25%;
+            top: 30%; /* Légèrement plus bas pour laisser de la place aux portes du haut */
             left: 50%;
             transform: translate(-50%, 0);
             width: 300px;
             height: 450px;
         }
         
-        /* Disposition en Arche - POSITIONNEMENT PLUS ESPACÉ */
+        /* Disposition en Arche / Étalement Maximal basé sur les cercles */
         
-        /* GAUCHE (Plus éloigné du centre pour ne pas se chevaucher) */
-        #door-1 { top: 10%; left: 5%; } 
-        #door-2 { top: 28%; left: 2%; } 
-        #door-3 { top: 46%; left: 2%; } 
-        #door-4 { top: 64%; left: 5%; } 
+        /* GAUCHE */
+        #door-1 { top: 10%; left: 5%; }    /* Haut gauche */
+        #door-2 { top: 30%; left: 1%; }    /* Milieu haut gauche */
+        #door-3 { top: 50%; left: 1%; }    /* Milieu bas gauche */
+        #door-4 { top: 70%; left: 5%; }    /* Bas gauche */
 
-        /* DROITE (Plus éloigné du centre pour ne pas se chevaucher) */
-        #door-5 { top: 10%; right: 5%; } 
-        #door-6 { top: 28%; right: 2%; } 
-        #door-7 { top: 46%; right: 2%; } 
-        #door-8 { top: 64%; right: 5%; } 
+        /* DROITE */
+        #door-5 { top: 10%; right: 5%; }   /* Haut droit */
+        #door-6 { top: 30%; right: 1%; }   /* Milieu haut droit */
+        #door-7 { top: 50%; right: 1%; }   /* Milieu bas droit */
+        #door-8 { top: 70%; right: 5%; }   /* Bas droit */
 
     </style>
 </head>
@@ -125,7 +122,7 @@
     <audio id="zone-audio" loop>
         <source src="votre_lien_audio_zone2.mp3" type="audio/mpeg"> 
     </audio>
-    <audio id="thought-sound" src="https://www.dropbox.com/s/uvpro4u58k9jpemt7oc3y/pickupCoin.wav?dl=1"></audio>
+    <audio id="thought-sound" src="https://www.dropbox.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=upbycyus&dl=0" loop></audio>
 
     <div id="intro-overlay-zone2">
         <span id="overlay-text"></span>
@@ -179,7 +176,7 @@
             }
         }
         
-        // Typewriter pour les boîtes de PENSÉE (SON JOUÉ UNE SEULE FOIS AU DÉBUT)
+        // Typewriter pour les boîtes de PENSÉE (SON JOUÉ EN BOUCLE SIMULANT LA PAROLE)
         function typeWriterThought(text, targetElement, useSound, callback) {
             if(typingInterval) clearInterval(typingInterval);
             skipRequested = false;
@@ -189,6 +186,11 @@
                 thoughtBox.removeEventListener('click', skipText, false);
                 targetElement.classList.remove('cursor-active');
                 isTyping = false;
+                if (useSound) {
+                    // Arrêt du son de parole
+                    thoughtSound.pause();
+                    thoughtSound.currentTime = 0; 
+                }
                 if (callback) callback();
             };
 
@@ -197,11 +199,10 @@
             targetElement.classList.add('cursor-active');
             let i = 0;
 
-            // On joue le son une seule fois avant de commencer à taper
             if (useSound) {
-                thoughtSound.currentTime = 0;
+                // Lancement du son de parole en boucle avant de commencer la frappe
                 thoughtSound.play().catch(e => { 
-                    console.warn("Le son de pensée n'a pas pu être joué."); 
+                    console.warn("Le son de pensée n'a pas pu être joué (Bloqué ou Problème de lien).", e); 
                 }); 
             }
 
