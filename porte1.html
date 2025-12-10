@@ -88,11 +88,13 @@ body{
   transform:translate(-50%, -50%);
   width:900px;
   height:500px;
-  background:url('https://img.itch.zone/aW1hZ2UvMjkwMzEwMC8xNzM2NzE1My5wbmc=/original/dK58Rm.png')
-             center/contain no-repeat;
+  background-color:black;
   display:none;
   z-index:5000;
-  pointer-events:auto;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
 /* Zone invisible autour pour fermer */
@@ -105,7 +107,7 @@ body{
   z-index:4000;
 }
 
-/* Bouton retour */
+/* Retour */
 #back-btn{
   position:fixed;
   top:14px;
@@ -116,46 +118,11 @@ body{
   z-index:6000;
 }
 
-/* CONTENU visionneuse, désormais libre */
-#viewer-content{
-  position:absolute;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-}
-
-/* IMAGE LIBREMENT POSITIONNABLE */
+/* Image de la visionneuse */
 #viewer-img{
-  position:absolute;
-  top:110px;     /* CHANGE ICI pour la hauteur */
-  left:125px;     /* CHANGE ICI pour la position horizontale */
-  width:200px;   /* CHANGE ICI pour la taille */
-  height:auto;
+  max-width:90%;
+  max-height:90%;
   image-rendering:pixelated;
-}
-
-/* TEXTE LIBREMENT POSITIONNABLE */
-#viewer-text{
-  position:absolute;
-  top:110px;     /* CHANGE ICI pour la hauteur du texte */
-  left:540px;    /* CHANGE ICI pour sa position horizontale */
-  width:320px;
-  font-size:0.9em;
-  color:white;
-  line-height:1.6;
-}
-
-/* Flèche suivante */
-#next-arrow{
-  position:absolute;
-  right:30px;
-  top:50%;
-  transform:translateY(-50%);
-  font-size:42px;
-  color:red;
-  cursor:pointer;
-  user-select:none;
 }
 </style>
 </head>
@@ -178,11 +145,7 @@ body{
 
 <!-- Visionneuse -->
 <div id="viewer-container">
-  <div id="viewer-content">
-    <img id="viewer-img" src="">
-    <div id="viewer-text"></div>
-    <div id="next-arrow">➡</div>
-  </div>
+  <img id="viewer-img" src="">
 </div>
 
 <!-- Audio -->
@@ -247,12 +210,11 @@ window.onload = ()=>{
 const viewer = document.getElementById("viewer-container");
 const viewerBlock = document.getElementById("viewer-bg-block");
 const viewerImg = document.getElementById("viewer-img");
-const viewerText = document.getElementById("viewer-text");
-const nextArrow = document.getElementById("next-arrow");
 
 const images=[
-  {img:"https://i.imgur.com/qmbKHzv.png", text:"On s'en fou !<br>Vraiment c'est nul !"},
-  {img:"https://i.imgur.com/xzZ06bS.png", text:"Mais quand même on sais pas<br>Et c'est triste"}
+  "https://img.itch.zone/aW1hZ2UvMjkwMzEwMC8xNzM2NzE1My5wbmc=/original/dK58Rm.png",
+  "https://i.imgur.com/qmbKHzv.png",
+  "https://i.imgur.com/xzZ06bS.png"
 ];
 
 let index=0;
@@ -266,14 +228,13 @@ document.getElementById("book-btn").addEventListener("click", ()=>{
 
 /* Actualiser */
 function refreshViewer(){
-  viewerImg.src = images[index].img;
-  viewerText.innerHTML = images[index].text;
+  viewerImg.src = images[index];
 }
 
 /* Ouvrir */
 function openViewer(){
   refreshViewer();
-  viewer.style.display="block";
+  viewer.style.display="flex";
   viewerBlock.style.display="block";
 }
 
@@ -283,13 +244,13 @@ function closeViewer(){
   viewerBlock.style.display="none";
 }
 
-/* Suivant */
-nextArrow.addEventListener("click", ()=>{
-  index=(index+1)%images.length;
+/* Clic pour passer à l'image suivante dans la visionneuse */
+viewer.addEventListener("click", ()=>{
+  index = (index+1)%images.length;
   refreshViewer();
 });
 
-/* Clic extérieur */
+/* Clic à l’extérieur */
 viewerBlock.addEventListener("click", closeViewer);
 </script>
 
