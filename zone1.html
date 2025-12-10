@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zone 1 : La Grotte Illusoire</title>
     <style>
-        /* ... Styles CSS (Inchangés) ... */
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        /* ... Styles CSS (Inchangés, y compris les couleurs et la position des éléments) ... */
+        @import url('https://fonts.com/css2?family=Press+Start+2P&display=swap');
         
         body {
             background-image: url('https://i.pinimg.com/originals/ed/88/da/ed88da8c757d74f6255717ffc7a78154.gif');
@@ -33,7 +33,7 @@
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             background-color: black; 
-            display: flex; /* Doit être visible au départ */
+            display: flex; 
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -45,7 +45,6 @@
         }
 
         #dialogue-box {
-            /* Garde le display: none; initial en JS */
             width: 90%;
             height: 20vh;
             background-color: rgba(0, 0, 0, 0.85);
@@ -60,10 +59,7 @@
             z-index: 10;
         }
         
-        /* ... (Reste des styles inchangés, l'essentiel est dans le HTML et JS) ... */
-        
         #think-button {
-            /* Styles par défaut inchangés */
             padding: 15px 30px;
             font-size: 1.2em;
             background-color: #550000;
@@ -80,7 +76,6 @@
         }
         
         #skip-button {
-             /* Styles par défaut inchangés */
             padding: 15px 30px;
             font-size: 1.2em;
             background-color: rgba(30, 30, 30, 0.9);
@@ -97,7 +92,6 @@
         }
 
         #thought-box {
-            /* Styles par défaut inchangés */
             width: 90%;
             background-color: rgba(0, 0, 0, 0.7);
             border: 2px dashed #ff00ff;
@@ -112,7 +106,6 @@
         }
 
         #page-click-handler {
-             /* Styles par défaut inchangés */
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             z-index: 1;
@@ -120,7 +113,6 @@
         }
 
         #discord-screen {
-             /* Styles par défaut inchangés */
             opacity: 0;
             position: absolute;
             top: 50%;
@@ -138,11 +130,18 @@
 </head>
 
 <body> 
-    <audio id="zone-audio" loop>...</audio>
-    <audio id="type-sound" src="..."></audio>
-    <audio id="click-sound" src="..."></audio>
-    <audio id="discord-sfx" src="..."></audio>
-    <audio id="discord-music" loop src="..."></audio>
+    <audio id="zone-audio" loop>
+        <source src="https://dl.dropboxusercontent.com/scl/fi/dlinbl4zwtp6fv75m3cbb/Hacker-Archives-Computer-Programming-Cyberpunk-Ambient-Night-Coding-Technology-Sounds-HD.mp3?rlkey=t20c0opoaoddyacmy2tb0eowd&st=01c1gfb7&dl=0" type="audio/mpeg">
+        Ton navigateur ne supporte pas l'audio HTML5.
+    </audio>
+
+    <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?rlkey=q1hljzkfdh6b4qjj89yut92oy&st=8d2bqys3&dl=0"></audio>
+
+    <audio id="click-sound" src="https://dl.dropboxusercontent.com/scl/fi/2wnzok93isvtcv1ztbh2x/Beep-OMORI-SFX.mp3?rlkey=ddgajf6uqlftp4drff77fmsdv&st=crjm5oee&dl=0"></audio>
+
+    <audio id="discord-sfx" src="https://dl.dropboxusercontent.com/scl/fi/jg6wbserycyspqewz9ogc/SPOILER-Omori-play-sound-effect-READ-PINNED-COMMENT.mp3?rlkey=glagwcdgsnvzqnqvkgdoihyza&st=pmjvrfjb&dl=0"></audio>
+
+    <audio id="discord-music" loop src="https://dl.dropboxusercontent.com/scl/fi/8w03j8k7h1p5d8j2r2t8u/Cyberpunk-Uplifting-Track.mp3?rlkey=4m6j5k9j5l8p7n6r3q0h1w9e4&st=n0g7v0r9&dl=0"></audio>
 
     <div id="intro-overlay-zone1">
         Zone 1 : La Grotte Illusoire <br><br> (Cliquer pour continuer)
@@ -200,12 +199,18 @@
         // --- GESTIONNAIRES D'ÉVÉNEMENTS GÉNÉRAUX ---
         
         function playClickSound() {
+            // Le .cloneNode(true) permet de jouer le son sans attendre la fin du précédent
             clickSound.cloneNode(true).play().catch(e => {}); 
         }
 
-        // Clic 1 : Démarrer la scène (Fonctionne maintenant car les autres sont cachés)
+        // Clic 1 : Démarrer la scène (LANCEMENT DE L'AUDIO CRITIQUE)
         overlay.addEventListener('click', function() {
-            zoneAudio.play().catch(error => { console.log("Audio zone 1 bloqué."); });
+            // Tente de lancer la musique de fond
+            zoneAudio.play().catch(error => { 
+                console.warn("L'audio de fond (zoneAudio) a été bloqué par le navigateur.", error); 
+                // On pourrait ajouter un fallback ici si c'était pour un jeu réel
+            });
+            
             overlay.style.display = 'none';
             // Révèle le click handler pour le Clic 2
             pageClickHandler.style.display = 'block'; 
@@ -213,8 +218,8 @@
 
         // Clic 2 : Lancer le dialogue initial
         pageClickHandler.addEventListener('click', function(event) {
-            pageClickHandler.style.display = 'none'; // Cache le click handler pour éviter les doubles clics
-            dialogueBox.style.display = 'block'; // Révèle la boîte de dialogue
+            pageClickHandler.style.display = 'none';
+            dialogueBox.style.display = 'block';
             
             dialogueBox.addEventListener('click', skipText, false); 
 
@@ -228,14 +233,14 @@
         function handleDialogueClick() {
             if (isTyping) return;
             dialogueBox.style.display = 'none';
-            thinkButton.style.display = 'block'; // Révèle le bouton "Penser"
+            thinkButton.style.display = 'block';
         }
 
         // Clic 4 : Clic sur le bouton "Penser"
         function showThought() {
             // Pas de son
             thinkButton.style.display = 'none';
-            thoughtBox.style.display = 'block'; // Révèle la pensée
+            thoughtBox.style.display = 'block';
             thoughtBox.addEventListener('click', skipText, false); 
 
             typeWriter(thoughtText, thoughtTextElement, true, () => { 
@@ -265,7 +270,7 @@
             zoneAudio.pause(); 
             discordMusic.play().catch(e => {}); 
 
-            discordScreen.style.display = 'block'; // Révèle l'image
+            discordScreen.style.display = 'block';
             
             setTimeout(() => {
                 discordScreen.style.opacity = 1;
@@ -277,7 +282,7 @@
         function narrativeFollowUp() {
             discordScreen.style.opacity = 0;
             setTimeout(() => {
-                 discordScreen.style.display = 'none'; // Cache l'image après fondu
+                 discordScreen.style.display = 'none';
             }, 2000); 
 
             dialogueBox.style.display = 'block';
@@ -306,7 +311,7 @@
             playClickSound(); 
 
             thoughtBox.style.display = 'none';
-            skipButton.style.display = 'block'; // Révèle le bouton "Laisser passer le temps"
+            skipButton.style.display = 'block';
         }
 
         // Clic sur le bouton de transition (Va vers la page suivante)
@@ -360,6 +365,7 @@
             let i = 0;
 
             if (!isSilent) {
+                // Tente de jouer le son de frappe
                 typeSound.play().catch(e => {}); 
                 isTypingAudioPlaying = true;
             }
