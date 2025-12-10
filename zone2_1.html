@@ -130,8 +130,6 @@ let typingInterval = null;
 let isTyping = false;
 let skipRequested = false;
 
-const exitMessage = "Mince, la sortie est bolqué. Je devrais peut être exploré, peut être que je trouverais une autre issue ou un moyen d'ouvrir ce cadena chelou.";
-
 /* fonction d'arrêt du son */
 function stopTypeSound(){ try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){} }
 function skipHandler(e){ if(isTyping){ skipRequested=true; e.stopPropagation(); } }
@@ -186,7 +184,11 @@ allDoors.forEach(el=>{
   if(el.id==='door-exit'){
     el.addEventListener('click',()=>{
       if(isTyping) return;
-      showMessage(exitMessage);
+      // premier message
+      showMessage("Mince, la sortie est vraiment bloquée.", ()=>{
+        // après clic sur le premier, on montre le second
+        showMessage("Je devrais peut-être explorer, peut-être que je trouverais une autre issue, ou un moyen d'ouvrir ce cadenas chelou.");
+      });
     });
   } else {
     el.addEventListener('click',()=>{
