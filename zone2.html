@@ -95,58 +95,34 @@
     width:auto;
   }
 
- /* ARC COURBÉ POUR LES PORTES */
+/* --- ARCHE EN DEMI-CERCLE --- */
 
-/* Taille de l'écran virtuelle (pour une arche proportionnelle) */
+/* Rayon de l'arche */
 :root {
-    --arc-height: 15%;  /* profondeur de la courbe (plus haut = plus arrondi) */
-    --arc-horizontal: 12%; /* recul horizontal pour les portes les plus hautes */
+    --radius: 35vh;   /* Taille du demi-cercle */
+    --centerY: 50%;   /* Centre vertical du cercle */
+    --centerX-left: 15%; 
+    --centerX-right: calc(100% - 15%);
 }
 
-/* --- COTE GAUCHE --- */
+/* Angles de placement pour les 4 portes de chaque côté (en degrés) */
+/* 0° = centre horizontal, 90° = tout en haut */
+#door-1 { --angle: 50deg; }
+#door-2 { --angle: 70deg; }
+#door-3 { --angle: 110deg; }
+#door-4 { --angle: 130deg; }
 
-#door-1 { 
-    top: 12%; 
-    left: calc(6% + var(--arc-horizontal)); 
-}
+#door-5 { --angle: 50deg; }
+#door-6 { --angle: 70deg; }
+#door-7 { --angle: 110deg; }
+#door-8 { --angle: 130deg; }
 
-#door-2 { 
-    top: 28%; 
-    left: calc(6% + var(--arc-horizontal) * 0.7); 
-}
+/* CÔTÉ GAUCHE */
+#door-1, #door-2, #door-3, #door-4 {
+    position: absolute;
+    left: calc(var(--centerX-left) - cos(var(--angle)) * var(--radius));
+    top: calc(var(--centerY) - sin(var(--angle)) * var(--r*
 
-#door-3 { 
-    top: 52%; 
-    left: calc(6% + var(--arc-horizontal) * 0.4); 
-}
-
-#door-4 { 
-    top: 76%; 
-    left: 6%; 
-}
-
-
-/* --- COTE DROIT (MIROIR EXACT) --- */
-
-#door-5 { 
-    top: 12%; 
-    right: calc(6% + var(--arc-horizontal)); 
-}
-
-#door-6 { 
-    top: 28%; 
-    right: calc(6% + var(--arc-horizontal) * 0.7); 
-}
-
-#door-7 { 
-    top: 52%; 
-    right: calc(6% + var(--arc-horizontal) * 0.4); 
-}
-
-#door-8 { 
-    top: 76%; 
-    right: 6%; 
-}
 
 
   /* protection responsive : reduire la taille des portes si l'écran est petit */
