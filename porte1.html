@@ -9,23 +9,11 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-:root{
-  --pink:#ff66ff;
-  --pink-strong:#ff00ff;
-}
-
-html,body{
-  margin:0;
-  padding:0;
-  height:100%;
+html, body{
+  margin:0; padding:0; height:100%;
   font-family:'Press Start 2P', monospace;
   overflow:hidden;
-}
-
-/* Fond principal */
-body{
-  background:url('https://blog-eyc.pages.dev/vid/fire/fire.gif') center center no-repeat;
-  background-size:cover;
+  background:url('https://blog-eyc.pages.dev/vid/fire/fire.gif') center/cover no-repeat;
   display:flex;
   align-items:flex-end;
   justify-content:center;
@@ -33,93 +21,73 @@ body{
 
 /* Livre cliquable */
 #book-btn{
-  width:320px;
-  height:auto;
+  width:320px; height:auto;
   cursor:pointer;
   image-rendering:pixelated;
   margin-bottom:22px;
   transition:transform .18s;
   z-index:10;
 }
-#book-btn:hover{
-  transform:scale(1.1);
-}
+#book-btn:hover{ transform:scale(1.1); }
 
-/* Dialogue box (pensées) */
+/* Dialogue */
 #dialogue-box{
   position:fixed;
-  left:50%;
-  bottom:26px;
+  left:50%; bottom:26px;
   transform:translateX(-50%);
   width:84%;
-  min-height:14vh;
-  max-height:28vh;
+  min-height:14vh; max-height:28vh;
   background:rgba(0,0,0,0.55);
-  border:3px solid var(--pink-strong);
+  border:3px solid #ff00ff;
   padding:18px;
-  color:var(--pink);
+  color:#ff66ff;
   display:none;
   z-index:9000;
   text-shadow:0 0 6px rgba(255,0,255,0.2);
   overflow:auto;
 }
-
-#dialogue-text{
-  font-size:0.86em;
-  line-height:1.45;
-}
-
+#dialogue-text{ font-size:0.86em; line-height:1.45; }
 .cursor-active{
-  border-right:0.15em solid var(--pink);
+  border-right:0.15em solid #ff66ff;
   animation:blink 0.5s steps(1) infinite;
   padding-right:6px;
 }
-
 @keyframes blink{
   0%,100%{border-color:transparent;}
-  50%{border-color:var(--pink);}
+  50%{border-color:#ff66ff;}
 }
 
-/* Visionneuse d’images (aucun fond) */
+/* Retour */
+#back-btn{
+  position:fixed; top:14px; left:14px;
+  font-size:32px; color:red;
+  cursor:pointer; z-index:6000;
+}
+
+/* Visionneuse */
 #viewer-container{
-  position:fixed;
-  top:50%;
-  left:50%;
+  position:fixed; top:50%; left:50%;
   transform:translate(-50%, -50%);
   display:none;
   z-index:5000;
-  pointer-events:auto;
 }
 
-/* Zone invisible autour pour fermer */
+/* Zone cliquable pour fermer */
 #viewer-bg-block{
-  position:fixed;
-  top:0; left:0;
+  position:fixed; top:0; left:0;
   width:100%; height:100%;
   background:transparent;
   display:none;
   z-index:4000;
 }
 
-/* Retour */
-#back-btn{
-  position:fixed;
-  top:14px;
-  left:14px;
-  font-size:32px;
-  color:red;
-  cursor:pointer;
-  z-index:6000;
-}
-
-/* Image dans la visionneuse */
+/* Image de la visionneuse */
 #viewer-img{
-  position:relative;
+  display:block;
   max-width:90%;
   max-height:90%;
-  image-rendering:pixelated;
-  display:block;
   margin:0 auto;
+  image-rendering:pixelated;
 }
 
 /* Flèche suivante */
@@ -131,7 +99,6 @@ body{
   font-size:42px;
   color:red;
   cursor:pointer;
-  user-select:none;
   z-index:5001;
 }
 </style>
@@ -139,43 +106,28 @@ body{
 
 <body>
 
-<!-- Dialogue -->
 <div id="dialogue-box"><div id="dialogue-text"></div></div>
-
-<!-- Retour -->
 <div id="back-btn" onclick="location.href='zone2_1.html'">⬅</div>
 
-<!-- Livre cliquable -->
-<img id="book-btn"
-     src="https://media.tenor.com/wgmpvhHPSkkAAAAj/book-trophy-pixel-art.gif"
-     alt="Livre">
+<img id="book-btn" src="https://media.tenor.com/wgmpvhHPSkkAAAAj/book-trophy-pixel-art.gif" alt="Livre">
 
-<!-- Zone invisible autour pour fermer -->
 <div id="viewer-bg-block"></div>
 
-<!-- Visionneuse -->
 <div id="viewer-container">
   <img id="viewer-img" src="">
   <div id="next-arrow">➡</div>
 </div>
 
-<!-- Audio -->
-<audio id="type-sound"
-src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=0">
-</audio>
+<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=0"></audio>
 
 <script>
-/* Dialogues */
 const dialogueBox = document.getElementById("dialogue-box");
 const dialogueText = document.getElementById("dialogue-text");
 const typeSound = document.getElementById("type-sound");
 
-let isTyping=false;
-let skip=false;
+let isTyping=false, skip=false;
 
-function stopSound(){
-  try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){}
-}
+function stopSound(){ try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){} }
 
 function typeWriter(text){
   if(isTyping) return;
@@ -185,37 +137,16 @@ function typeWriter(text){
   dialogueBox.style.display="block";
   dialogueText.classList.add("cursor-active");
   try{ typeSound.play().catch(()=>{});}catch(e){}
-
   let i=0;
   let interval=setInterval(()=>{
-    if(skip){
-      dialogueText.innerHTML=text;
-      clearInterval(interval);
-      dialogueText.classList.remove("cursor-active");
-      stopSound();
-      isTyping=false;
-      return;
-    }
-    if(i<text.length){
-      dialogueText.innerHTML+=text.charAt(i++);
-    } else {
-      clearInterval(interval);
-      dialogueText.classList.remove("cursor-active");
-      stopSound();
-      isTyping=false;
-    }
+    if(skip){ dialogueText.innerHTML=text; clearInterval(interval); dialogueText.classList.remove("cursor-active"); stopSound(); isTyping=false; return; }
+    if(i<text.length){ dialogueText.innerHTML+=text.charAt(i++); } 
+    else{ clearInterval(interval); dialogueText.classList.remove("cursor-active"); stopSound(); isTyping=false; }
   },28);
 }
+dialogueBox.addEventListener("click", ()=>{ if(isTyping){ skip=true; return; } dialogueBox.style.display="none"; });
 
-dialogueBox.addEventListener("click", ()=>{
-  if(isTyping){ skip=true; return; }
-  dialogueBox.style.display="none";
-});
-
-/* Premier message */
-window.onload = ()=>{
-  typeWriter("Oh tient un livre, dommage que je soit illettré !");
-};
+window.onload = ()=>{ typeWriter("Oh tient un livre, dommage que je soit illettré !"); }
 
 /* Visionneuse */
 const viewer = document.getElementById("viewer-container");
@@ -231,39 +162,22 @@ const images=[
 
 let index=0;
 
-/* Ouvrir la visionneuse */
 document.getElementById("book-btn").addEventListener("click", ()=>{
   typeWriter("Espérons qu'il y ai des images !");
   index=0;
   openViewer();
 });
 
-/* Actualiser image */
-function refreshViewer(){
-  viewerImg.src = images[index];
-}
+function refreshViewer(){ viewerImg.src = images[index]; }
+function openViewer(){ refreshViewer(); viewer.style.display="block"; viewerBlock.style.display="block"; }
+function closeViewer(){ viewer.style.display="none"; viewerBlock.style.display="none"; }
 
-/* Ouvrir */
-function openViewer(){
-  refreshViewer();
-  viewer.style.display="block";
-  viewerBlock.style.display="block";
-}
-
-/* Fermer */
-function closeViewer(){
-  viewer.style.display="none";
-  viewerBlock.style.display="none";
-}
-
-/* Flèche suivante */
 nextArrow.addEventListener("click", (e)=>{
-  e.stopPropagation(); // empêche de fermer la visionneuse si on clique sur la flèche
+  e.stopPropagation();
   index=(index+1)%images.length;
   refreshViewer();
 });
 
-/* Clic à l’extérieur */
 viewerBlock.addEventListener("click", closeViewer);
 </script>
 
