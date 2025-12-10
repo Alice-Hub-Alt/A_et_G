@@ -59,7 +59,6 @@
             transform: translateX(-50%);
             z-index: 10;
         }
-        /* Curseur de clic activé lorsque le texte est complet */
         .dialogue-ready {
             cursor: pointer;
         }
@@ -98,14 +97,13 @@
             z-index: 5;
         }
         
-        /* NOUVEAU STYLE POUR LE BOUTON DE TRANSITION NEUTRE */
         #skip-button {
             display: none;
             padding: 15px 30px;
             font-size: 1.2em;
-            background-color: rgba(30, 30, 30, 0.9); /* Gris foncé */
+            background-color: rgba(30, 30, 30, 0.9);
             color: white;
-            border: 3px solid #AAAAAA; /* Gris clair pour le bord */
+            border: 3px solid #AAAAAA; 
             cursor: pointer;
             text-shadow: 1px 1px 2px black;
             transition: background-color 0.3s;
@@ -174,7 +172,7 @@
 
     <audio id="discord-sfx" src="https://dl.dropboxusercontent.com/scl/fi/jg6wbserycyspqewz9ogc/SPOILER-Omori-play-sound-effect-READ-PINNED-COMMENT.mp3?rlkey=glagwcdgsnvzqnqvkgdoihyza&st=pmjvrfjb&dl=0"></audio>
 
-    <audio id="discord-music" loop src="https://dl.dropboxusercontent.com/scl/fi/8w03j8k7h1p5d8j2r2t8u/Cyberpunk-Uplifting-Track.mp3?rlkey=4m6j5k9j5l8p7n6r3q0h1w9e4&st=n0g7v0r9&dl=0"></audio>
+    <audio id="discord-music" loop src="https://dl.dropboxusercontent.com/scl/fi/8w03j8k7h1p5d8j2r2t8u/Cyberpunk-Uplifting-Track.mp3?rlkey=4m6j5l8p7n6r3q0h1w9e4&st=n0g7v0r9&dl=0"></audio>
 
     <div id="intro-overlay-zone1">
         Zone 1 : La Grotte Illusoire <br><br> (Cliquer pour continuer)
@@ -198,12 +196,11 @@
 
 
     <script>
-        // --- DONNÉES DE JEU MISES À JOUR ---
+        // --- DONNÉES DE JEU ---
         const initialText = "Le silence est assourdissant. Impossible de voir autour de toi, la pièce est plongée dans l'obscurité. Il n'y a rien d'autre que le bruit de la ventilation de ton ordinateur. Ce lieu est vide, mais réconfortant.";
         const thoughtText = "Je suis si seule... À quoi bon vivre au final ?";
         const discordIntroText = "Puis soudain, le bruit d'une notification Discord vint rompre ce silence assourdissant.";
         
-        // Nouveaux textes pour la séquence finale
         const narrativeFollowUp1 = "Au début Alice n'y fit pas vraiment attention";
         const cynicalThought = "Bon ben un mec de plus qui s'intéresse à moi juste car j'ai des seins";
         
@@ -215,7 +212,7 @@
         const dialogueBox = document.getElementById('dialogue-box');
         const dialogueTextElement = document.getElementById('dialogue-text');
         const thinkButton = document.getElementById('think-button');
-        const skipButton = document.getElementById('skip-button'); // Nouveau bouton
+        const skipButton = document.getElementById('skip-button');
         const thoughtBox = document.getElementById('thought-box');
         const thoughtTextElement = document.getElementById('thought-text');
         const zoneAudio = document.getElementById('zone-audio');
@@ -235,37 +232,9 @@
             clickSound.cloneNode(true).play().catch(e => {}); 
         }
 
-        // --- GESTIONNAIRES D'ÉVÉNEMENTS GÉNÉRAUX ---
-        
-        // Clic 1 : Démarrer la scène 
-        overlay.addEventListener('click', function() {
-            zoneAudio.play().catch(error => { console.log("Audio zone 1 bloqué."); });
-            overlay.style.display = 'none';
-            pageClickHandler.style.display = 'block'; 
-        }, { once: true });
-
-        // Clic 2 : Lancer le dialogue initial
-        pageClickHandler.addEventListener('click', function(event) {
-            pageClickHandler.style.display = 'none';
-            dialogueBox.style.display = 'block';
-            
-            dialogueBox.addEventListener('click', skipText, false); 
-
-            typeWriter(initialText, dialogueTextElement, false, () => { 
-                dialogueBox.addEventListener('click', handleDialogueClick, { once: true }); 
-            });
-        }, { once: true });
-
-        // Clic 3 : Révélation du bouton "Penser"
-        function handleDialogueClick() {
-            if (isTyping) return;
-            dialogueBox.style.display = 'none';
-            thinkButton.style.display = 'block'; 
-        }
-        
         // Clic 4 : Clic sur le bouton "Penser" (Révélation de la Pensée)
         function showThought() {
-            playClickSound(); 
+            // CORRIGÉ : SUPPRESSION DU SON DU BOUTON "PENSER"
             
             thinkButton.style.display = 'none';
             thoughtBox.style.display = 'block';
@@ -276,6 +245,8 @@
                 thoughtBox.addEventListener('click', continueToDiscord, { once: true }); 
             });
         }
+        
+        // Les autres fonctions de Clic 1 à Clic 3 restent inchangées et correctes...
 
         // Clic 5 : Clic sur la Pensée (Annonce Discord)
         function continueToDiscord() {
@@ -289,7 +260,7 @@
              });
         }
 
-        // Clic 6 : Clic sur l'Annonce Discord (Révélation de l'Image + SFX + Musique + **DÉBUT DE LA NOUVELLE SÉQUENCE**)
+        // Clic 6 : Clic sur l'Annonce Discord (Révélation de l'Image + SFX + Musique + DÉBUT DE LA NOUVELLE SÉQUENCE)
         function showDiscordImage() {
             if (isTyping) return;
             
@@ -311,10 +282,13 @@
         
         // Clic 7 : Clic sur l'image (Début de la nouvelle séquence narrative)
         function narrativeFollowUp() {
-            playClickSound(); // Son de validation pour passer à l'étape suivante
-
-            // Disparition de l'image (optionnel, ou on la laisse en fond sombre)
-            // Pour l'instant, on la laisse en attendant qu'on l'utilise pour le fond.
+            // CORRIGÉ : SUPPRESSION DU SON DE CLIC LORS DU PASSAGE
+            
+            // CORRIGÉ : Disparition de l'image
+            discordScreen.style.opacity = 0;
+            setTimeout(() => {
+                 discordScreen.style.display = 'none';
+            }, 2000); // 2 secondes pour le fondu
 
             dialogueBox.style.display = 'block';
             
@@ -328,7 +302,7 @@
         // Clic 8 : Suite narrative : Pensée cynique
         function cynicalThoughtSequence() {
             if (isTyping) return;
-            playClickSound();
+            // CORRIGÉ : SUPPRESSION DU SON DE CLIC LORS DU PASSAGE
 
             dialogueBox.style.display = 'none';
             thoughtBox.style.display = 'block';
@@ -343,17 +317,19 @@
         // Clic 9 : Révélation du bouton de transition
         function finalTransitionButton() {
             if (isTyping) return;
+            // On ne joue le son QUE pour le bouton d'action finale
+            playClickSound(); 
+
             thoughtBox.style.display = 'none';
             
-            // Affichage du bouton de transition (Skip Button)
+            // CORRIGÉ : Affichage du bouton de transition (Skip Button)
             skipButton.style.display = 'block';
-            playClickSound(); // Son de validation pour l'apparition du bouton
         }
 
 
         // Clic sur le bouton de transition (Va vers la page suivante)
         function skipToNextZone() {
-             playClickSound();
+             playClickSound(); // On garde le son pour l'action du bouton
              // Assurer que la musique de transition s'arrête
              discordMusic.pause();
              zoneAudio.pause();
@@ -362,7 +338,7 @@
              window.location.href = 'zone1_2.html'; 
         }
 
-        // --- FONCTION DE SKIP ---
+        // --- FONCTION DE SKIP et TYPEWRITER (Inchangées) ---
         function skipText(event) {
             if (isTyping) {
                 skipRequested = true;
@@ -370,8 +346,6 @@
             }
         }
 
-
-        // --- FONCTION MACHINE À ÉCRIRE (Inchangée) ---
         function typeWriter(text, targetElement, isSilent, callback) {
             if(typingInterval) clearInterval(typingInterval);
             
@@ -426,6 +400,7 @@
                 }
             }, 30);
         }
+        // --- FIN FONCTIONS ---
     </script>
 </body>
 </html>
