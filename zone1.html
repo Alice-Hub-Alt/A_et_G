@@ -97,6 +97,27 @@
             transform: translate(-50%, -50%);
             z-index: 5;
         }
+        
+        /* NOUVEAU STYLE POUR LE BOUTON DE TRANSITION NEUTRE */
+        #skip-button {
+            display: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            background-color: rgba(30, 30, 30, 0.9); /* Gris foncé */
+            color: white;
+            border: 3px solid #AAAAAA; /* Gris clair pour le bord */
+            cursor: pointer;
+            text-shadow: 1px 1px 2px black;
+            transition: background-color 0.3s;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+        }
+        #skip-button:hover {
+            background-color: rgba(50, 50, 50, 0.9);
+        }
 
         #thought-box {
             display: none;
@@ -163,6 +184,8 @@
         
     <button id="think-button" onclick="showThought()">Penser</button>
 
+    <button id="skip-button" onclick="skipToNextZone()">Laisser passer le temps</button>
+
     <div id="dialogue-box">
         <span id="dialogue-text"></span>
     </div>
@@ -175,21 +198,24 @@
 
 
     <script>
-        // --- DONNÉES DE JEU ---
-        const initialText = "Alice est seule dans une pièce plongée dans l'obscurité, au point de ne rien pouvoir voir autour d'elle. Le silence est assourdissant. Il n'y a rien d'autre que le bruit de la ventilation de son ordinateur. Ce lieu est vide, mais étrangement réconfortant.";
+        // --- DONNÉES DE JEU MISES À JOUR ---
+        const initialText = "Le silence est assourdissant. Impossible de voir autour de toi, la pièce est plongée dans l'obscurité. Il n'y a rien d'autre que le bruit de la ventilation de ton ordinateur. Ce lieu est vide, mais réconfortant.";
         const thoughtText = "Je suis si seule... À quoi bon vivre au final ?";
         const discordIntroText = "Puis soudain, le bruit d'une notification Discord vint rompre ce silence assourdissant.";
+        
+        // Nouveaux textes pour la séquence finale
+        const narrativeFollowUp1 = "Au début Alice n'y fit pas vraiment attention";
+        const cynicalThought = "Bon ben un mec de plus qui s'intéresse à moi juste car j'ai des seins";
         
         let typingInterval;
         let isTyping = false;
         let isTypingAudioPlaying = false; 
-        
-        // NOUVELLE VARIABLE : Pour gérer l'interruption de la frappe
         let skipRequested = false; 
 
         const dialogueBox = document.getElementById('dialogue-box');
         const dialogueTextElement = document.getElementById('dialogue-text');
         const thinkButton = document.getElementById('think-button');
+        const skipButton = document.getElementById('skip-button'); // Nouveau bouton
         const thoughtBox = document.getElementById('thought-box');
         const thoughtTextElement = document.getElementById('thought-text');
         const zoneAudio = document.getElementById('zone-audio');
@@ -218,12 +244,11 @@
             pageClickHandler.style.display = 'block'; 
         }, { once: true });
 
-        // Clic 2 : Lancer le dialogue initial (AVEC son de frappe)
+        // Clic 2 : Lancer le dialogue initial
         pageClickHandler.addEventListener('click', function(event) {
             pageClickHandler.style.display = 'none';
             dialogueBox.style.display = 'block';
             
-            // On attache un écouteur de clic pour le skip, qu'on va retirer après
             dialogueBox.addEventListener('click', skipText, false); 
 
             typeWriter(initialText, dialogueTextElement, false, () => { 
@@ -231,7 +256,7 @@
             });
         }, { once: true });
 
-        // Clic 3 : Clic sur la boîte de dialogue (VALIDE le texte, révèle le bouton)
+        // Clic 3 : Révélation du bouton "Penser"
         function handleDialogueClick() {
             if (isTyping) return;
             dialogueBox.style.display = 'none';
@@ -240,32 +265,31 @@
         
         // Clic 4 : Clic sur le bouton "Penser" (Révélation de la Pensée)
         function showThought() {
-            playClickSound(); // SON UNIQUEMENT AU CLIC SUR LE BOUTON
+            playClickSound(); 
             
             thinkButton.style.display = 'none';
             thoughtBox.style.display = 'block';
             
-            thoughtBox.addEventListener('click', skipText, false); // Active le skip sur la pensée
+            thoughtBox.addEventListener('click', skipText, false); 
 
-            typeWriter(thoughtText, thoughtTextElement, true, () => { // SILENCIEUX
-                thoughtBox.addEventListener('click', continueToDiscord, { once: true }); // Active le Clic 5
+            typeWriter(thoughtText, thoughtTextElement, true, () => { 
+                thoughtBox.addEventListener('click', continueToDiscord, { once: true }); 
             });
         }
 
         // Clic 5 : Clic sur la Pensée (Annonce Discord)
         function continueToDiscord() {
-             // PAS DE SON ICI
              thoughtBox.style.display = 'none';
              dialogueBox.style.display = 'block'; 
              
-             dialogueBox.addEventListener('click', skipText, false); // Active le skip sur l'annonce Discord
+             dialogueBox.addEventListener('click', skipText, false); 
 
-             typeWriter(discordIntroText, dialogueTextElement, false, () => { // Pas silencieux
-                dialogueBox.addEventListener('click', showDiscordImage, { once: true }); // Active le Clic 6
+             typeWriter(discordIntroText, dialogueTextElement, false, () => { 
+                dialogueBox.addEventListener('click', showDiscordImage, { once: true }); 
              });
         }
 
-        // Clic 6 : Clic sur l'Annonce Discord (Révélation de l'Image + SFX + Musique)
+        // Clic 6 : Clic sur l'Annonce Discord (Révélation de l'Image + SFX + Musique + **DÉBUT DE LA NOUVELLE SÉQUENCE**)
         function showDiscordImage() {
             if (isTyping) return;
             
@@ -280,53 +304,88 @@
             discordScreen.style.display = 'block';
             setTimeout(() => {
                 discordScreen.style.opacity = 1;
+                // Après la révélation, on passe au Clic 7 (sur l'image)
+                discordScreen.addEventListener('click', narrativeFollowUp, { once: true }); 
             }, 50); 
-
-            // Active le Clic 7 pour la suite
-            discordScreen.addEventListener('click', nextScene, { once: true }); 
         }
         
-        // Clic 7 : Clic sur l'Image (Transition vers la Zone 2 ou la suite)
-        function nextScene() {
-             discordMusic.pause(); 
-             discordScreen.style.opacity = 0;
-             setTimeout(() => {
-                 discordScreen.style.display = 'none';
-                 console.log("Fondu de l'image terminé. Passage à la suite.");
-                 // window.location.href = 'zone2.html'; 
-             }, 2000); 
+        // Clic 7 : Clic sur l'image (Début de la nouvelle séquence narrative)
+        function narrativeFollowUp() {
+            playClickSound(); // Son de validation pour passer à l'étape suivante
+
+            // Disparition de l'image (optionnel, ou on la laisse en fond sombre)
+            // Pour l'instant, on la laisse en attendant qu'on l'utilise pour le fond.
+
+            dialogueBox.style.display = 'block';
+            
+            dialogueBox.addEventListener('click', skipText, false); 
+
+            typeWriter(narrativeFollowUp1, dialogueTextElement, false, () => { 
+                dialogueBox.addEventListener('click', cynicalThoughtSequence, { once: true }); 
+            });
         }
 
-        // --- NOUVELLE FONCTION DE SKIP ---
+        // Clic 8 : Suite narrative : Pensée cynique
+        function cynicalThoughtSequence() {
+            if (isTyping) return;
+            playClickSound();
+
+            dialogueBox.style.display = 'none';
+            thoughtBox.style.display = 'block';
+            
+            thoughtBox.addEventListener('click', skipText, false); 
+
+            typeWriter(cynicalThought, thoughtTextElement, true, () => { // SILENCIEUX
+                thoughtBox.addEventListener('click', finalTransitionButton, { once: true }); 
+            });
+        }
+
+        // Clic 9 : Révélation du bouton de transition
+        function finalTransitionButton() {
+            if (isTyping) return;
+            thoughtBox.style.display = 'none';
+            
+            // Affichage du bouton de transition (Skip Button)
+            skipButton.style.display = 'block';
+            playClickSound(); // Son de validation pour l'apparition du bouton
+        }
+
+
+        // Clic sur le bouton de transition (Va vers la page suivante)
+        function skipToNextZone() {
+             playClickSound();
+             // Assurer que la musique de transition s'arrête
+             discordMusic.pause();
+             zoneAudio.pause();
+             
+             // Redirection vers la nouvelle page
+             window.location.href = 'zone1_2.html'; 
+        }
+
+        // --- FONCTION DE SKIP ---
         function skipText(event) {
-            // Vérifie si l'animation est en cours (isTyping est true)
             if (isTyping) {
                 skipRequested = true;
-                // Empêche le clic de déclencher le handleDialogueClick / continueToDiscord juste après
                 event.stopPropagation();
             }
         }
 
 
-        // --- FONCTION MACHINE À ÉCRIRE (Mise à jour pour gérer le silence ET le skip) ---
+        // --- FONCTION MACHINE À ÉCRIRE (Inchangée) ---
         function typeWriter(text, targetElement, isSilent, callback) {
             if(typingInterval) clearInterval(typingInterval);
             
-            // Réinitialiser le flag de skip
             skipRequested = false;
             
-            // Fonction pour finaliser l'affichage
             const finalizeTyping = () => {
                 clearInterval(typingInterval);
                 
-                // Arrêter le son si actif
                 if (isTypingAudioPlaying) {
                     typeSound.pause();
                     typeSound.currentTime = 0; 
                     isTypingAudioPlaying = false;
                 }
                 
-                // Nettoyer les écouteurs de skip
                 dialogueBox.removeEventListener('click', skipText, false);
                 thoughtBox.removeEventListener('click', skipText, false);
 
@@ -335,7 +394,6 @@
                 if (callback) callback();
             };
 
-            // Gérer le son s'il est actif
             if (isTypingAudioPlaying) {
                 typeSound.pause();
                 typeSound.currentTime = 0;
@@ -347,26 +405,23 @@
             targetElement.classList.add('cursor-active');
             let i = 0;
 
-            // DÉMARRER le son UNIQUEMENT si !isSilent
             if (!isSilent) {
                 typeSound.play().catch(e => {}); 
                 isTypingAudioPlaying = true;
             }
 
             typingInterval = setInterval(() => {
-                // 1. Logique de Skip
                 if (skipRequested) {
-                    targetElement.innerHTML = text; // Affiche tout le texte
+                    targetElement.innerHTML = text;
                     finalizeTyping();
                     return;
                 }
                 
-                // 2. Logique de Frappe normale
                 if (i < text.length) {
                     targetElement.innerHTML += text.charAt(i);
                     i++;
                 } else {
-                    targetElement.innerHTML = text; // Affichage final (sécurité)
+                    targetElement.innerHTML = text; 
                     finalizeTyping();
                 }
             }, 30);
