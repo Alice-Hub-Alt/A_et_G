@@ -54,7 +54,8 @@
   #book-gif {
     position: fixed;
     bottom: 10px;
-    left: 10%;
+    left: 50%;
+    transform: translateX(-50%);
     cursor: pointer;
     width: 100px;
     z-index: 100;
@@ -62,32 +63,50 @@
 
   #image-viewer {
     position: fixed;
-    bottom: 120px;
-    left: 10%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
-    background: rgba(0,0,0,0.4);
-    padding: 10px;
+    justify-content: center;
+    background: url('https://img.itch.zone/aW1hZ2UvMjkwMzEwMC8xNzM2NzE1My5wbmc=/original/dK58Rm.png') center center / cover no-repeat;
     border: 2px solid var(--pink-strong);
-    border-radius: 8px;
     display: none;
-    z-index: 900;
+    z-index: 999;
+  }
+
+  #viewer-content {
+    display: flex;
+    width: 80%;
+    height: 70%;
+    background: rgba(0,0,0,0.85);
+    padding: 20px;
+    box-sizing: border-box;
+    border-radius: 12px;
+    align-items: center;
+    justify-content: space-between;
   }
 
   #viewer-image {
-    width: 120px;
-    margin-right: 20px;
+    width: 45%;
+    object-fit: contain;
   }
 
   #viewer-text {
+    width: 50%;
     color: var(--pink);
-    font-size: 0.8em;
-    max-width: 300px;
+    font-size: 1em;
+    margin-left: 20px;
+    line-height: 1.5em;
   }
 
   #next-button {
-    margin-left: 20px;
-    font-size: 2em;
+    position: absolute;
+    right: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 3em;
     color: var(--red);
     cursor: pointer;
     user-select: none;
@@ -114,8 +133,10 @@
 <img id="book-gif" src="https://media.tenor.com/wgmpvhHPSkkAAAAj/book-trophy-pixel-art.gif" alt="Livre pixel art">
 
 <div id="image-viewer">
-  <img id="viewer-image" src="" alt="Image">
-  <div id="viewer-text"></div>
+  <div id="viewer-content">
+    <img id="viewer-image" src="" alt="Image">
+    <div id="viewer-text"></div>
+  </div>
   <div id="next-button">&#8594;</div>
 </div>
 
@@ -130,6 +151,7 @@ let isTyping = false;
 let skipRequested = false;
 
 function stopTypeSound(){ try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){} }
+
 function typeWriter(text, target, callback){
   if(typingInterval) clearInterval(typingInterval);
   skipRequested = false;
@@ -171,7 +193,6 @@ function showThought(message, callback){
   });
 }
 
-// afficher la première pensée au chargement
 window.addEventListener('load', ()=>{
   showThought("Oh tient un livre, dommage que je sois illettré !");
 });
@@ -214,3 +235,4 @@ thoughtBox.addEventListener('click', ()=>{ skipRequested=true; });
 
 </body>
 </html>
+
