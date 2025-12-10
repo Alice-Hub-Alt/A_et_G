@@ -126,7 +126,7 @@
     <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?rlkey=q1hljzkfdh6b4qjj89yut92oy&st=8d2bqys3&dl=0"></audio>
 
     <div id="intro-overlay-zone2">
-        Quelques mois plus tard... <br><br>
+        Quelques mois plus tard... <br><br> (Cliquer pour continuer)
     </div>
 
     <div id="dialogue-box" style="display:none;">
@@ -199,7 +199,8 @@
             { image: "screen_e2", action: "show_image_click_to_continue" },
             { image: "screen_e3", action: "show_image_click_to_continue" },
             
-            { text: "FIN PROVISOIRE DE LA ZONE. (Cliquez pour Zone 2)", type: "narrator", action: "end" }
+            // MODIFICATION ICI : Action 'end_redirect' pour basculer vers la Zone 2
+            { text: "FIN DE CETTE PÉRIODE. (Cliquer pour continuer)", type: "narrator", action: "end_redirect" } 
         ];
 
         let currentSequenceIndex = 0;
@@ -212,8 +213,8 @@
         // --- ÉLÉMENTS ---
         const dialogueBox = document.getElementById('dialogue-box');
         const dialogueTextElement = document.getElementById('dialogue-text');
-        const thoughtBox = document.getElementById('thought-box'); // NOUVEAU
-        const thoughtTextElement = document.getElementById('thought-text'); // NOUVEAU
+        const thoughtBox = document.getElementById('thought-box'); 
+        const thoughtTextElement = document.getElementById('thought-text'); 
         const zoneAudio = document.getElementById('zone-audio');
         const typeSound = document.getElementById('type-sound'); 
         const overlay = document.getElementById('intro-overlay-zone2');
@@ -229,7 +230,7 @@
             }
         }
         
-        // Fonction de machine à écrire (adaptée pour dialogue et pensée)
+        // Fonction de machine à écrire (reprise)
         function typeWriter(text, targetElement, isSilent, callback) {
             if(typingInterval) clearInterval(typingInterval);
             
@@ -245,7 +246,7 @@
                 }
                 
                 dialogueBox.removeEventListener('click', skipText, false);
-                thoughtBox.removeEventListener('click', skipText, false); // Ajout ThoughtBox
+                thoughtBox.removeEventListener('click', skipText, false); 
 
                 targetElement.classList.remove('cursor-active');
                 isTyping = false;
@@ -313,21 +314,18 @@
             });
         }
         
-        // Fonction pour afficher une Pensée
         function showThought(text) {
              hideActiveImage(() => {
                  dialogueBox.style.display = 'none';
                  thoughtBox.style.display = 'block';
                  thoughtBox.addEventListener('click', skipText, false); 
                  
-                 // Les pensées n'ont pas de bruit de frappe (isSilent = true)
                  typeWriter(text, thoughtTextElement, true, () => { 
                     thoughtBox.addEventListener('click', hideThoughtAndContinue, { once: true });
                  });
              });
         }
         
-        // Fonction pour cacher la Pensée et continuer la séquence
         function hideThoughtAndContinue() {
             if (isTyping) return;
             thoughtBox.style.display = 'none';
@@ -350,7 +348,6 @@
             currentSequenceIndex++;
 
             if (currentEvent.action === "dialogue") {
-                // Séquence Narrateur : cache l'image puis lance le dialogue
                 hideActiveImage(() => {
                     dialogueBox.style.display = 'block';
                     dialogueBox.addEventListener('click', skipText, false);
@@ -362,19 +359,22 @@
                     });
                 });
 
-            } else if (currentEvent.action === "show_thought") { // NOUVEAU TYPE D'ACTION
-                // Séquence Pensée
+            } else if (currentEvent.action === "show_thought") { 
                 showThought(currentEvent.text);
 
             } else if (currentEvent.action === "show_image_click_to_continue") {
-                // Séquence Image
                 showImageAndAwaitClick(currentEvent.image);
             
-            } else if (currentEvent.action === "end") {
+            } else if (currentEvent.action === "end_redirect") {
+                // NOUVELLE ACTION : Fin de séquence et redirection
                 hideActiveImage(() => {
                     dialogueBox.style.display = 'block';
                     typeWriter(currentEvent.text, dialogueTextElement, false, () => {
-                        // Fin de zone
+                        // Au clic, on passe à la zone suivante
+                        dialogueBox.addEventListener('click', () => {
+                            zoneAudio.pause(); // Stop l'audio avant de changer de page
+                            window.location.href = 'zone2.html'; // REDIRECTION VERS LE HUB
+                        }, { once: true });
                     });
                 });
             }
