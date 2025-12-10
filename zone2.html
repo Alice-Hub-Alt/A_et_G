@@ -95,26 +95,31 @@
     width:auto;
   }
 
-/* --- ARCHES INVERSÉES (le creux vers le centre) --- */
+/* --- ARCHES INVERSÉES CENTRÉES --- */
 :root {
   --left-edge: 2%;     /* bord gauche */
   --right-edge: 2%;    /* bord droit */
-  --top-start: 12%;    /* première porte en haut */
-  --top-gap: 24%;      /* espacement vertical entre portes */
-  --inset-max: 8%;     /* décalage maximum vers l’intérieur */
+  --top-start: 15%;    /* point de départ en haut */
+  --top-gap: 25%;      /* espacement vertical entre portes */
+  --inset-max: 8%;     /* décalage horizontal extrême vers l’intérieur */
 }
 
 /* --- CÔTÉ GAUCHE --- */
+/* Porte la plus haute (extrême) */
 #door-1 { top: var(--top-start); left: calc(var(--left-edge) + var(--inset-max)); }
-#door-2 { top: calc(var(--top-start) + var(--top-gap)); left: calc(var(--left-edge) + var(--inset-max) * 0.5); }
-#door-3 { top: calc(var(--top-start) + var(--top-gap) * 2); left: var(--left-edge); }
-#door-4 { top: calc(var(--top-start) + var(--top-gap) * 3); left: calc(var(--left-edge) + var(--inset-max) * 0.5); }
+/* Porte du milieu haute */
+#door-2 { top: calc(var(--top-start) + var(--top-gap)); left: calc(20%); }
+/* Porte du milieu basse */
+#door-3 { top: calc(var(--top-start) + var(--top-gap) * 2); left: calc(20%); }
+/* Porte la plus basse (extrême) */
+#door-4 { top: calc(var(--top-start) + var(--top-gap) * 3); left: calc(var(--left-edge) + var(--inset-max)); }
 
 /* --- CÔTÉ DROIT (miroir) --- */
 #door-5 { top: var(--top-start); right: calc(var(--right-edge) + var(--inset-max)); }
-#door-6 { top: calc(var(--top-start) + var(--top-gap)); right: calc(var(--right-edge) + var(--inset-max) * 0.5); }
-#door-7 { top: calc(var(--top-start) + var(--top-gap) * 2); right: var(--right-edge); }
-#door-8 { top: calc(var(--top-start) + var(--top-gap) * 3); right: calc(var(--right-edge) + var(--inset-max) * 0.5); }
+#door-6 { top: calc(var(--top-start) + var(--top-gap)); right: calc(20%); }
+#door-7 { top: calc(var(--top-start) + var(--top-gap) * 2); right: calc(20%); }
+#door-8 { top: calc(var(--top-start) + var(--top-gap) * 3); right: calc(var(--right-edge) + var(--inset-max)); }
+
 
 
 
