@@ -186,7 +186,7 @@ allDoors.forEach(el=>{
       if(isTyping) return;
       // premier message
       showMessage("Mince, la sortie est vraiment bloquée.", ()=>{
-        // après clic sur le premier, on montre le second
+        // deuxième message après clic
         showMessage("Je devrais peut-être explorer, peut-être que je trouverais une autre issue, ou un moyen d'ouvrir ce cadenas chelou.");
       });
     });
@@ -202,6 +202,29 @@ allDoors.forEach(el=>{
 typeSound.addEventListener('canplay',()=>{});
 typeSound.addEventListener('error',()=>{ console.warn('Type sound error or blocked.'); });
 
+/* ---------------- Code secret avec flèches ---------------- */
+document.addEventListener('DOMContentLoaded', function() {
+    const codeSequence = [40, 39, 38, 37, 38, 37, 40, 39]; // bas, droite, haut, gauche, haut, gauche, bas, droite
+    let codeIndex = 0;
+
+    document.addEventListener('keydown', function(event) {
+        const keyPressed = event.keyCode;
+        if(keyPressed === codeSequence[codeIndex]) {
+            codeIndex++;
+            if(codeIndex === codeSequence.length) {
+                triggerSecretCode();
+                codeIndex = 0;
+            }
+        } else {
+            codeIndex = 0;
+        }
+    });
+
+    function triggerSecretCode() {
+        alert("Code ACCEPTÉ. Une faille s'ouvre dans la réalité...");
+        window.location.href = 'secret_code.html';
+    }
+});
 </script>
 </body>
 </html>
