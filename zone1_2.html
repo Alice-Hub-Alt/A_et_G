@@ -1,1 +1,308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zone 1.2 : Un Faisceau de Lumière</title>
+    <style>
+        /* Styles repris de Zone 1.html */
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            /* Le GIF de fond provisoire */
+            background-image: url('https://c.tenor.com/0IQzAteWlN4AAAAd/tenor.gif');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center center;
+            
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+            font-family: 'Press Start 2P', monospace;
+            overflow: hidden;
+            background-color: rgba(0, 0, 0, 0.4); 
+            background-blend-mode: darken;
+        }
 
+        #intro-overlay-zone2 {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: black; 
+            display: flex; 
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            cursor: pointer;
+            font-size: 1.5em;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.3);
+            text-align: center;
+        }
+
+        #dialogue-box {
+            width: 90%;
+            height: 20vh;
+            background-color: rgba(0, 0, 0, 0.85);
+            border: 3px solid white;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+        
+        #dialogue-text {
+            font-size: 0.8em;
+            line-height: 1.5;
+            white-space: normal;
+            overflow: hidden; 
+            height: 100%;
+        }
+        
+        .cursor-active {
+            border-right: 0.15em solid white;
+            animation: blink-cursor 0.5s step-end infinite;
+        }
+        @keyframes blink-cursor {
+            from, to { border-color: transparent }
+            50% { border-color: white; }
+        }
+        
+        /* Styles pour les images de conversation */
+        .conv-screen {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 70%;
+            height: auto;
+            border: 3px solid white;
+            opacity: 0;
+            transition: opacity 1s ease-in-out; 
+            z-index: 20;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+
+<body> 
+    <audio id="zone-audio" loop>
+        <source src="" type="audio/mpeg">
+        Ton navigateur ne supporte pas l'audio HTML5.
+    </audio>
+
+    <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?rlkey=q1hljzkfdh6b4qjj89yut92oy&st=8d2bqys3&dl=0"></audio>
+
+    <div id="intro-overlay-zone2">
+        Quelques mois plus tard... <br><br> (Cliquer pour continuer)
+    </div>
+
+    <div id="dialogue-box" style="display:none;">
+        <span id="dialogue-text"></span>
+    </div>
+    
+    <img id="screen1" class="conv-screen" src="https://i.imgur.com/QBa0Hkv.png" alt="Screen 1">
+    <img id="screen2" class="conv-screen" src="https://i.imgur.com/DAcEnVA.png" alt="Screen 2">
+    <img id="screen3" class="conv-screen" src="https://i.imgur.com/sjenGQe.png" alt="Screen 3">
+    <img id="screen4" class="conv-screen" src="https://i.imgur.com/4OMCAbt.png" alt="Screen 4">
+    <img id="screen5" class="conv-screen" src="https://i.imgur.com/Ll5DcFY.png" alt="Screen 5 - Meilleur ami 1">
+    <img id="screen6" class="conv-screen" src="https://i.imgur.com/Ug7Zv5N.png" alt="Screen 6 - Meilleur ami 2">
+
+
+    <script>
+        // --- DONNÉES DE JEU ---
+        const dialogueSequence = [
+            { text: "Mais au fil du temps, Alice compris.", type: "narrator", action: "dialogue" },
+            { text: "Ce n'était pas quelqu'un comme les autres, il avais quelque chose d'unique en lui.", type: "narrator", action: "dialogue" },
+            { image: "screen1", action: "show_image_click_to_continue" },
+            { image: "screen2", action: "show_image_click_to_continue" },
+            { image: "screen3", action: "show_image_click_to_continue" },
+            { text: "Il s'intéressais vraiment à elle", type: "narrator", action: "dialogue" },
+            { text: "Petit à Petit, Alice cessa d'être renfermé sur elle même (enfin, en vrais si elle l'était toujours, mais carrément moins !)", type: "narrator", action: "dialogue" },
+            { image: "screen4", action: "show_image_click_to_continue" },
+            { text: "Puis un beau jour, elle cessa d'être seule", type: "narrator", action: "dialogue" },
+            { image: "screen5", action: "show_image_click_to_continue" },
+            { image: "screen6", action: "show_image_click_to_continue" },
+            { text: "FIN PROVISOIRE DE LA ZONE. (Cliquez pour Zone 2)", type: "narrator", action: "end" }
+        ];
+
+        let currentSequenceIndex = 0;
+        let activeImageElement = null;
+        let typingInterval;
+        let isTyping = false;
+        let isTypingAudioPlaying = false; 
+        let skipRequested = false; 
+
+        // --- ÉLÉMENTS ---
+        const dialogueBox = document.getElementById('dialogue-box');
+        const dialogueTextElement = document.getElementById('dialogue-text');
+        const zoneAudio = document.getElementById('zone-audio');
+        const typeSound = document.getElementById('type-sound'); 
+        const overlay = document.getElementById('intro-overlay-zone2');
+        
+        typeSound.volume = 0.5;
+
+        // --- FONCTIONS DE BASE (reprises et simplifiées) ---
+        
+        function skipText(event) {
+            if (isTyping) {
+                skipRequested = true;
+                event.stopPropagation();
+            }
+        }
+        
+        // Fonction de machine à écrire (seul le Narrateur fait du bruit ici)
+        function typeWriter(text, targetElement, isSilent, callback) {
+            // ... (Fonction typeWriter complète de la zone1.html) ...
+            if(typingInterval) clearInterval(typingInterval);
+            
+            skipRequested = false;
+            
+            const finalizeTyping = () => {
+                clearInterval(typingInterval);
+                
+                if (isTypingAudioPlaying) {
+                    typeSound.pause();
+                    typeSound.currentTime = 0; 
+                    isTypingAudioPlaying = false;
+                }
+                
+                dialogueBox.removeEventListener('click', skipText, false);
+
+                targetElement.classList.remove('cursor-active');
+                isTyping = false;
+                if (callback) callback();
+            };
+
+            if (isTypingAudioPlaying) {
+                typeSound.pause();
+                typeSound.currentTime = 0;
+                isTypingAudioPlaying = false;
+            }
+
+            isTyping = true;
+            targetElement.innerHTML = '';
+            targetElement.classList.add('cursor-active');
+            let i = 0;
+
+            if (!isSilent) {
+                typeSound.play().catch(e => {}); 
+                isTypingAudioPlaying = true;
+            }
+
+            typingInterval = setInterval(() => {
+                if (skipRequested) {
+                    targetElement.innerHTML = text;
+                    finalizeTyping();
+                    return;
+                }
+                
+                if (i < text.length) {
+                    targetElement.innerHTML += text.charAt(i);
+                    i++;
+                } else {
+                    targetElement.innerHTML = text; 
+                    finalizeTyping();
+                }
+            }, 30);
+        }
+
+        // --- NOUVELLE LOGIQUE DE SCÈNE ---
+
+        // Masque l'image précédente si elle existe
+        function hideActiveImage(callback) {
+            if (activeImageElement) {
+                activeImageElement.style.opacity = 0;
+                // Attend la fin de la transition pour cacher complètement
+                setTimeout(() => {
+                    activeImageElement.style.display = 'none';
+                    activeImageElement = null;
+                    if (callback) callback();
+                }, 1000); 
+            } else {
+                 if (callback) callback();
+            }
+        }
+
+        // Affiche l'image spécifiée et attend le clic pour continuer
+        function showImageAndAwaitClick(imageId) {
+            hideActiveImage(() => {
+                const imageElement = document.getElementById(imageId);
+                imageElement.style.display = 'block';
+                activeImageElement = imageElement;
+                
+                // Révélation progressive
+                setTimeout(() => {
+                    imageElement.style.opacity = 1;
+                    imageElement.addEventListener('click', advanceSequence, { once: true });
+                }, 50);
+            });
+        }
+        
+        // Gère l'avancement de la séquence d'événements
+        function advanceSequence() {
+            if (isTyping) return;
+
+            // Masque la boîte de dialogue si elle est affichée (utile après une séquence dialogue)
+            dialogueBox.style.display = 'none';
+
+            if (currentSequenceIndex >= dialogueSequence.length) {
+                console.log("Fin de la séquence.");
+                return;
+            }
+
+            const currentEvent = dialogueSequence[currentSequenceIndex];
+            currentSequenceIndex++;
+
+            if (currentEvent.action === "dialogue") {
+                // Séquence Narrateur : cache l'image puis lance le dialogue
+                hideActiveImage(() => {
+                    dialogueBox.style.display = 'block';
+                    dialogueBox.addEventListener('click', skipText, false);
+
+                    const isSilent = currentEvent.type !== "narrator"; // Seul le narrateur est bruyant
+                    
+                    typeWriter(currentEvent.text, dialogueTextElement, isSilent, () => {
+                        dialogueBox.addEventListener('click', advanceSequence, { once: true });
+                    });
+                });
+
+            } else if (currentEvent.action === "show_image_click_to_continue") {
+                // Séquence Image : cache l'image précédente (si elle existe) puis affiche la nouvelle
+                showImageAndAwaitClick(currentEvent.image);
+            
+            } else if (currentEvent.action === "end") {
+                hideActiveImage(() => {
+                    dialogueBox.style.display = 'block';
+                    typeWriter(currentEvent.text, dialogueTextElement, false, () => {
+                        // On pourrait mettre une redirection ici, mais pour l'instant on reste sur la page.
+                    });
+                });
+            }
+        }
+
+        // Clic 0 : Démarrage initial de la zone
+        overlay.addEventListener('click', function() {
+            // Lancement de la musique de Guilian
+            zoneAudio.play().catch(error => { console.warn("L'audio de fond a été bloqué.", error); });
+            
+            overlay.style.display = 'none';
+            // Le premier dialogue se lance directement après la disparition du calque
+            advanceSequence(); 
+        }, { once: true });
+
+        // Démarrage : l'overlay est le seul élément visible, on attend le clic 0.
+    </script>
+</body>
+</html>
