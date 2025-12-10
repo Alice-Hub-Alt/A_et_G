@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Zone 3_2 : Le Labyrinthe de la Connexion</title>
+<title>Zone 2 : Le Labyrinthe de la Connexion</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
@@ -33,7 +33,23 @@
     cursor:default;
   }
 
-  /* boite de pensée (rose), mais invisible tant qu'on ne clique pas sur les portes centrales */
+  /* overlay d'intro */
+  #intro-overlay-zone2{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,1);
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--pink-strong);
+    text-align:center;
+    padding:20px;
+    box-sizing:border-box;
+    cursor:pointer;
+    text-shadow:2px 2px 8px rgba(255,0,255,0.25);
+  }
+
+  /* boite de pensée (rose) */
   #dialogue-box{
     position:fixed;
     left:50%;
@@ -89,6 +105,7 @@
   #door-7{ right:10%; top:50%; transform:none; }
   #door-8{ right:20%; top:70%; transform:none; }
 
+  /* protection responsive : reduire la taille des portes si l'écran est petit */
   @media (max-height:700px){
     .clickable-door{ height:150px; }
     #door-exit{ height:360px; }
@@ -102,27 +119,44 @@
 </head>
 <body>
 
+  <!-- Audio : zone ambiant (laisser tel quel si tu as ton mp3) -->
   <audio id="zone-audio" loop>
     <source src="votre_lien_audio_zone2.mp3" type="audio/mpeg">
   </audio>
 
+  <!-- Son de "dialogue" demandé (exact link fourni) -->
 <audio id="type-sound"
        src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=u3fz7wy8&dl=0">
 </audio>
 
+  <div id="intro-overlay-zone2"><span id="overlay-text"></span></div>
+
   <div id="dialogue-box"><div id="dialogue-text"></div></div>
 
   <img id="door-exit" class="clickable-door" src="https://i.imgur.com/7xp8PkZ.png" alt="Porte sortie">
+
   <img id="door-1" class="clickable-door" src="https://i.imgur.com/OSOCKnQ.png" alt="Porte 1">
   <img id="door-2" class="clickable-door" src="https://i.imgur.com/mTg0Zm6.png" alt="Porte 2">
   <img id="door-3" class="clickable-door" src="https://i.imgur.com/WKgSmFP.png" alt="Porte 3">
   <img id="door-4" class="clickable-door" src="https://i.imgur.com/HY94Buw.png" alt="Porte 4">
+
   <img id="door-5" class="clickable-door" src="https://i.imgur.com/gQgJFUN.png" alt="Porte 5">
   <img id="door-6" class="clickable-door" src="https://i.imgur.com/7vIHXUp.png" alt="Porte 6">
   <img id="door-7" class="clickable-door" src="https://i.imgur.com/qmbKHzv.png" alt="Porte 7">
   <img id="door-8" class="clickable-door" src="https://i.imgur.com/xzZ06bS.png" alt="Porte 8">
 
 <script>
+/* données */
+const overlayText = "Hein..? Je suis où là ? Je suis dans ma tête c'est ça ? Pourquoi le narrateur est pas là ?!!!";
+const initialDoorMessage = "Bon, on dirait que cette grande porte est la sortie";
+const doorExitLocked = "La porte est verrouillée... on dirait un cadenas avec juste des flèches dessus.";
+const genericDoorMessage = "Non, pas maintenant. C’est sûrement pas par là.";
+
+let initialDoorMessageShown = false;
+
+/* éléments */
+const overlay = document.getElementById('intro-overlay-zone2');
+const overlayTextElement = document.getElementById('overlay-text');
 const dialogueBox = document.getElementById('dialogue-box');
 const dialogueTextElement = document.getElementById('dialogue-text');
 const typeSound = document.getElementById('type-sound');
@@ -135,81 +169,142 @@ let typingInterval = null;
 let isTyping = false;
 let skipRequested = false;
 
-const centralMessage = "Bon, on dirait que cette grande porte est la sortie";
-
 /* fonction d'arrêt sûr du son de dialogue */
-function stopTypeSound(){ try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){} }
+function stopTypeSound(){
+  try{
+    typeSound.pause();
+    // reset si possible
+    typeSound.currentTime = 0;
+  }catch(e){
+    // ignore
+  }
+}
 
 /* skip onclick pendant la frappe */
-function skipHandler(e){ if(isTyping){ skipRequested=true; e.stopPropagation(); } }
+function skipHandler(e){
+  if(isTyping){
+    skipRequested = true;
+    e.stopPropagation();
+  }
+}
 
 /* typewriter : démarre son + stop quand terminé */
-function typeWriter(text,target,onFinish){
+function typeWriter(text, target, onFinish){
   if(typingInterval) clearInterval(typingInterval);
-  skipRequested=false;
-  isTyping=true;
-  target.innerHTML="";
+  skipRequested = false;
+
+  // start
+  isTyping = true;
+  target.innerHTML = "";
   target.classList.add('cursor-active');
-  try{ typeSound.loop=false; typeSound.currentTime=0; typeSound.play().catch(()=>{}); }catch(e){}
-  let i=0;
-  typingInterval=setInterval(()=>{
+
+  // lance le son (essayer, sinon on ignore l'erreur)
+  try{
+    // veiller à ce que le son ne boucle pas
+    typeSound.loop = false;
+    typeSound.currentTime = 0;
+    const p = typeSound.play();
+    if(p && p.catch) p.catch(()=>{/* autoplay blocked, OK */});
+  }catch(e){ /* silent */ }
+
+  let i = 0;
+  typingInterval = setInterval(() => {
     if(skipRequested){
-      target.innerHTML=text;
+      // on force l'affichage complet et on stoppe le son
+      target.innerHTML = text;
       clearInterval(typingInterval);
       stopTypeSound();
       target.classList.remove('cursor-active');
-      isTyping=false;
-      if(onFinish) onFinish();
+      isTyping = false;
+      if(typeof onFinish === 'function') onFinish();
       return;
     }
-    if(i<text.length){ target.innerHTML+=text.charAt(i++); }
-    else{
+
+    if(i < text.length){
+      target.innerHTML += text.charAt(i++);
+    } else {
+      // fini normalement -> stop son et callback
       clearInterval(typingInterval);
       stopTypeSound();
       target.classList.remove('cursor-active');
-      isTyping=false;
-      if(onFinish) onFinish();
+      isTyping = false;
+      if(typeof onFinish === 'function') onFinish();
     }
-  },28);
+  }, 28); // vitesse de frappe
+}
+
+/* version silencieuse pour l'overlay */
+function typeWriterSilent(text, target, onFinish){
+  target.innerHTML = "";
+  let i = 0;
+  const t = setInterval(()=>{
+    if(i < text.length) target.innerHTML += text.charAt(i++);
+    else { clearInterval(t); if(typeof onFinish==='function') onFinish(); }
+  }, 36);
 }
 
 /* afficher message de pensée (rose) */
 function showMessage(message, callback){
   if(isTyping) return;
-  dialogueBox.style.display="block";
+  dialogueBox.style.display = "block";
   dialogueBox.addEventListener('click', skipHandler, false);
-  typeWriter(message,dialogueTextElement,()=>{
-    dialogueBox.addEventListener('click',()=>{
-      dialogueBox.style.display="none";
+
+  typeWriter(message, dialogueTextElement, ()=>{
+    // quand la frappe est finie : on attend un clic pour fermer
+    dialogueBox.addEventListener('click', () => {
+      dialogueBox.style.display = "none";
+      // toujours s'assurer que le son est arrêté
       stopTypeSound();
       if(callback) callback();
-    },{once:true});
+    }, { once:true });
   });
 }
 
-/* play ambiance sonore dès le chargement */
-try{ zoneAudio.play().catch(()=>{}); }catch(e){}
-
-/* gestion portes */
+/* gestion portes (petites) : message générique */
 allDoors.forEach(el=>{
-  if(el.id === 'door-exit' || el.id==='door-3' || el.id==='door-7'){
-    el.addEventListener('click',()=>{
+  if(el.id !== 'door-exit'){
+    el.addEventListener('click', ()=>{
       if(isTyping) return;
-      showMessage(centralMessage);
-    });
-  } else {
-    el.addEventListener('click',()=>{
-      if(isTyping) return;
-      const doorNum = el.id.replace('door-','');
-      window.location.href = `porte${doorNum}.html`;
+      showMessage(genericDoorMessage);
     });
   }
 });
 
-/* préchargement son dialogue */
-typeSound.addEventListener('canplay',()=>{});
-typeSound.addEventListener('error',()=>{ console.warn('Type sound error or blocked.'); });
+/* porte de sortie */
+doorExit.addEventListener('click', ()=>{
+  if(isTyping) return;
+  if(!initialDoorMessageShown){
+    showMessage(initialDoorMessage, ()=> initialDoorMessageShown = true);
+  } else {
+    showMessage(doorExitLocked, ()=>{
+      zoneAudio.pause();
+      window.location.href = 'zone3_2.html';
+      window.location.href = 'zone2_1.html';
+    });
+  }
+});
 
+/* démarrage scène : overlay + click pour enlever */
+function startScene(){
+  typeWriterSilent(overlayText, overlayTextElement, ()=>{
+    overlay.addEventListener('click', ()=>{
+      overlay.style.transition = 'opacity .6s';
+      overlay.style.opacity = 0;
+      setTimeout(()=>{
+        overlay.style.display = 'none';
+        // play ambient if present
+        try{ zoneAudio.play().catch(()=>{}); }catch(e){}
+        showMessage(initialDoorMessage, ()=> initialDoorMessageShown = true);
+      },600);
+    }, { once:true });
+  });
+}
+
+/* prévenir si le fichier dropbox met trop de temps : on le précharge un peu */
+typeSound.addEventListener('canplay', ()=>{ /* ok */ });
+typeSound.addEventListener('error', ()=>{ console.warn('Type sound error or blocked.'); });
+
+startScene();
 </script>
 
 </body>
