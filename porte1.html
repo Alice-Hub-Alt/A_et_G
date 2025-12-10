@@ -1,249 +1,180 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Visionneur Livre Pixel</title>
+<meta charset="UTF-8">
+<title>Visionneuse Livre</title>
+
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+    body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: url("https://blog-eyc.pages.dev/vid/fire/fire.gif") center/cover no-repeat;
+        font-family: Arial, sans-serif;
+    }
 
-  :root {
-    --pink:#ff66ff;
-    --pink-strong:#ff00ff;
-    --red:#ff0000;
-  }
+    /* Bouton retour */
+    .back-button {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        font-size: 40px;
+        color: red;
+        cursor: pointer;
+        z-index: 10;
+        user-select: none;
+    }
 
-  html, body {
-    height: 100%;
-    margin: 0;
-    font-family: 'Press Start 2P', monospace;
-    overflow: hidden;
-    color: white;
-  }
+    /* Gif cliquable */
+    .book-gif {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 230px; /* taille GRANDE */
+        cursor: pointer;
+        z-index: 5;
+    }
 
-  body {
-    background: url('https://blog-eyc.pages.dev/vid/fire/fire.gif') center center / cover no-repeat fixed;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
-  }
+    /* Boite de pensée */
+    .thought-box {
+        position: absolute;
+        bottom: 150px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 150, 200, 0.8);
+        padding: 20px 25px;
+        border-radius: 20px;
+        width: 60%;
+        font-size: 22px;
+        text-align: center;
+        animation: fadeIn 0.7s ease;
+        z-index: 20;
+    }
 
-  #thought-box {
-    position: fixed;
-    left: 50%;
-    bottom: 28px;
-    transform: translateX(-50%);
-    width: 84%;
-    min-height: 14vh;
-    max-height: 30vh;
-    background: rgba(0,0,0,0.56);
-    border: 3px solid var(--pink-strong);
-    padding: 18px;
-    box-sizing: border-box;
-    color: var(--pink);
-    display: none;
-    text-shadow: 0 0 6px rgba(255,0,255,0.2);
-    overflow:auto;
-    z-index: 9000;
-  }
-  #thought-text { font-size: 0.86em; line-height:1.45; white-space: pre-line; }
-  .cursor-active { border-right:0.15em solid var(--pink); animation: blink 0.5s steps(1) infinite; padding-right:6px; }
-  @keyframes blink{ 0%,100%{ border-color:transparent } 50%{ border-color:var(--pink) } }
+    /* Visionneuse */
+    .viewer {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 65%;
+        height: 65%;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 50;
+    }
 
-  #book-gif {
-    position: fixed;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    cursor: pointer;
-    width: 300px; /* encore plus grand */
-    z-index: 100;
-  }
+    /* Fond opaque + image */
+    .viewer-content {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background-image: url("https://img.itch.zone/aW1hZ2UvMjkwMzEwMC8xNzM2NzE1My5wbmc=/original/dK58Rm.png");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        padding: 40px;
+    }
 
-  #image-viewer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,0.5); /* légèrement sombre pour voir contours */
-    z-index: 999;
-  }
+    /* IMAGE dans la visionneuse — déplacée à droite & agrandie */
+    .viewer-image {
+        width: 48%;  
+        margin-left: 90px; /* plus à droite */
+        margin-top: 10px;
+    }
 
-  #viewer-content {
-    display: flex;
-    width: 70%; /* réduit de la page entière */
-    height: 70%; /* réduit de la page entière */
-    background: url('https://img.itch.zone/aW1hZ2UvMjkwMzEwMC8xNzM2NzE1My5wbmc=/original/dK58Rm.png') center center / contain no-repeat;
-    border-radius: 12px;
-    position: relative;
-    align-items: center;
-    justify-content: flex-start;
-    cursor: default;
-    padding: 40px;
-    box-sizing: border-box;
-  }
+    /* TEXTE — plus large & plus à droite */
+    .viewer-text {
+        width: 45%;
+        font-size: 26px;
+        color: white;
+        margin-left: 60px;
+        white-space: pre-line;
+        text-shadow: 2px 2px 4px black;
+    }
 
-  .viewer-image {
-    max-width: 45%;
-    max-height: 80%;
-    margin-left: 40px;
-    transition: opacity 0.5s ease;
-  }
+    /* Flèche suivante */
+    .next-arrow {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 55px;
+        color: red;
+        cursor: pointer;
+        user-select: none;
+    }
 
-  #viewer-text {
-    width: 60%;
-    margin-left: 80px; /* beaucoup d'espace entre image et texte */
-    color: var(--pink);
-    font-size: 1em;
-    line-height: 1.5em;
-    white-space: pre-line; /* permet retour à la ligne */
-  }
-
-  #next-button {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 3em;
-    color: var(--red);
-    cursor: pointer;
-    user-select: none;
-  }
-
-  #back-button {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    font-size: 2em;
-    color: var(--red);
-    cursor: pointer;
-    user-select: none;
-    z-index: 1000;
-  }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translate(-50%, -40%); }
+        to { opacity: 1; transform: translate(-50%, -50%); }
+    }
 </style>
 </head>
+
 <body>
 
-<a id="back-button" href="zone2_1.html">&#8592;</a>
+<!-- Bouton retour -->
+<div class="back-button" onclick="location.href='zone2_1.html'">←</div>
 
-<div id="thought-box"><div id="thought-text"></div></div>
+<!-- Gif cliquable -->
+<img src="https://media.tenor.com/wgmpvhHPSkkAAAAj/book-trophy-pixel-art.gif" class="book-gif" onclick="openViewer()">
 
-<img id="book-gif" src="https://media.tenor.com/wgmpvhHPSkkAAAAj/book-trophy-pixel-art.gif" alt="Livre pixel art">
+<!-- Boite pensée d’arrivée -->
+<div id="introThought" class="thought-box">Oh tient un livre, dommage que je soit illettré !</div>
 
-<div id="image-viewer">
-  <div id="viewer-content">
-    <img id="viewer-image" src="" alt="Image">
-    <div id="viewer-text"></div>
-    <div id="next-button">&#8594;</div>
-  </div>
+<!-- Visionneuse d’images -->
+<div class="viewer" id="viewer" onclick="clickOutside(event)">
+    <div class="viewer-content" id="viewerBox">
+        <img id="viewerImage" class="viewer-image">
+        <div id="viewerText" class="viewer-text"></div>
+        <div class="next-arrow" onclick="nextImage(event)">→</div>
+    </div>
 </div>
 
-<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=u3fz7wy8&dl=0"></audio>
-
 <script>
-const thoughtBox = document.getElementById('thought-box');
-const thoughtText = document.getElementById('thought-text');
-const typeSound = document.getElementById('type-sound');
-let typingInterval = null;
-let isTyping = false;
-let skipRequested = false;
+    let images = [
+        { src: "https://i.imgur.com/qmbKHzv.png", text: "On s'en fou\nVraiment c'est nul !" },
+        { src: "https://i.imgur.com/xzZ06bS.png", text: "Mais quand même on sais pas\nEt ça reste triste." }
+    ];
 
-function stopTypeSound(){ try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){} }
+    let currentIndex = 0;
 
-function typeWriter(text, target, callback){
-  if(typingInterval) clearInterval(typingInterval);
-  skipRequested = false;
-  isTyping = true;
-  target.innerHTML = "";
-  target.classList.add('cursor-active');
-  try{ typeSound.loop=false; typeSound.currentTime=0; typeSound.play().catch(()=>{}); }catch(e){}
-  let i = 0;
-  typingInterval = setInterval(()=>{
-    if(skipRequested){
-      target.innerHTML = text;
-      clearInterval(typingInterval);
-      stopTypeSound();
-      target.classList.remove('cursor-active');
-      isTyping=false;
-      if(callback) callback();
-      return;
+    function openViewer() {
+        document.getElementById("introThought").style.display = "none";
+
+        let box = document.createElement("div");
+        box.className = "thought-box";
+        box.textContent = "Espérons qu'il y ai des images !";
+        document.body.appendChild(box);
+
+        setTimeout(() => box.remove(), 1800);
+
+        updateViewer();
+        document.getElementById("viewer").style.display = "flex";
     }
-    if(i<text.length){ target.innerHTML += text.charAt(i++); }
-    else{
-      clearInterval(typingInterval);
-      stopTypeSound();
-      target.classList.remove('cursor-active');
-      isTyping=false;
-      if(callback) callback();
+
+    function updateViewer() {
+        document.getElementById("viewerImage").src = images[currentIndex].src;
+        document.getElementById("viewerText").textContent = images[currentIndex].text;
     }
-  },28);
-}
 
-function showThought(message, callback){
-  if(isTyping) return;
-  thoughtBox.style.display = "block";
-  typeWriter(message, thoughtText, ()=>{
-    thoughtBox.addEventListener('click', ()=>{
-      thoughtBox.style.display = "none";
-      stopTypeSound();
-      if(callback) callback();
-    }, {once:true});
-  });
-}
+    function nextImage(event) {
+        event.stopPropagation();
+        currentIndex = (currentIndex + 1) % images.length;
+        updateViewer();
+    }
 
-window.addEventListener('load', ()=>{
-  showThought("Oh tient un livre, dommage que je sois illettré !");
-});
-
-// images et textes
-const images = [
-  {src:"https://i.imgur.com/qmbKHzv.png", text:"On s'en fou !\nVraiment c'est nul !"},
-  {src:"https://i.imgur.com/xzZ06bS.png", text:"Mais quand même on sais pas"}
-];
-
-let currentIndex = 0;
-
-const bookGif = document.getElementById('book-gif');
-const viewer = document.getElementById('image-viewer');
-const viewerContent = document.getElementById('viewer-content');
-const viewerImage = document.getElementById('viewer-image');
-const viewerText = document.getElementById('viewer-text');
-const nextButton = document.getElementById('next-button');
-
-function updateViewer(){
-  viewerImage.style.opacity = 0;
-  setTimeout(()=>{
-    viewerImage.src = images[currentIndex].src;
-    viewerText.textContent = images[currentIndex].text;
-    viewerImage.style.opacity = 1;
-  }, 250); // transition fondu
-}
-
-bookGif.addEventListener('click', ()=>{
-  showThought("Espérons qu'il y ai des images !", ()=>{
-    viewer.style.display = "flex";
-    currentIndex = 0;
-    updateViewer();
-  });
-});
-
-nextButton.addEventListener('click', ()=>{
-  currentIndex = (currentIndex + 1) % images.length;
-  updateViewer();
-});
-
-// fermer visionneuse si on clique à l'extérieur
-viewer.addEventListener('click', (e)=>{
-  if(e.target === viewer){ // si clique sur le fond
-    viewer.style.display = "none";
-  }
-});
-
+    function clickOutside(event) {
+        let viewerBox = document.getElementById("viewerBox");
+        if (!viewerBox.contains(event.target)) {
+            document.getElementById("viewer").style.display = "none";
+        }
+    }
 </script>
 
 </body>
