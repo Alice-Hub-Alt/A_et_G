@@ -68,6 +68,27 @@
             height: 100%;
         }
         
+        #thought-box {
+            /* Style pour les pensées (reprises de zone1.html) */
+            width: 90%;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 2px dashed #ff00ff;
+            padding: 15px;
+            box-sizing: border-box;
+            cursor: pointer; 
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        #thought-text {
+            font-size: 0.7em;
+            color: #ff00ff;
+            line-height: 1.5;
+        }
+
         .cursor-active {
             border-right: 0.15em solid white;
             animation: blink-cursor 0.5s step-end infinite;
@@ -112,6 +133,10 @@
         <span id="dialogue-text"></span>
     </div>
     
+    <div id="thought-box" style="display:none;">
+        <span id="thought-text"></span>
+    </div>
+
     <img id="screen_a1" class="conv-screen" src="https://i.imgur.com/XA7ud3Z.png" alt="Screen 1 (Evolution)">
     <img id="screen_a2" class="conv-screen" src="https://i.imgur.com/AW3Nnom.png" alt="Screen 2 (Evolution)">
     <img id="screen_a3" class="conv-screen" src="https://i.imgur.com/aValYxk.png" alt="Screen 3 (Evolution)">
@@ -135,38 +160,44 @@
             { text: "Mais au fil du temps, Alice compris.", type: "narrator", action: "dialogue" },
             { text: "Ce n'était pas quelqu'un comme les autres, il avais quelque chose d'unique en lui.", type: "narrator", action: "dialogue" },
             
-            // Screens d'évolution (XA7ud3Z, AW3Nnom, aValYxk)
+            // Screens d'évolution
             { image: "screen_a1", action: "show_image_click_to_continue" },
             { image: "screen_a2", action: "show_image_click_to_continue" },
             { image: "screen_a3", action: "show_image_click_to_continue" },
             
             { text: "Il s'intéressais vraiment à elle.", type: "narrator", action: "dialogue" },
-            { text: "Et il se souciais d'elle", type: "narrator", action: "dialogue" },
+            { text: "Et il se souciais d'elle.", type: "narrator", action: "dialogue" },
             
-            // Screen Soucis (4zgNYwT)
+            // Screen Soucis
             { image: "screen_b1", action: "show_image_click_to_continue" },
 
-            { text: "Et il acceptais même ses conditions d'amitié absolument invraisemblable (comme ne jamais se rencontrée, qu'elle ne révèle jamais sa voix, ne montre jamais son visage, ou d'autres trucs objectivement absurde)", type: "narrator", action: "dialogue" },
+            { text: "Et il acceptais même ses conditions d'amitié absolument invraisemblable (comme ne jamais se rencontrée, qu'elle ne révèle jamais sa voix, ne montre jamais son visage, ou d'autres trucs objectivement absurde).", type: "narrator", action: "dialogue" },
             
-            // Screens Condition (3One5eE, TU3SW7O)
+            // NOUVELLE PENSÉE 1
+            { text: "Je rêve ou le narrateur viens de me juger là ?", type: "thought", action: "show_thought" },
+
+            // Screens Condition
             { image: "screen_c1", action: "show_image_click_to_continue" },
             { image: "screen_c2", action: "show_image_click_to_continue" },
 
-            { text: "Petit à Petit, Alice cessa d'être renfermé sur elle même (enfin, en vrais si elle l'était toujours, mais carrément moins !)", type: "narrator", action: "dialogue" },
+            { text: "Petit à Petit, Alice cessa d'être renfermé sur elle même (enfin, en vrais si elle l'était toujours beaucoup, mais pour cette reclus de la société c'était déjà pas mal !)", type: "narrator", action: "dialogue" },
+
+            // NOUVELLE PENSÉE 2 (Familier : 'chat')
+            { text: "(Nan mais chat vas pas ?!!!)", type: "thought", action: "show_thought" },
 
             { text: "Ils partagèrent les mêmes passions.", type: "narrator", action: "dialogue" },
             
-            // Screens Passions (QBa0Hkv, DAcEnVA, sjenGQe)
+            // Screens Passions
             { image: "screen_d1", action: "show_image_click_to_continue" },
             { image: "screen_d2", action: "show_image_click_to_continue" },
             { image: "screen_d3", action: "show_image_click_to_continue" },
 
             { text: "Puis un beau jour, elle cessa d'être seule.", type: "narrator", action: "dialogue" },
             
-            // Screens Meilleur Ami (Ll5DcFY, Ug7Zv5N, 4OMCAbt)
+            // Screens Meilleur Ami
             { image: "screen_e1", action: "show_image_click_to_continue" },
             { image: "screen_e2", action: "show_image_click_to_continue" },
-            { image: "screen_e3", action: "show_image_click_to_continue" }, // Note : C'était l'ancien screen 4
+            { image: "screen_e3", action: "show_image_click_to_continue" },
             
             { text: "FIN PROVISOIRE DE LA ZONE. (Cliquez pour Zone 2)", type: "narrator", action: "end" }
         ];
@@ -181,6 +212,8 @@
         // --- ÉLÉMENTS ---
         const dialogueBox = document.getElementById('dialogue-box');
         const dialogueTextElement = document.getElementById('dialogue-text');
+        const thoughtBox = document.getElementById('thought-box'); // NOUVEAU
+        const thoughtTextElement = document.getElementById('thought-text'); // NOUVEAU
         const zoneAudio = document.getElementById('zone-audio');
         const typeSound = document.getElementById('type-sound'); 
         const overlay = document.getElementById('intro-overlay-zone2');
@@ -196,6 +229,7 @@
             }
         }
         
+        // Fonction de machine à écrire (adaptée pour dialogue et pensée)
         function typeWriter(text, targetElement, isSilent, callback) {
             if(typingInterval) clearInterval(typingInterval);
             
@@ -211,6 +245,7 @@
                 }
                 
                 dialogueBox.removeEventListener('click', skipText, false);
+                thoughtBox.removeEventListener('click', skipText, false); // Ajout ThoughtBox
 
                 targetElement.classList.remove('cursor-active');
                 isTyping = false;
@@ -252,7 +287,6 @@
 
         // --- LOGIQUE DE SCÈNE ---
 
-        // Masque l'image précédente si elle existe
         function hideActiveImage(callback) {
             if (activeImageElement) {
                 activeImageElement.style.opacity = 0;
@@ -266,7 +300,6 @@
             }
         }
 
-        // Affiche l'image spécifiée et attend le clic pour continuer
         function showImageAndAwaitClick(imageId) {
             hideActiveImage(() => {
                 const imageElement = document.getElementById(imageId);
@@ -280,11 +313,33 @@
             });
         }
         
+        // Fonction pour afficher une Pensée
+        function showThought(text) {
+             hideActiveImage(() => {
+                 dialogueBox.style.display = 'none';
+                 thoughtBox.style.display = 'block';
+                 thoughtBox.addEventListener('click', skipText, false); 
+                 
+                 // Les pensées n'ont pas de bruit de frappe (isSilent = true)
+                 typeWriter(text, thoughtTextElement, true, () => { 
+                    thoughtBox.addEventListener('click', hideThoughtAndContinue, { once: true });
+                 });
+             });
+        }
+        
+        // Fonction pour cacher la Pensée et continuer la séquence
+        function hideThoughtAndContinue() {
+            if (isTyping) return;
+            thoughtBox.style.display = 'none';
+            advanceSequence();
+        }
+
         // Gère l'avancement de la séquence d'événements
         function advanceSequence() {
             if (isTyping) return;
 
             dialogueBox.style.display = 'none';
+            thoughtBox.style.display = 'none';
 
             if (currentSequenceIndex >= dialogueSequence.length) {
                 console.log("Fin de la séquence.");
@@ -307,15 +362,19 @@
                     });
                 });
 
+            } else if (currentEvent.action === "show_thought") { // NOUVEAU TYPE D'ACTION
+                // Séquence Pensée
+                showThought(currentEvent.text);
+
             } else if (currentEvent.action === "show_image_click_to_continue") {
-                // Séquence Image : cache l'image précédente (si elle existe) puis affiche la nouvelle
+                // Séquence Image
                 showImageAndAwaitClick(currentEvent.image);
             
             } else if (currentEvent.action === "end") {
                 hideActiveImage(() => {
                     dialogueBox.style.display = 'block';
                     typeWriter(currentEvent.text, dialogueTextElement, false, () => {
-                        // Fin de zone, on pourrait mettre une redirection future ici
+                        // Fin de zone
                     });
                 });
             }
