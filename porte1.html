@@ -3,23 +3,214 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Porte 1</title>
+<title>Visionneur Livre Pixel</title>
 <style>
-  body{
-    margin:0;
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background-color:#111;
-    color:#ff66ff;
-    font-family:'Press Start 2P', monospace;
-    font-size:3em;
-    text-align:center;
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+  :root {
+    --pink:#ff66ff;
+    --pink-strong:#ff00ff;
+    --red:#ff0000;
+  }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    font-family: 'Press Start 2P', monospace;
+    overflow: hidden;
+    color: white;
+  }
+
+  body {
+    background: url('https://blog-eyc.pages.dev/vid/fire/fire.gif') center center / cover no-repeat fixed;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  #thought-box {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    transform: translateX(-50%);
+    width: 84%;
+    min-height: 14vh;
+    max-height: 30vh;
+    background: rgba(0,0,0,0.56);
+    border: 3px solid var(--pink-strong);
+    padding: 18px;
+    box-sizing: border-box;
+    color: var(--pink);
+    display: none;
+    text-shadow: 0 0 6px rgba(255,0,255,0.2);
+    overflow:auto;
+    z-index: 9000;
+  }
+  #thought-text { font-size: 0.86em; line-height:1.45; }
+  .cursor-active { border-right:0.15em solid var(--pink); animation: blink 0.5s steps(1) infinite; padding-right:6px; }
+  @keyframes blink{ 0%,100%{ border-color:transparent } 50%{ border-color:var(--pink) } }
+
+  #book-gif {
+    position: fixed;
+    bottom: 10px;
+    left: 10%;
+    cursor: pointer;
+    width: 100px;
+    z-index: 100;
+  }
+
+  #image-viewer {
+    position: fixed;
+    bottom: 120px;
+    left: 10%;
+    display: flex;
+    align-items: center;
+    background: rgba(0,0,0,0.4);
+    padding: 10px;
+    border: 2px solid var(--pink-strong);
+    border-radius: 8px;
+    display: none;
+    z-index: 900;
+  }
+
+  #viewer-image {
+    width: 120px;
+    margin-right: 20px;
+  }
+
+  #viewer-text {
+    color: var(--pink);
+    font-size: 0.8em;
+    max-width: 300px;
+  }
+
+  #next-button {
+    margin-left: 20px;
+    font-size: 2em;
+    color: var(--red);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  #back-button {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    font-size: 2em;
+    color: var(--red);
+    cursor: pointer;
+    user-select: none;
+    z-index: 1000;
   }
 </style>
 </head>
 <body>
-  Porte 1
+
+<a id="back-button" href="zone2_1.html">&#8592;</a>
+
+<div id="thought-box"><div id="thought-text"></div></div>
+
+<img id="book-gif" src="https://media.tenor.com/wgmpvhHPSkkAAAAj/book-trophy-pixel-art.gif" alt="Livre pixel art">
+
+<div id="image-viewer">
+  <img id="viewer-image" src="" alt="Image">
+  <div id="viewer-text"></div>
+  <div id="next-button">&#8594;</div>
+</div>
+
+<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=u3fz7wy8&dl=0"></audio>
+
+<script>
+const thoughtBox = document.getElementById('thought-box');
+const thoughtText = document.getElementById('thought-text');
+const typeSound = document.getElementById('type-sound');
+let typingInterval = null;
+let isTyping = false;
+let skipRequested = false;
+
+function stopTypeSound(){ try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){} }
+function typeWriter(text, target, callback){
+  if(typingInterval) clearInterval(typingInterval);
+  skipRequested = false;
+  isTyping = true;
+  target.innerHTML = "";
+  target.classList.add('cursor-active');
+  try{ typeSound.loop=false; typeSound.currentTime=0; typeSound.play().catch(()=>{}); }catch(e){}
+  let i = 0;
+  typingInterval = setInterval(()=>{
+    if(skipRequested){
+      target.innerHTML = text;
+      clearInterval(typingInterval);
+      stopTypeSound();
+      target.classList.remove('cursor-active');
+      isTyping=false;
+      if(callback) callback();
+      return;
+    }
+    if(i<text.length){ target.innerHTML += text.charAt(i++); }
+    else{
+      clearInterval(typingInterval);
+      stopTypeSound();
+      target.classList.remove('cursor-active');
+      isTyping=false;
+      if(callback) callback();
+    }
+  },28);
+}
+
+function showThought(message, callback){
+  if(isTyping) return;
+  thoughtBox.style.display = "block";
+  typeWriter(message, thoughtText, ()=>{
+    thoughtBox.addEventListener('click', ()=>{
+      thoughtBox.style.display = "none";
+      stopTypeSound();
+      if(callback) callback();
+    }, {once:true});
+  });
+}
+
+// afficher la première pensée au chargement
+window.addEventListener('load', ()=>{
+  showThought("Oh tient un livre, dommage que je sois illettré !");
+});
+
+// images et textes
+const images = [
+  {src:"https://i.imgur.com/qmbKHzv.png", text:"On s'en fou"},
+  {src:"https://i.imgur.com/xzZ06bS.png", text:"Mais quand même on sais pas"}
+];
+
+let currentIndex = 0;
+
+const bookGif = document.getElementById('book-gif');
+const viewer = document.getElementById('image-viewer');
+const viewerImage = document.getElementById('viewer-image');
+const viewerText = document.getElementById('viewer-text');
+const nextButton = document.getElementById('next-button');
+
+bookGif.addEventListener('click', ()=>{
+  showThought("Espérons qu'il y ai des images !", ()=>{
+    viewer.style.display = "flex";
+    currentIndex = 0;
+    updateViewer();
+  });
+});
+
+function updateViewer(){
+  viewerImage.src = images[currentIndex].src;
+  viewerText.textContent = images[currentIndex].text;
+}
+
+nextButton.addEventListener('click', ()=>{
+  currentIndex = (currentIndex + 1) % images.length;
+  updateViewer();
+});
+
+// permettre de cliquer sur la pensée pour skip
+thoughtBox.addEventListener('click', ()=>{ skipRequested=true; });
+</script>
+
 </body>
 </html>
