@@ -95,28 +95,39 @@
     width:auto;
   }
 
-/* --- ARCHE GAUCHE --- */
-/* Porte 1 (Extrême haute) */
-#door-1 { top: 5%; left: 10%; transform:none; }
-/* Porte 2 (Milieu haut) - Aligné verticalement avec 3 */
-#door-2 { top: 25%; left: 30%; transform:none; }
-/* Porte 3 (Milieu bas) - Aligné verticalement avec 2 */
-#door-3 { top: 45%; left: 30%; transform:none; }
-/* Porte 4 (Extrême basse) - Remonté, aligné horizontalement avec 1 */
-#door-4 { top: 65%; left: 10%; transform:none; }
+  /* ARCHE GAUCHE - positions décalées et espacées, garanties inside-screen */
+  #door-1{ left:6%; top:12%; transform:none; }
+  #door-2{ left:10%; top:30%; transform:none; }
+  #door-3{ left:6%; top:52%; transform:none; }
+  #door-4{ left:12%; top:72%; transform:none; }
 
-/* --- ARCHE DROITE (Miroir) --- */
-/* Porte 5 (Extrême haute) */
-#door-5 { top: 5%; right: 10%; transform:none; }
-/* Porte 6 (Milieu haut) - Aligné verticalement avec 7 */
-#door-6 { top: 25%; right: 30%; transform:none; }
-/* Porte 7 (Milieu bas) - Aligné verticalement avec 6 */
-#door-7 { top: 45%; right: 30%; transform:none; }
-/* Porte 8 (Extrême basse) - Remonté, aligné horizontalement avec 5 */
-#door-8 { top: 65%; right: 10%; transform:none; }
+  /* ARCHE DROITE - miroir approximatif */
+  #door-5{ right:6%; top:12%; transform:none; }
+  #door-6{ right:10%; top:30%; transform:none; }
+  #door-7{ right:6%; top:52%; transform:none; }
+  #door-8{ right:12%; top:72%; transform:none; }
+
+  /* protection responsive : reduire la taille des portes si l'écran est petit */
+  @media (max-height:700px){
+    .clickable-door{ height:150px; }
+    #door-exit{ height:360px; }
+  }
+  @media (max-width:600px){
+    .clickable-door{ height:120px; }
+    #door-exit{ height:300px; left:50%; top:22%;}
+    #dialogue-box{ width:92%; font-size:0.9rem; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Audio : zone ambiant (laisser tel quel si tu as ton mp3) -->
+  <audio id="zone-audio" loop>
+    <source src="votre_lien_audio_zone2.mp3" type="audio/mpeg">
+  </audio>
 
   <!-- Son de "dialogue" demandé (exact link fourni) -->
- <audio id="type-sound"
+<audio id="type-sound"
        src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=u3fz7wy8&dl=0">
 </audio>
 
