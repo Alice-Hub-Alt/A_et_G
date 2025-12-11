@@ -8,349 +8,785 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-  :root{
-    --pink:#ff66ff;
-    --pink-strong:#b300ff;
-  }
-
   html, body {
-    margin:0;
-    height:100%;
+    margin:0; height:100%;
   }
 
   body {
-    background-image: url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2tmam1wYzlkYzRpZzR3cmt3Mno4MGdrYmkwaDZpcmpzYTc5azdnNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/NANml9RASmTDU9tA5s/giphy.gif');
-    background-size: cover;
+    background-image:url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2tmam1wYzlkYzRpZzR3cmt3Mno4MGdrYmkwaDZpcmpzYTc5azdnNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/NANml9RASmTDU9tA5s/giphy.gif');
+    background-size:cover;
+    background-position:center;
     background-repeat:no-repeat;
-    background-attachment: fixed;
-    background-position: center;
-    font-family: 'Press Start 2P';
-    color:white;
+    background-attachment:fixed;
+    font-family:'Press Start 2P';
     overflow:hidden;
+    color:white;
     display:flex;
     align-items:center;
     justify-content:center;
-    cursor:default;
   }
 
-  /* TOOLTIP */
-  .door-wrapper {
-    position:absolute;
-  }
+  .door-wrapper { position:absolute; }
 
   .tooltip {
     position:absolute;
-    top:-32px;
-    left:50%;
+    top:-32px; left:50%;
     transform:translateX(-50%);
-    background:#000;
+    background:black;
     padding:6px 12px;
     font-size:0.72em;
     color:white;
-    white-space:nowrap;
     border:2px solid currentColor;
     opacity:0;
-    pointer-events:none;
     transition:opacity .18s;
+    pointer-events:none;
+    white-space:nowrap;
   }
+  .door-wrapper:hover .tooltip { opacity:1; }
 
-  .door-wrapper:hover .tooltip {
-    opacity:1;
-  }
-
-  /* DIALOGUE */
   #dialogue-box {
     position:fixed;
-    bottom:28px;
-    left:50%;
+    bottom:28px; left:50%;
     transform:translateX(-50%);
     width:84%;
     min-height:14vh;
     max-height:30vh;
     background:black;
-    border:3px solid var(--pink-strong);
+    border:3px solid #b300ff;
     padding:18px;
-    box-sizing:border-box;
-    z-index:9000;
-    color:var(--pink);
+    color:#ff66ff;
     display:none;
-    text-shadow:0 0 6px rgba(255,0,255,0.3);
     overflow:auto;
+    z-index:9000;
   }
 
   #dialogue-text {
-    font-size:0.86em;
-    line-height:1.45;
+    font-size:0.86em; line-height:1.45;
   }
 
   .cursor-active {
-    border-right:0.15em solid var(--pink);
-    animation:blink 0.5s steps(1) infinite;
+    border-right:0.15em solid #ff66ff;
+    animation:blink .5s steps(1) infinite;
     padding-right:6px;
   }
 
   @keyframes blink {
     0%,100%{ border-color:transparent; }
-    50%{ border-color:var(--pink); }
+    50%{ border-color:#ff66ff; }
   }
 
-  /* PORTES */
   .clickable-door {
     height:200px;
     cursor:pointer;
-    image-rendering:pixelated;
     transition:transform .18s;
-    z-index:100;
-    user-select:none;
+    image-rendering:pixelated;
   }
+  .clickable-door:hover { transform:scale(1.06); }
 
-  .clickable-door:hover {
-    transform:scale(1.06);
-  }
-
-  /* SORTIE */
-  #door-exit {
-    height:460px;
-  }
-
+  #door-exit { height:460px; }
   .exit-container {
     position:absolute;
-    left:50%;
-    top:28%;
+    top:28%; left:50%;
     transform:translateX(-50%);
   }
 
-  /* CHOIX : ENTRER / INSPECTER */
   #choice-box {
     position:fixed;
-    bottom:0;
-    left:0;
+    bottom:0; left:0;
     width:100%;
     background:black;
     padding:18px;
     display:none;
     justify-content:center;
     gap:48px;
-    z-index:9999;
     border-top:3px solid white;
+    z-index:9999;
   }
 
   .choice-btn {
     font-family:'Press Start 2P';
     font-size:0.8em;
+    padding:14px 22px;
     color:white;
     background:black;
     border:2px solid white;
-    padding:14px 22px;
     cursor:pointer;
   }
-
   .choice-btn:hover {
     background:white;
     color:black;
   }
 
-  /* AUTRES PORTES */
-  #door-1{ left:20%; top:5%; }
-  #door-2{ left:10%; top:25%; }
-  #door-3{ left:10%; top:50%; }
-  #door-4{ left:20%; top:70%; }
-  #door-5{ right:20%; top:5%; }
-  #door-6{ right:10%; top:25%; }
-  #door-7{ right:10%; top:50%; }
-  #door-8{ right:20%; top:70%; }
-
-  @media (max-height:700px){
-    .clickable-door{ height:150px; }
-    #door-exit{ height:360px; }
+  #code-box {
+    position:fixed;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    width:90%; max-width:600px;
+    background:black;
+    border:3px solid white;
+    padding:20px;
+    display:none;
+    z-index:99999;
   }
 
-  @media (max-width:600px){
-    .clickable-door{ height:120px; }
-    #door-exit{ height:300px; }
-    .exit-container{ top:22%; }
-    #dialogue-box{ width:92%; }
+  #code-images {
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:12px;
   }
+
+  #code-images img {
+    width:64px;
+    image-rendering:pixelated;
+  }
+
+  /* positions portes */
+  #door-1 { left:20%; top:5%; }
+  #door-2 { left:10%; top:25%; }
+  #door-3 { left:10%; top:50%; }
+  #door-4 { left:20%; top:70%; }
+  #door-5 { right:20%; top:5%; }
+  #door-6 { right:10%; top:25%; }
+  #door-7 { right:10%; top:50%; }
+  #door-8 { right:20%; top:70%; }
 </style>
 </head>
 <body>
 
-  <audio id="zone-audio" loop>
-    <source src="votre_lien_audio_zone2.mp3" type="audio/mpeg">
-  </audio>
+<audio id="zone-audio" loop>
+  <source src="votre_lien_audio_zone2.mp3" type="audio/mpeg">
+</audio>
 
-  <audio id="type-sound"
-    src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=u3fz7wy8&dl=0">
-  </audio>
+<audio id="type-sound"
+  src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=u3fz7wy8&dl=0">
+</audio>
 
-  <div id="dialogue-box"><div id="dialogue-text"></div></div>
+<div id="dialogue-box"><div id="dialogue-text"></div></div>
 
-  <!-- CHOIX -->
-  <div id="choice-box">
-    <button id="btn-enter" class="choice-btn">Entrer</button>
-    <button id="btn-inspect" class="choice-btn">Inspecter</button>
+<div id="choice-box">
+  <button id="btn-enter" class="choice-btn">Entrer</button>
+  <button id="btn-inspect" class="choice-btn">Inspecter</button>
+</div>
+
+<div id="code-box">
+  <div style="text-align:center; margin-bottom:14px; color:white;">
+    Entrer un code:
   </div>
+  <div id="code-images"></div>
+</div>
 
-  <!-- SORTIE -->
-  <div class="door-wrapper exit-container">
-    <div class="tooltip" style="color:white;">Sortie ?</div>
-    <img id="door-exit" class="clickable-door" src="https://i.imgur.com/7xp8PkZ.png">
-  </div>
+<!-- SORTIE -->
+<div class="door-wrapper exit-container">
+  <div class="tooltip" style="color:white;">Sortie ?</div>
+  <img id="door-exit" class="clickable-door" src="https://i.imgur.com/7xp8PkZ.png">
+</div>
 
-  <!-- PORTES -->
-  <div class="door-wrapper" style="left:20%; top:5%;">
-    <div class="tooltip" style="color:#b300ff;">Porte 1</div>
-    <img id="door-1" class="clickable-door" src="https://i.imgur.com/OSOCKnQ.png">
-  </div>
+<!-- PORTES -->
+<div class="door-wrapper" style="left:20%; top:5%;">
+  <div class="tooltip" style="color:#b300ff;">Porte 1</div>
+  <img id="door-1" class="clickable-door" src="https://i.imgur.com/OSOCKnQ.png">
+</div>
 
-  <div class="door-wrapper" style="left:10%; top:25%;">
-    <div class="tooltip" style="color:#0058ff;">Porte 2</div>
-    <img id="door-2" class="clickable-door" src="https://i.imgur.com/mTg0Zm6.png">
-  </div>
+<div class="door-wrapper" style="left:10%; top:25%;">
+  <div class="tooltip" style="color:#0058ff;">Porte 2</div>
+  <img id="door-2" class="clickable-door" src="https://i.imgur.com/mTg0Zm6.png">
+</div>
 
-  <div class="door-wrapper" style="left:10%; top:50%;">
-    <div class="tooltip" style="color:#b300ff;">Porte 3</div>
-    <img id="door-3" class="clickable-door" src="https://i.imgur.com/WKgSmFP.png">
-  </div>
+<div class="door-wrapper" style="left:10%; top:50%;">
+  <div class="tooltip" style="color:#b300ff;">Porte 3</div>
+  <img id="door-3" class="clickable-door" src="https://i.imgur.com/WKgSmFP.png">
+</div>
 
-  <div class="door-wrapper" style="left:20%; top:70%;">
-    <div class="tooltip" style="color:#0058ff;">Porte 4</div>
-    <img id="door-4" class="clickable-door" src="https://i.imgur.com/HY94Buw.png">
-  </div>
+<div class="door-wrapper" style="left:20%; top:70%;">
+  <div class="tooltip" style="color:#0058ff;">Porte 4</div>
+  <img id="door-4" class="clickable-door" src="https://i.imgur.com/HY94Buw.png">
+</div>
 
-  <div class="door-wrapper" style="right:20%; top:5%;">
-    <div class="tooltip" style="color:#b300ff;">Porte 5</div>
-    <img id="door-5" class="clickable-door" src="https://i.imgur.com/gQgJFUN.png">
-  </div>
+<div class="door-wrapper" style="right:20%; top:5%;">
+  <div class="tooltip" style="color:#b300ff;">Porte 5</div>
+  <img id="door-5" class="clickable-door" src="https://i.imgur.com/gQgJFUN.png">
+</div>
 
-  <div class="door-wrapper" style="right:10%; top:25%;">
-    <div class="tooltip" style="color:#0058ff;">Porte 6</div>
-    <img id="door-6" class="clickable-door" src="https://i.imgur.com/7vIHXUp.png">
-  </div>
+<div class="door-wrapper" style="right:10%; top:25%;">
+  <div class="tooltip" style="color:#0058ff;">Porte 6</div>
+  <img id="door-6" class="clickable-door" src="https://i.imgur.com/7vIHXUp.png">
+</div>
 
-  <div class="door-wrapper" style="right:10%; top:50%;">
-    <div class="tooltip" style="color:#b300ff;">Porte 7</div>
-    <img id="door-7" class="clickable-door" src="https://i.imgur.com/qmbKHzv.png">
-  </div>
+<div class="door-wrapper" style="right:10%; top:50%;">
+  <div class="tooltip" style="color:#b300ff;">Porte 7</div>
+  <img id="door-7" class="clickable-door" src="https://i.imgur.com/qmbKHzv.png">
+</div>
 
-  <div class="door-wrapper" style="right:20%; top:70%;">
-    <div class="tooltip" style="color:#0058ff;">Porte 8</div>
-    <img id="door-8" class="clickable-door" src="https://i.imgur.com/xzZ06bS.png">
-  </div>
+<div class="door-wrapper" style="right:20%; top:70%;">
+  <div class="tooltip" style="color:#0058ff;">Porte 8</div>
+  <img id="door-8" class="clickable-door" src="https://i.imgur.com/xzZ06bS.png">
+</div>
 
 <script>
-const dialogueBox=document.getElementById('dialogue-box');
-const dialogueTextElement=document.getElementById('dialogue-text');
-const choiceBox=document.getElementById('choice-box');
-const btnEnter=document.getElementById('btn-enter');
-const btnInspect=document.getElementById('btn-inspect');
-const typeSound=document.getElementById('type-sound');
-const zoneAudio=document.getElementById('zone-audio');
+const dialogueBox=document.getElementById("dialogue-box");
+const dialogueText=document.getElementById("dialogue-text");
+const choiceBox=document.getElementById("choice-box");
+const btnEnter=document.getElementById("btn-enter");
+const btnInspect=document.getElementById("btn-inspect");
+
+const codeBox=document.getElementById("code-box");
+const codeImages=document.getElementById("code-images");
 
 let currentDoor=null;
 
-let typingInterval=null;
-let isTyping=false;
-let skipRequested=false;
+let typing=false, skip=false, interval=null;
 
-function stopTypeSound(){ try{ typeSound.pause(); typeSound.currentTime=0;}catch(e){} }
-function skipHandler(e){ if(isTyping){ skipRequested=true; e.stopPropagation(); } }
+function stopTypeSound(){ try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){} }
 
-function typeWriter(text,target,onFinish){
-  if(typingInterval) clearInterval(typingInterval);
-  skipRequested=false;
-  isTyping=true;
+function typeWriter(text,target,cb){
+  if(interval) clearInterval(interval);
+  skip=false;
+  typing=true;
   target.innerHTML="";
-  target.classList.add('cursor-active');
+  target.classList.add("cursor-active");
   try{ typeSound.currentTime=0; typeSound.play().catch(()=>{});}catch(e){}
   let i=0;
-  typingInterval=setInterval(()=>{
-    if(skipRequested){
+
+  interval=setInterval(()=>{
+    if(skip){
       target.innerHTML=text;
-      clearInterval(typingInterval);
-      stopTypeSound();
-      target.classList.remove('cursor-active');
-      isTyping=false;
-      if(onFinish) onFinish();
+      end();
       return;
     }
     if(i<text.length){
       target.innerHTML+=text.charAt(i++);
-    } else {
-      clearInterval(typingInterval);
-      stopTypeSound();
-      target.classList.remove('cursor-active');
-      isTyping=false;
-      if(onFinish) onFinish();
-    }
+    } else end();
   },28);
+
+  function end(){
+    clearInterval(interval);
+    stopTypeSound();
+    target.classList.remove("cursor-active");
+    typing=false;
+    if(cb) cb();
+  }
 }
 
-function showMessage(msg,callback){
-  if(isTyping) return;
+function showDialogue(msg,cb){
+  if(typing) return;
   dialogueBox.style.display="block";
-  dialogueBox.addEventListener('click',skipHandler,false);
-  typeWriter(msg,dialogueTextElement,()=>{
-    dialogueBox.addEventListener('click',()=>{
+  dialogueBox.onclick=(e)=>{ if(typing){ skip=true; e.stopPropagation(); }};
+  typeWriter(msg,dialogueText,()=>{
+    dialogueBox.onclick=()=>{
       dialogueBox.style.display="none";
       stopTypeSound();
-      if(callback) callback();
-    },{once:true});
+      if(cb) cb();
+    };
   });
 }
 
-/* Clic sur une porte */
-document.querySelectorAll('.clickable-door').forEach(el=>{
-  el.addEventListener('click',()=>{
-    if(el.id==='door-exit'){
-      showMessage("Mince, la sortie est vraiment bloquée.",()=>{
-        showMessage("Je devrais peut-être explorer, peut-être que je trouverais une autre issue, ou un moyen d'ouvrir ce cadenas chelou.");
-      });
+document.querySelectorAll(".clickable-door").forEach(d=>{
+  d.addEventListener("click",()=>{
+    if(d.id==="door-exit"){
+      currentDoor="exit";
+      choiceBox.style.display="flex";
       return;
     }
-
-    currentDoor=el.id.replace('door-','');
-
+    currentDoor=d.id.replace("door-","");
     choiceBox.style.display="flex";
   });
 });
 
-/* Bouton ENTRER */
-btnEnter.addEventListener('click',()=>{
+/* Choix ENTRER */
+btnEnter.onclick=()=>{
   if(!currentDoor) return;
-  window.location.href=`porte${currentDoor}.html`;
-});
 
-/* Bouton INSPECTER */
-btnInspect.addEventListener('click',()=>{
+  if(currentDoor==="exit"){
+    choiceBox.style.display="none";
+    openCodeInput();
+    return;
+  }
+
+  window.location.href=`porte${currentDoor}.html`;
+};
+
+/* Choix INSPECTER */
+btnInspect.onclick=()=>{
   if(!currentDoor) return;
 
   choiceBox.style.display="none";
 
+  if(currentDoor==="exit"){
+    showDialogue("Mince, la sortie est vraiment bloquée.",()=>{
+      showDialogue("Je devrais peut-être explorer, peut-être que je trouverais une autre issue, ou un moyen d'ouvrir ce cadenas chelou.");
+    });
+    return;
+  }
+
   let msg2="[inséré plus tard]";
+  if(currentDoor==="1") msg2="«Quelle est la relique dont j'ai le plus aimé faire don ?»";
+  if(currentDoor==="8") msg2="«Quel est l'héritage dont il a le plus chéri la transmission ?»";
 
-  if(currentDoor==="1"){
-    msg2="«Quelle est la relique dont tu le plus aimer faire don ?»";
-  }
-  if(currentDoor==="8"){
-    msg2=" «Quel est l'héritage dont il a le plus chéri la transmission ?» ";
-  }
-
-  showMessage("Je vois une inscription sur la poignée.",()=>{
-    showMessage(msg2);
+  showDialogue("Je vois une inscription sur la poignée.",()=>{
+    showDialogue(msg2);
   });
+};
+
+/* ===========================
+      MODE CODE SECRET
+=========================== */
+
+const imgs={
+  down:{vio:"https://i.imgur.com/F5Tg88X.png",blu:"https://i.imgur.com/vSK3Z7m.png"},
+  up:{vio:"https://i.imgur.com/mGro9Au.png",blu:"https://i.imgur.com/xnhXVcZ.png"},
+  right:{vio:"https://i.imgur.com/ypjtAil.png",blu:"https://i.imgur.com/7o9t0GQ.png"},
+  left:{vio:"https://i.imgur.com/Uyh6gqF.png",blu:"https://i.imgur.com/ciRDT96.png"}
+};
+
+let nextViolet=true;
+let codeSequence=[];
+
+function openCodeInput(){
+  codeBox.style.display="block";
+  codeImages.innerHTML="";
+  nextViolet=true;
+  codeSequence=[];
+}
+
+function addCodeImg(direction){
+  if(codeSequence.length>=8) return;
+
+  let color = nextViolet ? "vio" : "blu";
+  nextViolet=!nextViolet;
+
+  let img=document.createElement("img");
+  img.src=imgs[direction][color];
+  codeImages.appendChild(img);
+
+  codeSequence.push({direction,color});
+}
+
+document.addEventListener("keydown",e=>{
+  if(codeBox.style.display!=="block") return;
+
+  if(e.key==="ArrowDown") addCodeImg("down");
+  if(e.key==="ArrowUp") addCodeImg("up");
+  if(e.key==="ArrowLeft") addCodeImg("left");
+  if(e.key==="ArrowRight") addCodeImg("right");
 });
 
-/* Code secret */
-document.addEventListener('DOMContentLoaded',()=>{
-  const seq=[40,39,38,37,38,37,40,39];
+/* fermer le code input en cliquant ailleurs */
+document.addEventListener("click",e=>{
+  if(codeBox.style.display==="block" && !codeBox.contains(e.target) && e.target!==btnEnter){
+    codeBox.style.display="none";
+  }
+});
+
+/* CODE SECRET = bas, droite, haut, gauche, droite, haut, gauche, bas  */
+document.addEventListener("DOMContentLoaded",()=>{
+  const seq=[40,39,38,37,39,38,37,40];
   let index=0;
-  document.addEventListener('keydown',e=>{
+  document.addEventListener("keydown",e=>{
     if(e.keyCode===seq[index]){
       index++;
       if(index===seq.length){
-        alert("Code ACCEPTÉ. Une faille s'ouvre dans la réalité...");
-        window.location.href='secret_code.html';
+        alert("Code accepté. Une faille s'ouvre...");
+        window.location.href="secret_code.html";
+        index=0;
+      }
+    } else index=0;
+  });
+});
+</script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Zone 2_1 : Le Labyrinthe de la Connexion</title>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+  html, body {
+    margin:0; height:100%;
+  }
+
+  body {
+    background-image:url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2tmam1wYzlkYzRpZzR3cmt3Mno4MGdrYmkwaDZpcmpzYTc5azdnNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/NANml9RASmTDU9tA5s/giphy.gif');
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    background-attachment:fixed;
+    font-family:'Press Start 2P';
+    overflow:hidden;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .door-wrapper { position:absolute; }
+
+  .tooltip {
+    position:absolute;
+    top:-32px; left:50%;
+    transform:translateX(-50%);
+    background:black;
+    padding:6px 12px;
+    font-size:0.72em;
+    color:white;
+    border:2px solid currentColor;
+    opacity:0;
+    transition:opacity .18s;
+    pointer-events:none;
+    white-space:nowrap;
+  }
+  .door-wrapper:hover .tooltip { opacity:1; }
+
+  #dialogue-box {
+    position:fixed;
+    bottom:28px; left:50%;
+    transform:translateX(-50%);
+    width:84%;
+    min-height:14vh;
+    max-height:30vh;
+    background:black;
+    border:3px solid #b300ff;
+    padding:18px;
+    color:#ff66ff;
+    display:none;
+    overflow:auto;
+    z-index:9000;
+  }
+
+  #dialogue-text {
+    font-size:0.86em; line-height:1.45;
+  }
+
+  .cursor-active {
+    border-right:0.15em solid #ff66ff;
+    animation:blink .5s steps(1) infinite;
+    padding-right:6px;
+  }
+
+  @keyframes blink {
+    0%,100%{ border-color:transparent; }
+    50%{ border-color:#ff66ff; }
+  }
+
+  .clickable-door {
+    height:200px;
+    cursor:pointer;
+    transition:transform .18s;
+    image-rendering:pixelated;
+  }
+  .clickable-door:hover { transform:scale(1.06); }
+
+  #door-exit { height:460px; }
+  .exit-container {
+    position:absolute;
+    top:28%; left:50%;
+    transform:translateX(-50%);
+  }
+
+  #choice-box {
+    position:fixed;
+    bottom:0; left:0;
+    width:100%;
+    background:black;
+    padding:18px;
+    display:none;
+    justify-content:center;
+    gap:48px;
+    border-top:3px solid white;
+    z-index:9999;
+  }
+
+  .choice-btn {
+    font-family:'Press Start 2P';
+    font-size:0.8em;
+    padding:14px 22px;
+    color:white;
+    background:black;
+    border:2px solid white;
+    cursor:pointer;
+  }
+  .choice-btn:hover {
+    background:white;
+    color:black;
+  }
+
+  #code-box {
+    position:fixed;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    width:90%; max-width:600px;
+    background:black;
+    border:3px solid white;
+    padding:20px;
+    display:none;
+    z-index:99999;
+  }
+
+  #code-images {
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:12px;
+  }
+
+  #code-images img {
+    width:64px;
+    image-rendering:pixelated;
+  }
+
+  /* positions portes */
+  #door-1 { left:20%; top:5%; }
+  #door-2 { left:10%; top:25%; }
+  #door-3 { left:10%; top:50%; }
+  #door-4 { left:20%; top:70%; }
+  #door-5 { right:20%; top:5%; }
+  #door-6 { right:10%; top:25%; }
+  #door-7 { right:10%; top:50%; }
+  #door-8 { right:20%; top:70%; }
+</style>
+</head>
+<body>
+
+<audio id="zone-audio" loop>
+  <source src="votre_lien_audio_zone2.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="type-sound"
+  src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=u3fz7wy8&dl=0">
+</audio>
+
+<div id="dialogue-box"><div id="dialogue-text"></div></div>
+
+<div id="choice-box">
+  <button id="btn-enter" class="choice-btn">Entrer</button>
+  <button id="btn-inspect" class="choice-btn">Inspecter</button>
+</div>
+
+<div id="code-box">
+  <div style="text-align:center; margin-bottom:14px; color:white;">
+    Entrer un code:
+  </div>
+  <div id="code-images"></div>
+</div>
+
+<!-- SORTIE -->
+<div class="door-wrapper exit-container">
+  <div class="tooltip" style="color:white;">Sortie ?</div>
+  <img id="door-exit" class="clickable-door" src="https://i.imgur.com/7xp8PkZ.png">
+</div>
+
+<!-- PORTES -->
+<div class="door-wrapper" style="left:20%; top:5%;">
+  <div class="tooltip" style="color:#b300ff;">Porte 1</div>
+  <img id="door-1" class="clickable-door" src="https://i.imgur.com/OSOCKnQ.png">
+</div>
+
+<div class="door-wrapper" style="left:10%; top:25%;">
+  <div class="tooltip" style="color:#0058ff;">Porte 2</div>
+  <img id="door-2" class="clickable-door" src="https://i.imgur.com/mTg0Zm6.png">
+</div>
+
+<div class="door-wrapper" style="left:10%; top:50%;">
+  <div class="tooltip" style="color:#b300ff;">Porte 3</div>
+  <img id="door-3" class="clickable-door" src="https://i.imgur.com/WKgSmFP.png">
+</div>
+
+<div class="door-wrapper" style="left:20%; top:70%;">
+  <div class="tooltip" style="color:#0058ff;">Porte 4</div>
+  <img id="door-4" class="clickable-door" src="https://i.imgur.com/HY94Buw.png">
+</div>
+
+<div class="door-wrapper" style="right:20%; top:5%;">
+  <div class="tooltip" style="color:#b300ff;">Porte 5</div>
+  <img id="door-5" class="clickable-door" src="https://i.imgur.com/gQgJFUN.png">
+</div>
+
+<div class="door-wrapper" style="right:10%; top:25%;">
+  <div class="tooltip" style="color:#0058ff;">Porte 6</div>
+  <img id="door-6" class="clickable-door" src="https://i.imgur.com/7vIHXUp.png">
+</div>
+
+<div class="door-wrapper" style="right:10%; top:50%;">
+  <div class="tooltip" style="color:#b300ff;">Porte 7</div>
+  <img id="door-7" class="clickable-door" src="https://i.imgur.com/qmbKHzv.png">
+</div>
+
+<div class="door-wrapper" style="right:20%; top:70%;">
+  <div class="tooltip" style="color:#0058ff;">Porte 8</div>
+  <img id="door-8" class="clickable-door" src="https://i.imgur.com/xzZ06bS.png">
+</div>
+
+<script>
+const dialogueBox=document.getElementById("dialogue-box");
+const dialogueText=document.getElementById("dialogue-text");
+const choiceBox=document.getElementById("choice-box");
+const btnEnter=document.getElementById("btn-enter");
+const btnInspect=document.getElementById("btn-inspect");
+
+const codeBox=document.getElementById("code-box");
+const codeImages=document.getElementById("code-images");
+
+let currentDoor=null;
+
+let typing=false, skip=false, interval=null;
+
+function stopTypeSound(){ try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){} }
+
+function typeWriter(text,target,cb){
+  if(interval) clearInterval(interval);
+  skip=false;
+  typing=true;
+  target.innerHTML="";
+  target.classList.add("cursor-active");
+  try{ typeSound.currentTime=0; typeSound.play().catch(()=>{});}catch(e){}
+  let i=0;
+
+  interval=setInterval(()=>{
+    if(skip){
+      target.innerHTML=text;
+      end();
+      return;
+    }
+    if(i<text.length){
+      target.innerHTML+=text.charAt(i++);
+    } else end();
+  },28);
+
+  function end(){
+    clearInterval(interval);
+    stopTypeSound();
+    target.classList.remove("cursor-active");
+    typing=false;
+    if(cb) cb();
+  }
+}
+
+function showDialogue(msg,cb){
+  if(typing) return;
+  dialogueBox.style.display="block";
+  dialogueBox.onclick=(e)=>{ if(typing){ skip=true; e.stopPropagation(); }};
+  typeWriter(msg,dialogueText,()=>{
+    dialogueBox.onclick=()=>{
+      dialogueBox.style.display="none";
+      stopTypeSound();
+      if(cb) cb();
+    };
+  });
+}
+
+document.querySelectorAll(".clickable-door").forEach(d=>{
+  d.addEventListener("click",()=>{
+    if(d.id==="door-exit"){
+      currentDoor="exit";
+      choiceBox.style.display="flex";
+      return;
+    }
+    currentDoor=d.id.replace("door-","");
+    choiceBox.style.display="flex";
+  });
+});
+
+/* Choix ENTRER */
+btnEnter.onclick=()=>{
+  if(!currentDoor) return;
+
+  if(currentDoor==="exit"){
+    choiceBox.style.display="none";
+    openCodeInput();
+    return;
+  }
+
+  window.location.href=`porte${currentDoor}.html`;
+};
+
+/* Choix INSPECTER */
+btnInspect.onclick=()=>{
+  if(!currentDoor) return;
+
+  choiceBox.style.display="none";
+
+  if(currentDoor==="exit"){
+    showDialogue("Mince, la sortie est vraiment bloquée.",()=>{
+      showDialogue("Je devrais peut-être explorer, peut-être que je trouverais une autre issue, ou un moyen d'ouvrir ce cadenas chelou.");
+    });
+    return;
+  }
+
+  let msg2="[inséré plus tard]";
+  if(currentDoor==="1") msg2="«Quelle est la relique dont j'ai le plus aimé faire don ?»";
+  if(currentDoor==="8") msg2="«Quel est l'héritage dont il a le plus chéri la transmission ?»";
+
+  showDialogue("Je vois une inscription sur la poignée.",()=>{
+    showDialogue(msg2);
+  });
+};
+
+/* ===========================
+      MODE CODE SECRET
+=========================== */
+
+const imgs={
+  down:{vio:"https://i.imgur.com/F5Tg88X.png",blu:"https://i.imgur.com/vSK3Z7m.png"},
+  up:{vio:"https://i.imgur.com/mGro9Au.png",blu:"https://i.imgur.com/xnhXVcZ.png"},
+  right:{vio:"https://i.imgur.com/ypjtAil.png",blu:"https://i.imgur.com/7o9t0GQ.png"},
+  left:{vio:"https://i.imgur.com/Uyh6gqF.png",blu:"https://i.imgur.com/ciRDT96.png"}
+};
+
+let nextViolet=true;
+let codeSequence=[];
+
+function openCodeInput(){
+  codeBox.style.display="block";
+  codeImages.innerHTML="";
+  nextViolet=true;
+  codeSequence=[];
+}
+
+function addCodeImg(direction){
+  if(codeSequence.length>=8) return;
+
+  let color = nextViolet ? "vio" : "blu";
+  nextViolet=!nextViolet;
+
+  let img=document.createElement("img");
+  img.src=imgs[direction][color];
+  codeImages.appendChild(img);
+
+  codeSequence.push({direction,color});
+}
+
+document.addEventListener("keydown",e=>{
+  if(codeBox.style.display!=="block") return;
+
+  if(e.key==="ArrowDown") addCodeImg("down");
+  if(e.key==="ArrowUp") addCodeImg("up");
+  if(e.key==="ArrowLeft") addCodeImg("left");
+  if(e.key==="ArrowRight") addCodeImg("right");
+});
+
+/* fermer le code input en cliquant ailleurs */
+document.addEventListener("click",e=>{
+  if(codeBox.style.display==="block" && !codeBox.contains(e.target) && e.target!==btnEnter){
+    codeBox.style.display="none";
+  }
+});
+
+/* CODE SECRET = bas, droite, haut, gauche, droite, haut, gauche, bas  */
+document.addEventListener("DOMContentLoaded",()=>{
+  const seq=[40,39,38,37,39,38,37,40];
+  let index=0;
+  document.addEventListener("keydown",e=>{
+    if(e.keyCode===seq[index]){
+      index++;
+      if(index===seq.length){
+        alert("Code accepté. Une faille s'ouvre...");
+        window.location.href="secret_code.html";
         index=0;
       }
     } else index=0;
