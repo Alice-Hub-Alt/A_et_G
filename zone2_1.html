@@ -10,7 +10,7 @@
 
   :root{
     --pink:#ff66ff;
-    --pink-strong:#b300ff; /* violet plus sombre */
+    --pink-strong:#b300ff;
   }
 
   html, body {
@@ -43,7 +43,7 @@
     top:-32px;
     left:50%;
     transform:translateX(-50%);
-    background:#000; /* FOND NOIR OPAQUE */
+    background:#000;
     padding:6px 12px;
     font-size:0.72em;
     color:white;
@@ -58,7 +58,7 @@
     opacity:1;
   }
 
-  /* DIALOGUE BOX */
+  /* DIALOGUE */
   #dialogue-box {
     position:fixed;
     bottom:28px;
@@ -67,7 +67,7 @@
     width:84%;
     min-height:14vh;
     max-height:30vh;
-    background:black; /* OPAQUE */
+    background:black;
     border:3px solid var(--pink-strong);
     padding:18px;
     box-sizing:border-box;
@@ -108,7 +108,7 @@
     transform:scale(1.06);
   }
 
-  /* SORTIE → RÉPARÉ ET CENTRÉ PROPREMENT */
+  /* SORTIE */
   #door-exit {
     height:460px;
   }
@@ -118,6 +118,36 @@
     left:50%;
     top:28%;
     transform:translateX(-50%);
+  }
+
+  /* CHOIX : ENTRER / INSPECTER */
+  #choice-box {
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    background:black;
+    padding:18px;
+    display:none;
+    justify-content:center;
+    gap:48px;
+    z-index:9999;
+    border-top:3px solid white;
+  }
+
+  .choice-btn {
+    font-family:'Press Start 2P';
+    font-size:0.8em;
+    color:white;
+    background:black;
+    border:2px solid white;
+    padding:14px 22px;
+    cursor:pointer;
+  }
+
+  .choice-btn:hover {
+    background:white;
+    color:black;
   }
 
   /* AUTRES PORTES */
@@ -155,15 +185,21 @@
 
   <div id="dialogue-box"><div id="dialogue-text"></div></div>
 
-  <!-- SORTIE FIXÉE -->
+  <!-- CHOIX -->
+  <div id="choice-box">
+    <button id="btn-enter" class="choice-btn">Entrer</button>
+    <button id="btn-inspect" class="choice-btn">Inspecter</button>
+  </div>
+
+  <!-- SORTIE -->
   <div class="door-wrapper exit-container">
     <div class="tooltip" style="color:white;">Sortie ?</div>
     <img id="door-exit" class="clickable-door" src="https://i.imgur.com/7xp8PkZ.png">
   </div>
 
-  <!-- PORTES 1 à 8 -->
+  <!-- PORTES -->
   <div class="door-wrapper" style="left:20%; top:5%;">
-    <div class="tooltip" style="color:#b300ff;">Porte 1: Quelle est la relique dont j'ai le plus aimer faire don ?</div>
+    <div class="tooltip" style="color:#b300ff;">Porte 1</div>
     <img id="door-1" class="clickable-door" src="https://i.imgur.com/OSOCKnQ.png">
   </div>
 
@@ -198,17 +234,20 @@
   </div>
 
   <div class="door-wrapper" style="right:20%; top:70%;">
-    <div class="tooltip" style="color:#0058ff;">Porte 8: Quelle est l'héritage dont il a le plus chéri la transmission ?</div>
+    <div class="tooltip" style="color:#0058ff;">Porte 8</div>
     <img id="door-8" class="clickable-door" src="https://i.imgur.com/xzZ06bS.png">
   </div>
 
 <script>
-/* Votre script intact, pas modifié sauf lisibilité */
 const dialogueBox=document.getElementById('dialogue-box');
 const dialogueTextElement=document.getElementById('dialogue-text');
+const choiceBox=document.getElementById('choice-box');
+const btnEnter=document.getElementById('btn-enter');
+const btnInspect=document.getElementById('btn-inspect');
 const typeSound=document.getElementById('type-sound');
 const zoneAudio=document.getElementById('zone-audio');
-const allDoors=document.querySelectorAll('.clickable-door');
+
+let currentDoor=null;
 
 let typingInterval=null;
 let isTyping=false;
@@ -260,22 +299,46 @@ function showMessage(msg,callback){
   });
 }
 
-try{ zoneAudio.play().catch(()=>{});}catch(e){}
-
-allDoors.forEach(el=>{
-  if(el.id==='door-exit'){
-    el.addEventListener('click',()=>{
-      if(isTyping) return;
+/* Clic sur une porte */
+document.querySelectorAll('.clickable-door').forEach(el=>{
+  el.addEventListener('click',()=>{
+    if(el.id==='door-exit'){
       showMessage("Mince, la sortie est vraiment bloquée.",()=>{
         showMessage("Je devrais peut-être explorer, peut-être que je trouverais une autre issue, ou un moyen d'ouvrir ce cadenas chelou.");
       });
-    });
-  } else {
-    el.addEventListener('click',()=>{
-      const num=el.id.replace('door-','');
-      window.location.href=`porte${num}.html`;
-    });
+      return;
+    }
+
+    currentDoor=el.id.replace('door-','');
+
+    choiceBox.style.display="flex";
+  });
+});
+
+/* Bouton ENTRER */
+btnEnter.addEventListener('click',()=>{
+  if(!currentDoor) return;
+  window.location.href=`porte${currentDoor}.html`;
+});
+
+/* Bouton INSPECTER */
+btnInspect.addEventListener('click',()=>{
+  if(!currentDoor) return;
+
+  choiceBox.style.display="none";
+
+  let msg2="[inséré plus tard]";
+
+  if(currentDoor==="1"){
+    msg2="Quelle est la relique dont j'ai le plus aimer faire don ?";
   }
+  if(currentDoor==="8"){
+    msg2="Quelle est l'héritage dont il a le plus chéri la transmission ?";
+  }
+
+  showMessage("Je vois une inscription sur la poignée.",()=>{
+    showMessage(msg2);
+  });
 });
 
 /* Code secret */
