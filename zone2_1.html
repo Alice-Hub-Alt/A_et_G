@@ -8,9 +8,7 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-  html, body {
-    margin:0; height:100%;
-  }
+  html, body { margin:0; height:100%; }
 
   body {
     background-image:url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2tmam1wYzlkYzRpZzR3cmt3Mno4MGdrYmkwaDZpcmpzYTc5azdnNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/NANml9RASmTDU9tA5s/giphy.gif');
@@ -215,6 +213,10 @@
 </div>
 
 <script>
+// FIX ICI : récupérer correctement l'audio
+const typeSound = document.getElementById("type-sound");
+const zoneAudio = document.getElementById("zone-audio");
+
 const dialogueBox=document.getElementById("dialogue-box");
 const dialogueText=document.getElementById("dialogue-text");
 const choiceBox=document.getElementById("choice-box");
@@ -226,29 +228,37 @@ let currentDoor=null;
 
 let typing=false, skip=false, interval=null;
 
-function stopTypeSound(){ try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){} }
+function stopTypeSound(){
+  try{
+    typeSound.pause();
+    typeSound.currentTime=0;
+  }catch(e){}
+}
 
 function typeWriter(text,target,cb){
   if(interval) clearInterval(interval);
   skip=false;
   typing=true;
+
   target.innerHTML="";
   target.classList.add("cursor-active");
+
   try{ typeSound.currentTime=0; typeSound.play().catch(()=>{});}catch(e){}
+
   let i=0;
 
   interval=setInterval(()=>{
     if(skip){
       target.innerHTML=text;
-      end();
+      finish();
       return;
     }
     if(i<text.length){
       target.innerHTML+=text.charAt(i++);
-    } else end();
+    } else finish();
   },28);
 
-  function end(){
+  function finish(){
     clearInterval(interval);
     stopTypeSound();
     target.classList.remove("cursor-active");
@@ -260,7 +270,14 @@ function typeWriter(text,target,cb){
 function showDialogue(msg,cb){
   if(typing) return;
   dialogueBox.style.display="block";
-  dialogueBox.onclick=(e)=>{ if(typing){ skip=true; e.stopPropagation(); }};
+
+  dialogueBox.onclick=(e)=>{
+    if(typing){
+      skip=true;
+      e.stopPropagation();
+    }
+  };
+
   typeWriter(msg,dialogueText,()=>{
     dialogueBox.onclick=()=>{
       dialogueBox.style.display="none";
@@ -296,7 +313,6 @@ btnEnter.onclick=()=>{
 
 btnInspect.onclick=()=>{
   if(!currentDoor) return;
-
   choiceBox.style.display="none";
 
   if(currentDoor==="exit"){
@@ -361,8 +377,11 @@ document.addEventListener("click",e=>{
 });
 
 document.addEventListener("DOMContentLoaded",()=>{
+  try{ zoneAudio.play().catch(()=>{});}catch(e){}
+
   const seq=[40,39,38,37,39,38,37,40];
   let index=0;
+
   document.addEventListener("keydown",e=>{
     if(e.keyCode===seq[index]){
       index++;
