@@ -13,9 +13,6 @@ body {
     background-image: url('https://neocardmaker.com/uploads/monthly_2019_10/1502293590_Spooky2.gif.aa0118140c56d49b8ecc4294d9e4bd34.gif');
     background-size: cover;
     background-repeat: no-repeat;
-    /* On change la position pour garantir que tout est couvert, souvent 'center' suffit avec 'cover' et 100vh,
-    mais si le problème persiste, background-attachment: fixed; pourrait aider, bien que tu l'aies retiré ici.
-    Je conserve 'center' mais je m'assurerai que le script gère la transition. */
     background-position: center; 
     background-attachment: fixed; /* Ajouté pour fixer l'image et qu'elle couvre bien */
     margin: 0;
@@ -24,7 +21,6 @@ body {
     overflow: hidden;
     color: white;
     z-index: 1;
-    /* Ajout de la transition pour le changement de fond */
     transition: background-image 1s ease-in-out;
 }
 
@@ -98,6 +94,8 @@ body {
     max-width: 60%;
     display: none;
     z-index: 2500;
+    /* NOUVEAU: Contour blanc aux images */
+    border: 2px solid white; 
 }
 
 /* FONDU FINAL */
@@ -136,6 +134,8 @@ body {
 /* ---------------------- TEXT ENGINE ---------------------- */
 
 let isTyping = false, skipTyping = false;
+let currentImageShown = null;
+
 const dBox = document.getElementById("dialogue-box");
 const dText = document.getElementById("dialogue-text");
 const tBox = document.getElementById("thought-box");
@@ -144,12 +144,21 @@ const typeSound = document.getElementById("type-sound");
 const typeSoundThought = document.getElementById("type-sound-thought");
 const allImages = document.querySelectorAll(".scene-img");
 
-// Gère le son des boîtes de pensée, déjà configuré
 typeSound.volume = 0.5;
 typeSoundThought.volume = 0.5;
 
+// Fonction pour arrêter le son
+function stopSound(soundEl) {
+    soundEl.pause();
+    soundEl.currentTime = 0;
+}
 
-function typeWriter(text, box, span, sound, nextAction) {
+function typeWriter(text, box, span, sound) {
+    // Retirer les écouteurs de clic pour éviter de double-avancer la séquence
+    document.body.removeEventListener('click', hideImageAndContinue, true);
+    dBox.removeEventListener('click', next);
+    tBox.removeEventListener('click', next);
+
     span.innerHTML = "";
     box.style.display = "block";
     tBox.style.display = (box === dBox ? "none" : tBox.style.display);
@@ -159,8 +168,11 @@ function typeWriter(text, box, span, sound, nextAction) {
     skipTyping = false;
 
     span.classList.add("cursor-active");
-    sound.currentTime = 0;
-    sound.play().catch(()=>{});
+    // NOUVEAU: On ne met pas en pause/reset si on est en train de typer et qu'on retape
+    if(sound.paused) {
+        sound.currentTime = 0;
+        sound.play().catch(()=>{});
+    }
 
     let i = 0;
     const interval = setInterval(() => {
@@ -172,51 +184,70 @@ function typeWriter(text, box, span, sound, nextAction) {
         } else end();
     }, 28);
 
+    // NOUVEAU: Écouteur pour skipper le texte au clic
+    box.onclick = (e) => {
+        if (isTyping) {
+            skipTyping = true;
+            // On veut que le clic qui skip ne soit pas aussi le clic qui avance
+            e.stopPropagation(); 
+        }
+    };
+
+
     function end() {
         clearInterval(interval);
         span.classList.remove("cursor-active");
-        sound.pause();
+        stopSound(sound); // NOUVEAU: Coupe le son à la fin de la frappe
         isTyping = false;
-        if (nextAction) nextAction();
+        // Une fois terminé, le clic sert à avancer la séquence
+        // On remplace l'écouteur de skip par l'écouteur d'avancement
+        box.onclick = next;
     }
 }
 
-function showDialogue(t) { 
-    // MODIFICATION 2: Ajout du callback pour avancer la séquence après le dialogue
-    typeWriter(t, dBox, dText, typeSound, () => dBox.addEventListener('click', next, {once: true}));
-}
-function showThought(t) { 
-    // MODIFICATION 2: Ajout du callback pour avancer la séquence après la pensée
-    typeWriter(t, tBox, tText, typeSoundThought, () => tBox.addEventListener('click', next, {once: true})); 
-}
+function showDialogue(t) { typeWriter(t, dBox, dText, typeSound); }
+function showThought(t) { typeWriter(t, tBox, tText, typeSoundThought); }
 
 /* ---------------------- SCENE IMAGES ---------------------- */
 
 // Fonction pour cacher toutes les images
 function hideAllImages() {
     allImages.forEach(img => img.style.display = "none");
+    currentImageShown = null;
+}
+
+function hideImageAndContinue() {
+    if (currentImageShown) {
+        hideAllImages();
+        // On enlève l'écouteur général du body pour cacher l'image
+        document.body.removeEventListener('click', hideImageAndContinue, true);
+        next(); // On passe à l'étape suivante
+    }
 }
 
 function showImage(id) {
     dBox.style.display = "none";
     tBox.style.display = "none";
 
-    // L'image précédente ne disparait pas: on force le nettoyage ici
     hideAllImages();
     
     const imgElement = document.getElementById(id);
     imgElement.style.display = "block";
-    imgElement.onclick = next; // Le clic sur l'image fait avancer
+    currentImageShown = imgElement;
+
+    // NOUVEAU: Le clic n'importe où sur l'écran fait disparaître l'image
+    document.body.addEventListener('click', hideImageAndContinue, {once: true, capture: true}); 
 }
 
-// Fonction pour changer le fond (point 4)
+// Fonction pour changer le fond (point 3)
 function changeBackground(url) {
     document.body.style.backgroundImage = `url('${url}')`;
-    next(); // Avance immédiatement
+    next();
 }
 
 
 /* ---------------------- GLITCH ---------------------- */
+// (Les fonctions spawnGlitch et removeGlitch restent inchangées)
 
 function spawnGlitch(amount) {
     amount *= 5;
@@ -228,14 +259,14 @@ function spawnGlitch(amount) {
         g.style.left = Math.random()*90+"vw";
         document.body.appendChild(g);
     }
-    next(); // Avance après avoir spawné les glitches
+    next(); 
 }
 
 function removeGlitch(percent) {
     const gifs = [...document.querySelectorAll(".glitch-gif")];
     const count = Math.floor(gifs.length * percent);
     for (let i = 0; i < count; i++) gifs[i].remove();
-    next(); // Avance après avoir retiré les glitches
+    next(); 
 }
 
 /* ---------------------- SEQUENCE ---------------------- */
@@ -279,12 +310,8 @@ const seq = [
     ()=>showThought("Belle formulation j'avoue, t'es doué."),
     ()=>showThought("Mais ça ne changera pas le fait que je suis qu'une merde."),
     
-    // MODIFICATION 4: Changement du fond après l'image 6 (ici, l'action est après img4/glitch/pensées,
-    // ce qui correspond au contexte de la fin de ta demande si 'img4' est ta 6e étape logique, 
-    // ou si on compte l'étape suivant img4 qui est img5/img6 plus loin)
-    // J'insère ici l'action pour changer le fond avant img5, comme l'image 6 a été montrée avant.
-    // L'image 6 du code de base était screen_c2 à l'index 11, ici on le place logiquement.
-    ()=>changeBackground('https://c.tenor.com/0IQzAteWlN4AAAAd/tenor.gif'),
+    // MODIFICATION 3: Changement du fond avec la bonne URL
+    ()=>changeBackground('https://c.tenor.com/ZL7fgNaWWXMAAAAd/tenor.gif'),
     
     ()=>showImage("img5"),
 
@@ -303,47 +330,50 @@ let index = 0;
 
 function next() {
     if (isTyping) { 
-        skipTyping = true; 
-        // Retirer les écouteurs de clic qui avancent la séquence quand on skip
-        dBox.removeEventListener('click', next);
-        tBox.removeEventListener('click', next);
+        // Gestion du skip se fait dans typeWriter.onclick
         return; 
     }
+    // NOUVEAU: Si une image est affichée et on clique (ce clic vient d'un autre écouteur), on ne fait rien ici.
+    // La fonction 'hideImageAndContinue' va appeler 'next()' après avoir masqué l'image.
+    if (currentImageShown) {
+        return;
+    }
+
     if (index < seq.length) seq[index++]();
 }
 
 /* ---------------------- FIN ---------------------- */
 
 function fadeToEnd() {
-    // La dernière image est img6. On la cache AVANT de faire le fondu.
     hideAllImages(); 
+
+    // Enlever l'écouteur de body pour être sûr qu'aucun clic ne perturbe le fondu final
+    document.body.removeEventListener('click', next);
 
     const black = document.getElementById("fade-black");
     black.style.opacity = 1;
 
     setTimeout(()=>{
-        // L'image de fond a déjà été changée par changeBackground() plus haut.
-        // On ne fait plus de changement de fond ici (sinon elle change 2 fois).
-        
-        // MODIFICATION 3 & 4: L'image img6 DOIT être cachée AVANT. On ne la réaffiche pas.
-        
-        // On relance un fondu inverse après le délai
         black.style.opacity = 0; 
         
-        // On peut afficher une image finale si besoin ici, sinon on redirige
-        
-        // MODIFICATION 3: Correction de la redirection vers fin.html
-        setTimeout(()=>window.location.href="fin.html", 1000); // Redirection après le fondu noir
+        // MODIFICATION 7: Redirection vers fin.html
+        setTimeout(()=>window.location.href="fin.html", 1000); 
     },1200);
 }
 
+// L'écouteur initial est changé pour lancer la séquence au clic, 
+// puis on ajoute un écouteur général sur le body pour l'avancement.
 document.getElementById("intro-overlay-zone2").onclick = () => {
     document.getElementById("intro-overlay-zone2").style.display = "none";
+    // NOUVEAU: On appelle next() pour la première étape (la pensée)
     next();
 };
 
-// MODIFICATION 2: Le clic sur le body est remplacé par le clic sur les boîtes pour l'avancement
-// document.body.onclick = next;
+// MODIFICATION 5: Le clic général sur le body était déjà géré par les boîtes de dialogue/pensée et les images.
+// On s'assure juste que le premier clic appelle la première étape après l'intro.
+// L'avancement est désormais géré par les clics spécifiques sur les boîtes (pour le texte) 
+// ou sur le body (pour les images).
+
 </script>
 </body>
 </html>
