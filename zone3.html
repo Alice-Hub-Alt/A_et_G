@@ -14,7 +14,7 @@ body {
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center; 
-    background-attachment: fixed; /* Ajouté pour fixer l'image et qu'elle couvre bien */
+    background-attachment: fixed;
     margin: 0;
     padding: 0;
     font-family: 'Press Start 2P', monospace;
@@ -48,7 +48,7 @@ body {
     display: none;
     z-index: 3000;
     box-sizing: border-box;
-    cursor: pointer; /* Ajout du curseur cliquable */
+    cursor: pointer;
 }
 
 #dialogue-box {
@@ -94,7 +94,6 @@ body {
     max-width: 60%;
     display: none;
     z-index: 2500;
-    /* NOUVEAU: Contour blanc aux images */
     border: 2px solid white; 
 }
 
@@ -113,8 +112,8 @@ body {
 
 <body>
 
-<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?rlkey=q1hljzkfdh6b4qjj89yut92oy"></audio>
-<audio id="type-sound-thought" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3"></audio>
+<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?rlkey=q1hljzkfdh6b4qjj89yut92oy&dl=1"></audio>
+<audio id="type-sound-thought" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=183ys2rx&dl=1"></audio>
 
 <div id="fade-black"></div>
 
@@ -153,11 +152,13 @@ function stopSound(soundEl) {
     soundEl.currentTime = 0;
 }
 
-function typeWriter(text, box, span, sound) {
-    // Retirer les écouteurs de clic pour éviter de double-avancer la séquence
+function typeWriter(text, box, span, sound, isLongSound = false) {
+    // Nettoyage des écouteurs précédents
     document.body.removeEventListener('click', hideImageAndContinue, true);
     dBox.removeEventListener('click', next);
     tBox.removeEventListener('click', next);
+    dBox.onclick = null;
+    tBox.onclick = null;
 
     span.innerHTML = "";
     box.style.display = "block";
@@ -168,10 +169,18 @@ function typeWriter(text, box, span, sound) {
     skipTyping = false;
 
     span.classList.add("cursor-active");
-    // NOUVEAU: On ne met pas en pause/reset si on est en train de typer et qu'on retape
-    if(sound.paused) {
+    
+    // NOUVEAU: Gestion du son pour le narrateur (long) vs la pensée (court)
+    if (isLongSound) {
+        // Pour le narrateur (long son de 6 min), on le lance une seule fois au début
         sound.currentTime = 0;
         sound.play().catch(()=>{});
+    } else {
+        // Pour la pensée, on le joue en boucle pendant la frappe
+        if(sound.paused) {
+            sound.currentTime = 0;
+            sound.play().catch(()=>{});
+        }
     }
 
     let i = 0;
@@ -181,47 +190,62 @@ function typeWriter(text, box, span, sound) {
             end();
         } else if (i < text.length) {
             span.innerHTML += text[i++];
+            
+            // Si c'est le narrateur (son long), on coupe le son s'il n'y a plus de lettres.
+            // S'il ne reste qu'une seule lettre à afficher après celle-ci, on peut couper le son.
+            if (isLongSound && i >= text.length - 1) {
+                stopSound(sound);
+            }
         } else end();
     }, 28);
 
-    // NOUVEAU: Écouteur pour skipper le texte au clic
+    // NOUVEAU: Écouteur pour skipper le texte au clic sur la boîte
     box.onclick = (e) => {
         if (isTyping) {
             skipTyping = true;
-            // On veut que le clic qui skip ne soit pas aussi le clic qui avance
             e.stopPropagation(); 
         }
     };
 
-
     function end() {
         clearInterval(interval);
         span.classList.remove("cursor-active");
-        stopSound(sound); // NOUVEAU: Coupe le son à la fin de la frappe
+        
+        // On s'assure que le son est coupé, surtout si c'est la pensée (son court)
+        if (!isLongSound) {
+            stopSound(sound);
+        }
+        
         isTyping = false;
-        // Une fois terminé, le clic sert à avancer la séquence
-        // On remplace l'écouteur de skip par l'écouteur d'avancement
+        // Une fois terminé, le clic sur la boîte sert à avancer la séquence
         box.onclick = next;
     }
 }
 
-function showDialogue(t) { typeWriter(t, dBox, dText, typeSound); }
-function showThought(t) { typeWriter(t, tBox, tText, typeSoundThought); }
+function showDialogue(t) { 
+    // Le narrateur est un "long son" (true)
+    typeWriter(t, dBox, dText, typeSound, true); 
+}
+function showThought(t) { 
+    // La pensée est un "court son" (false)
+    typeWriter(t, tBox, tText, typeSoundThought, false); 
+}
 
 /* ---------------------- SCENE IMAGES ---------------------- */
 
-// Fonction pour cacher toutes les images
 function hideAllImages() {
     allImages.forEach(img => img.style.display = "none");
     currentImageShown = null;
 }
 
-function hideImageAndContinue() {
+// NOUVEAU: Fonction appelée au clic n'importe où pour masquer l'image
+function hideImageAndContinue(e) {
     if (currentImageShown) {
         hideAllImages();
         // On enlève l'écouteur général du body pour cacher l'image
         document.body.removeEventListener('click', hideImageAndContinue, true);
         next(); // On passe à l'étape suivante
+        e.stopPropagation(); // Évite que le clic n'appelle next() une seconde fois
     }
 }
 
@@ -235,7 +259,7 @@ function showImage(id) {
     imgElement.style.display = "block";
     currentImageShown = imgElement;
 
-    // NOUVEAU: Le clic n'importe où sur l'écran fait disparaître l'image
+    // NOUVEAU: Le clic n'importe où sur l'écran (le body) fait disparaître l'image
     document.body.addEventListener('click', hideImageAndContinue, {once: true, capture: true}); 
 }
 
@@ -247,7 +271,6 @@ function changeBackground(url) {
 
 
 /* ---------------------- GLITCH ---------------------- */
-// (Les fonctions spawnGlitch et removeGlitch restent inchangées)
 
 function spawnGlitch(amount) {
     amount *= 5;
@@ -272,7 +295,6 @@ function removeGlitch(percent) {
 /* ---------------------- SEQUENCE ---------------------- */
 
 const seq = [
-    // MODIFICATION 2: La première action est maintenant une pensée.
     ()=>showThought("Oula, c'est, particulier disons"),
     ()=>showDialogue("Alice fut abasourdie, elle qui pensais être tiré d'affaire était en fait sur le point de réellement sombrer"),
     ()=>showThought("Ah bah t'es de retour toi !"),
@@ -310,7 +332,7 @@ const seq = [
     ()=>showThought("Belle formulation j'avoue, t'es doué."),
     ()=>showThought("Mais ça ne changera pas le fait que je suis qu'une merde."),
     
-    // MODIFICATION 3: Changement du fond avec la bonne URL
+    // NOUVEAU: Changement du fond avec la bonne URL
     ()=>changeBackground('https://c.tenor.com/ZL7fgNaWWXMAAAAd/tenor.gif'),
     
     ()=>showImage("img5"),
@@ -329,14 +351,8 @@ const seq = [
 let index = 0;
 
 function next() {
-    if (isTyping) { 
-        // Gestion du skip se fait dans typeWriter.onclick
+    if (isTyping || currentImageShown) { 
         return; 
-    }
-    // NOUVEAU: Si une image est affichée et on clique (ce clic vient d'un autre écouteur), on ne fait rien ici.
-    // La fonction 'hideImageAndContinue' va appeler 'next()' après avoir masqué l'image.
-    if (currentImageShown) {
-        return;
     }
 
     if (index < seq.length) seq[index++]();
@@ -345,9 +361,12 @@ function next() {
 /* ---------------------- FIN ---------------------- */
 
 function fadeToEnd() {
+    // La dernière image devrait être cachée par hideImageAndContinue, 
+    // mais on le fait une dernière fois pour être sûr.
     hideAllImages(); 
 
-    // Enlever l'écouteur de body pour être sûr qu'aucun clic ne perturbe le fondu final
+    // On s'assure qu'il n'y a plus d'écouteurs actifs sur le body
+    document.body.removeEventListener('click', hideImageAndContinue, true);
     document.body.removeEventListener('click', next);
 
     const black = document.getElementById("fade-black");
@@ -356,24 +375,21 @@ function fadeToEnd() {
     setTimeout(()=>{
         black.style.opacity = 0; 
         
-        // MODIFICATION 7: Redirection vers fin.html
-        setTimeout(()=>window.location.href="fin.html", 1000); 
-    },1200);
+        // Correction 4: Redirection vers fin.html
+        window.location.href="fin.html"; 
+    }, 1200); // Laisse le temps pour le fondu noir
 }
 
 // L'écouteur initial est changé pour lancer la séquence au clic, 
 // puis on ajoute un écouteur général sur le body pour l'avancement.
 document.getElementById("intro-overlay-zone2").onclick = () => {
     document.getElementById("intro-overlay-zone2").style.display = "none";
-    // NOUVEAU: On appelle next() pour la première étape (la pensée)
-    next();
+    // Après que l'overlay ait disparu, le premier clic lance la séquence (qui commence par showThought)
+    // On ajoute un écouteur général pour gérer l'avancement des étapes qui n'ont pas de boîte de dialogue/pensée (ex: glitch)
+    document.body.addEventListener('click', next);
+    // On lance la première action tout de suite
+    next(); 
 };
-
-// MODIFICATION 5: Le clic général sur le body était déjà géré par les boîtes de dialogue/pensée et les images.
-// On s'assure juste que le premier clic appelle la première étape après l'intro.
-// L'avancement est désormais géré par les clics spécifiques sur les boîtes (pour le texte) 
-// ou sur le body (pour les images).
-
 </script>
 </body>
 </html>
