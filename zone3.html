@@ -3,22 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zone 1.2 : Un Faisceau de Lumière</title>
+    <title>Zone 3 : C'est la merde</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 body {
+    /* MODIFICATION 1: Correction du fond pour qu'il remplisse bien l'écran */
     background-image: url('https://neocardmaker.com/uploads/monthly_2019_10/1502293590_Spooky2.gif.aa0118140c56d49b8ecc4294d9e4bd34.gif');
     background-size: cover;
     background-repeat: no-repeat;
-    background-position: center;
+    /* On change la position pour garantir que tout est couvert, souvent 'center' suffit avec 'cover' et 100vh,
+    mais si le problème persiste, background-attachment: fixed; pourrait aider, bien que tu l'aies retiré ici.
+    Je conserve 'center' mais je m'assurerai que le script gère la transition. */
+    background-position: center; 
+    background-attachment: fixed; /* Ajouté pour fixer l'image et qu'elle couvre bien */
     margin: 0;
     padding: 0;
     font-family: 'Press Start 2P', monospace;
     overflow: hidden;
     color: white;
     z-index: 1;
+    /* Ajout de la transition pour le changement de fond */
+    transition: background-image 1s ease-in-out;
 }
 
 /* INTRO OVERLAY */
@@ -45,6 +52,7 @@ body {
     display: none;
     z-index: 3000;
     box-sizing: border-box;
+    cursor: pointer; /* Ajout du curseur cliquable */
 }
 
 #dialogue-box {
@@ -117,7 +125,6 @@ body {
 <div id="dialogue-box"><span id="dialogue-text"></span></div>
 <div id="thought-box"><span id="thought-text"></span></div>
 
-<!-- IMAGES -->
 <img id="img1" class="scene-img" src="https://i.imgur.com/LHb0oXX.png">
 <img id="img2" class="scene-img" src="https://i.imgur.com/eUtYYag.png">
 <img id="img3" class="scene-img" src="https://i.imgur.com/72KkopR.png">
@@ -135,6 +142,12 @@ const tBox = document.getElementById("thought-box");
 const tText = document.getElementById("thought-text");
 const typeSound = document.getElementById("type-sound");
 const typeSoundThought = document.getElementById("type-sound-thought");
+const allImages = document.querySelectorAll(".scene-img");
+
+// Gère le son des boîtes de pensée, déjà configuré
+typeSound.volume = 0.5;
+typeSoundThought.volume = 0.5;
+
 
 function typeWriter(text, box, span, sound, nextAction) {
     span.innerHTML = "";
@@ -168,18 +181,40 @@ function typeWriter(text, box, span, sound, nextAction) {
     }
 }
 
-function showDialogue(t) { typeWriter(t, dBox, dText, typeSound); }
-function showThought(t) { typeWriter(t, tBox, tText, typeSoundThought); }
+function showDialogue(t) { 
+    // MODIFICATION 2: Ajout du callback pour avancer la séquence après le dialogue
+    typeWriter(t, dBox, dText, typeSound, () => dBox.addEventListener('click', next, {once: true}));
+}
+function showThought(t) { 
+    // MODIFICATION 2: Ajout du callback pour avancer la séquence après la pensée
+    typeWriter(t, tBox, tText, typeSoundThought, () => tBox.addEventListener('click', next, {once: true})); 
+}
 
 /* ---------------------- SCENE IMAGES ---------------------- */
+
+// Fonction pour cacher toutes les images
+function hideAllImages() {
+    allImages.forEach(img => img.style.display = "none");
+}
 
 function showImage(id) {
     dBox.style.display = "none";
     tBox.style.display = "none";
 
-    document.querySelectorAll(".scene-img").forEach(img=>img.style.display="none");
-    document.getElementById(id).style.display = "block";
+    // L'image précédente ne disparait pas: on force le nettoyage ici
+    hideAllImages();
+    
+    const imgElement = document.getElementById(id);
+    imgElement.style.display = "block";
+    imgElement.onclick = next; // Le clic sur l'image fait avancer
 }
+
+// Fonction pour changer le fond (point 4)
+function changeBackground(url) {
+    document.body.style.backgroundImage = `url('${url}')`;
+    next(); // Avance immédiatement
+}
+
 
 /* ---------------------- GLITCH ---------------------- */
 
@@ -193,17 +228,20 @@ function spawnGlitch(amount) {
         g.style.left = Math.random()*90+"vw";
         document.body.appendChild(g);
     }
+    next(); // Avance après avoir spawné les glitches
 }
 
 function removeGlitch(percent) {
     const gifs = [...document.querySelectorAll(".glitch-gif")];
     const count = Math.floor(gifs.length * percent);
     for (let i = 0; i < count; i++) gifs[i].remove();
+    next(); // Avance après avoir retiré les glitches
 }
 
 /* ---------------------- SEQUENCE ---------------------- */
 
 const seq = [
+    // MODIFICATION 2: La première action est maintenant une pensée.
     ()=>showThought("Oula, c'est, particulier disons"),
     ()=>showDialogue("Alice fut abasourdie, elle qui pensais être tiré d'affaire était en fait sur le point de réellement sombrer"),
     ()=>showThought("Ah bah t'es de retour toi !"),
@@ -240,7 +278,14 @@ const seq = [
 
     ()=>showThought("Belle formulation j'avoue, t'es doué."),
     ()=>showThought("Mais ça ne changera pas le fait que je suis qu'une merde."),
-
+    
+    // MODIFICATION 4: Changement du fond après l'image 6 (ici, l'action est après img4/glitch/pensées,
+    // ce qui correspond au contexte de la fin de ta demande si 'img4' est ta 6e étape logique, 
+    // ou si on compte l'étape suivant img4 qui est img5/img6 plus loin)
+    // J'insère ici l'action pour changer le fond avant img5, comme l'image 6 a été montrée avant.
+    // L'image 6 du code de base était screen_c2 à l'index 11, ici on le place logiquement.
+    ()=>changeBackground('https://c.tenor.com/0IQzAteWlN4AAAAd/tenor.gif'),
+    
     ()=>showImage("img5"),
 
     ()=>removeGlitch(0.7),
@@ -248,7 +293,7 @@ const seq = [
     ()=>showThought("Merci beaucoup, je sais pas ce que je ferais sans toi"),
 
     ()=>showImage("img6"),
-
+    
     ()=>removeGlitch(1),
 
     ()=>fadeToEnd
@@ -257,28 +302,38 @@ const seq = [
 let index = 0;
 
 function next() {
-    if (isTyping) { skipTyping = true; return; }
+    if (isTyping) { 
+        skipTyping = true; 
+        // Retirer les écouteurs de clic qui avancent la séquence quand on skip
+        dBox.removeEventListener('click', next);
+        tBox.removeEventListener('click', next);
+        return; 
+    }
     if (index < seq.length) seq[index++]();
 }
 
 /* ---------------------- FIN ---------------------- */
 
 function fadeToEnd() {
+    // La dernière image est img6. On la cache AVANT de faire le fondu.
+    hideAllImages(); 
+
     const black = document.getElementById("fade-black");
     black.style.opacity = 1;
 
     setTimeout(()=>{
-        document.body.style.backgroundImage = "url('https://c.tenor.com/ZL7fgNaWWXMAAAAd/tenor.gif')";
-        document.querySelectorAll(".scene-img").forEach(img=>img.style.display="none");
-        black.style.opacity = 0;
-
-        const img = document.getElementById("img6");
-        img.style.display = "block";
-        img.style.opacity = 0;
-        img.style.transition = "1s";
-
-        setTimeout(()=>img.style.opacity = 1, 50);
-        setTimeout(()=>window.location.href="fin.html", 3000);
+        // L'image de fond a déjà été changée par changeBackground() plus haut.
+        // On ne fait plus de changement de fond ici (sinon elle change 2 fois).
+        
+        // MODIFICATION 3 & 4: L'image img6 DOIT être cachée AVANT. On ne la réaffiche pas.
+        
+        // On relance un fondu inverse après le délai
+        black.style.opacity = 0; 
+        
+        // On peut afficher une image finale si besoin ici, sinon on redirige
+        
+        // MODIFICATION 3: Correction de la redirection vers fin.html
+        setTimeout(()=>window.location.href="fin.html", 1000); // Redirection après le fondu noir
     },1200);
 }
 
@@ -287,7 +342,8 @@ document.getElementById("intro-overlay-zone2").onclick = () => {
     next();
 };
 
-document.body.onclick = next;
+// MODIFICATION 2: Le clic sur le body est remplacé par le clic sur les boîtes pour l'avancement
+// document.body.onclick = next;
 </script>
 </body>
 </html>
