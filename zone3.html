@@ -1,325 +1,180 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zone 1.2 : Un Faisceau de Lumière</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zone 3 : C'est la merde</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-        body {
-            background-image: url('https://c.tenor.com/0IQzAteWlN4AAAAd/tenor.gif');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            background-position: center center;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            color: white;
-            font-family: 'Press Start 2P', monospace;
-            overflow: hidden;
-            background-color: rgba(0, 0, 0, 0.4);
-            background-blend-mode: darken;
-        }
+body {
+    background-image: url('https://neocardmaker.com/uploads/monthly_2019_10/1502293590_Spooky2.gif.aa0118140c56d49b8ecc4294d9e4bd34.gif');
+    background-size: cover;
+    background-repeat: no-repeat;
+    margin: 0;
+    overflow: hidden;
+    font-family: 'Press Start 2P', cursive;
+}
 
-        #intro-overlay-zone2 {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: black;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            cursor: pointer;
-            font-size: 1.5em;
-            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.3);
-            text-align: center;
-        }
+.scene-img {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+    z-index: 5000;
+}
 
-        #dialogue-box, #thought-box {
-            width: 90%;
-            box-sizing: border-box;
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-            padding: 20px;
-            display: none;
-        }
+#final-button {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 15px 30px;
+    font-size: 1em;
+    background: black;
+    color: white;
+    border: 3px solid white;
+    cursor: pointer;
+    z-index: 6000;
+    display: none;
+    transition: opacity 0.5s;
+}
 
-        #dialogue-box {
-            height: 20vh;
-            background-color: rgba(0,0,0,0.85);
-            border: 3px solid white;
-        }
-
-        #dialogue-text {
-            font-size: 0.8em;
-            line-height: 1.5;
-            white-space: normal;
-            overflow: hidden;
-            height: 100%;
-        }
-
-        #thought-box {
-            background-color: rgba(0,0,0,0.7);
-            border: 2px dashed #ff00ff;
-            padding: 15px;
-            cursor: pointer;
-        }
-
-        #thought-text {
-            font-size: 0.7em;
-            color: #ff00ff;
-            line-height:1.5;
-        }
-
-        .cursor-active {
-            border-right: 0.15em solid white;
-            animation: blink-cursor 0.5s step-end infinite;
-        }
-        @keyframes blink-cursor {
-            from, to { border-color: transparent; }
-            50% { border-color: white; }
-        }
-
-        .conv-screen {
-            display: none;
-            position: absolute;
-            top:50%;
-            left:50%;
-            transform: translate(-50%, -50%);
-            max-width:70%;
-            height:auto;
-            border:3px solid white;
-            opacity:0;
-            transition: opacity 1s ease-in-out;
-            z-index:20;
-            cursor:pointer;
-        }
-
-        .floating-gif {
-            position: absolute;
-            width: 220px;
-            height: 220px;
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        #end-button {
-            position: fixed;
-            top:50%;
-            left:50%;
-            transform: translate(-50%, -50%);
-            background:black;
-            color:white;
-            border:2px solid white;
-            font-size:1.4em;
-            padding:15px 40px;
-            display:none;
-            cursor:pointer;
-            z-index:2000;
-        }
-    </style>
+.glitch-gif {
+    position: fixed;
+    width: 250px;
+    height: 250px;
+    z-index: 4000;
+}
+</style>
 </head>
-
 <body>
+<div id="intro-overlay-zone2" style="position:fixed;top:0;left:0;width:100%;height:100%;background:black;z-index:7000;"></div>
 
-    <audio id="zone-audio" loop></audio>
+<img id="img5" class="scene-img" src="https://i.imgur.com/oBwbwxW.png">
+<img id="img6" class="scene-img" src="https://i.imgur.com/kuEm3Fv.png">
 
-    <div id="intro-overlay-zone2">
-        Quelques mois plus tard... <br><br> (Cliquer pour continuer)
-    </div>
+<button id="final-button" onclick="window.location.href='fin.html'">Dormir</button>
 
-    <div id="dialogue-box"><span id="dialogue-text"></span></div>
-    <div id="thought-box"><span id="thought-text"></span></div>
+<script>
+/* ---------------------- VARIABLES ---------------------- */
+let currentImageShown = null;
+let usedPositions = [];
+const GIF_SIZE = 250; // Taille plus grande pour couvrir l'écran
+const MAX_GIFS = 10; // On ne met qu'une dizaine
 
-    <!-- IMAGES -->
-    <img id="screen_a1" class="conv-screen" src="https://i.imgur.com/XA7ud3Z.png">
-    <img id="screen_a2" class="conv-screen" src="https://i.imgur.com/AW3Nnom.png">
-    <img id="screen_a3" class="conv-screen" src="https://i.imgur.com/aValYxk.png">
-    <img id="screen_b1" class="conv-screen" src="https://i.imgur.com/4zgNYwT.png">
-    <img id="screen_c1" class="conv-screen" src="https://i.imgur.com/3One5eE.png">
-    <img id="screen_c2" class="conv-screen" src="https://i.imgur.com/TU3SW7O.png">
-    <img id="screen_d1" class="conv-screen" src="https://i.imgur.com/QBa0Hkv.png">
-    <img id="screen_d2" class="conv-screen" src="https://i.imgur.com/DAcEnVA.png">
-    <img id="screen_d3" class="conv-screen" src="https://i.imgur.com/sjenGQe.png">
-    <img id="screen_e1" class="conv-screen" src="https://i.imgur.com/Ll5DcFY.png">
-    <img id="screen_e2" class="conv-screen" src="https://i.imgur.com/Ug7Zv5N.png">
-    <img id="screen_e3" class="conv-screen" src="https://i.imgur.com/4OMCAbt.png">
+/* ---------------------- IMAGE ---------------------- */
+function showImage(id) {
+    hideAllImages();
+    const img = document.getElementById(id);
+    img.style.display = "block";
+    currentImageShown = img;
+    document.body.addEventListener('click', hideImageAndContinue, {once: true, capture: true});
+}
 
-    <button id="end-button">Dormir</button>
+function hideAllImages() {
+    document.querySelectorAll(".scene-img").forEach(img => img.style.display = "none");
+    currentImageShown = null;
+}
 
-    <script>
+function hideImageAndContinue(e) {
+    hideAllImages();
+    document.body.removeEventListener('click', hideImageAndContinue, true);
+    next();
+    e.stopPropagation();
+}
 
-        /* ---------------- PLACEMENT GIFS TRANSPARENTS ---------------- */
+/* ---------------------- GLITCH ---------------------- */
+function getRandomPosition() {
+    const cols = Math.floor(window.innerWidth / GIF_SIZE);
+    const rows = Math.floor(window.innerHeight / GIF_SIZE);
+    let x, y, key, attempts = 0;
+    do {
+        const col = Math.floor(Math.random() * cols);
+        const row = Math.floor(Math.random() * rows);
+        x = col * GIF_SIZE;
+        y = row * GIF_SIZE;
+        key = `${col}-${row}`;
+        attempts++;
+        if (attempts > 100) return null;
+    } while (usedPositions.includes(key));
+    usedPositions.push(key);
+    return {x, y};
+}
 
-        const gifURL = "https://i.imgur.com/6Y2yU7p.png";
+function spawnGlitch(amount) {
+    if (document.querySelectorAll(".glitch-gif").length === 0) usedPositions = [];
+    const currentCount = document.querySelectorAll(".glitch-gif").length;
+    const remaining = MAX_GIFS - currentCount;
+    const toSpawn = Math.min(amount, remaining);
+    for (let i=0; i<toSpawn; i++) {
+        const pos = getRandomPosition();
+        if (!pos) break;
+        const g = document.createElement("img");
+        g.src = "https://i.imgur.com/UsrQHo8.gif";
+        g.className = "glitch-gif";
+        g.style.left = pos.x + "px";
+        g.style.top = pos.y + "px";
+        document.body.appendChild(g);
+    }
+    next();
+}
 
-        const gifPositions = [
-            {x: "5%", y:"5%"},
-            {x: "30%", y:"3%"},
-            {x: "60%", y:"6%"},
-            {x: "80%", y:"12%"},
-            {x: "10%", y:"40%"},
-            {x: "50%", y:"35%"},
-            {x: "75%", y:"45%"},
-            {x: "15%", y:"70%"},
-            {x: "45%", y:"75%"},
-            {x: "78%", y:"70%"}
-        ];
+function removeGlitch(percent) {
+    let gifs = [...document.querySelectorAll(".glitch-gif")];
+    if (percent >= 1) {
+        gifs.forEach(g => g.remove());
+        usedPositions = [];
+    } else {
+        const count = Math.floor(gifs.length * percent);
+        gifs.sort(() => Math.random() - 0.5).slice(0, count).forEach(g => g.remove());
+    }
+    next();
+}
 
-        let floatingGifs = [];
+/* ---------------------- FONCTION FINALE ---------------------- */
+function createButton() {
+    const button = document.getElementById("final-button");
+    button.style.opacity = 0;
+    button.style.display = "block";
+    setTimeout(() => button.style.opacity = 1, 50);
+}
 
-        function createFloatingGifs() {
-            removeFloatingGifs();
+/* ---------------------- SEQUENCE ---------------------- */
+const seq = [
+    ()=>spawnGlitch(5),
+    ()=>spawnGlitch(5),
+    ()=>showImage("img5"),
+    ()=>removeGlitch(0.5),
+    ()=>showImage("img6"),
+    ()=>removeGlitch(1),
+    ()=>fadeToEnd
+];
 
-            for (let pos of gifPositions) {
-                let g = document.createElement("img");
-                g.src = gifURL;
-                g.classList.add("floating-gif");
-                g.style.left = pos.x;
-                g.style.top = pos.y;
-                document.body.appendChild(g);
-                floatingGifs.push(g);
-            }
-        }
+let seqIndex = 0;
+function next() {
+    if (seqIndex < seq.length) {
+        const f = seq[seqIndex];
+        seqIndex++;
+        f();
+    }
+}
 
-        function removeFloatingGifs() {
-            floatingGifs.forEach(g => g.remove());
-            floatingGifs = [];
-        }
+/* ---------------------- FIN ---------------------- */
+function fadeToEnd() {
+    hideAllImages();
+    document.body.removeEventListener('click', hideImageAndContinue, true);
+    document.body.removeEventListener('click', next);
+    setTimeout(createButton, 100); // Affiche le bouton "Dormir" après fin
+}
 
-        /* ---------------- DIALOGUE SYSTEM ---------------- */
-
-        const dialogueSequence = [
-            { text: "Mais au fil du temps, Alice compris.", action: "dialogue" },
-            { text: "Ce n'était pas quelqu'un comme les autres, il avais quelque chose d'unique en lui.", action: "dialogue" },
-            { image: "screen_a1", action: "image" },
-            { image: "screen_a2", action: "image" },
-            { image: "screen_a3", action: "image" },
-            { text: "Il s'intéressais vraiment à elle.", action: "dialogue" },
-            { text: "Et il se souciais d'elle.", action: "dialogue" },
-            { image: "screen_b1", action: "image" },
-            { text: "Et il acceptais même ses conditions...", action: "dialogue" },
-            { text: "Je rêve ou le narrateur viens de me juger là ?", action: "thought" },
-            { image: "screen_c1", action: "image" },
-            { image: "screen_c2", action: "image" },
-            { text: "Petit à petit, Alice cessa d'être renfermée...", action: "dialogue" },
-            { text: "(Nan mais ça vas pas ?!!)", action: "thought" },
-            { text: "Ils partagèrent les mêmes passions.", action: "dialogue" },
-            { image: "screen_d1", action: "image" },
-            { image: "screen_d2", action: "image" },
-            { image: "screen_d3", action: "image" },
-            { text: "Puis un beau jour, elle cessa d'être seule.", action: "dialogue" },
-            { image: "screen_e1", action: "image" },
-            { image: "screen_e2", action: "image" },
-            { image: "screen_e3", action: "image" },
-            { action: "end" }
-        ];
-
-        let currentIndex = 0;
-        let activeImage = null;
-
-        const dialogueBox = document.getElementById("dialogue-box");
-        const dialogueText = document.getElementById("dialogue-text");
-        const thoughtBox = document.getElementById("thought-box");
-        const thoughtText = document.getElementById("thought-text");
-        const overlay = document.getElementById("intro-overlay-zone2");
-        const endButton = document.getElementById("end-button");
-
-        function hideImage(cb) {
-            if (!activeImage) return cb();
-            activeImage.style.opacity = 0;
-            setTimeout(() => {
-                activeImage.style.display = "none";
-                activeImage = null;
-                cb();
-            }, 800);
-        }
-
-        function showImage(id) {
-            hideImage(() => {
-                createFloatingGifs();
-                const img = document.getElementById(id);
-                img.style.display = "block";
-                activeImage = img;
-                setTimeout(() => {
-                    img.style.opacity = 1;
-                    img.onclick = next;
-                }, 40);
-            });
-        }
-
-        function typeWriter(text, element, cb) {
-            element.innerHTML = "";
-            let i = 0;
-            let inter = setInterval(() => {
-                element.innerHTML += text[i];
-                i++;
-                if (i >= text.length) {
-                    clearInterval(inter);
-                    cb();
-                }
-            }, 25);
-        }
-
-        function showDialogue(text) {
-            hideImage(() => {
-                removeFloatingGifs();
-                thoughtBox.style.display = "none";
-                dialogueBox.style.display = "block";
-                typeWriter(text, dialogueText, () => {
-                    dialogueBox.onclick = next;
-                });
-            });
-        }
-
-        function showThought(text) {
-            hideImage(() => {
-                removeFloatingGifs();
-                dialogueBox.style.display = "none";
-                thoughtBox.style.display = "block";
-                typeWriter(text, thoughtText, () => {
-                    thoughtBox.onclick = next;
-                });
-            });
-        }
-
-        function next() {
-            dialogueBox.style.display = "none";
-            thoughtBox.style.display = "none";
-
-            let step = dialogueSequence[currentIndex++];
-            if (!step) return;
-
-            if (step.action === "dialogue") return showDialogue(step.text);
-            if (step.action === "thought") return showThought(step.text);
-            if (step.action === "image") return showImage(step.image);
-
-            if (step.action === "end") {
-                hideImage(() => {
-                    removeFloatingGifs();
-                    endButton.style.display = "block";
-                    endButton.onclick = () => {
-                        window.location.href = "fin.html";
-                    };
-                });
-            }
-        }
-
-        overlay.onclick = () => {
-            overlay.style.display = "none";
-            next();
-        };
-
-    </script>
+/* ---------------------- LANCEMENT ---------------------- */
+document.getElementById("intro-overlay-zone2").onclick = () => {
+    document.getElementById("intro-overlay-zone2").style.display = "none";
+    next();
+    document.body.addEventListener('click', next);
+};
+</script>
 </body>
 </html>
