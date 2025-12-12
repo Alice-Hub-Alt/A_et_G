@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zone 1.2 : Un Faisceau de Lumière</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        body {
+            background-image: url('https://c.tenor.com/p2wKpFGlWrgAAAAd/tenor.gif');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin: 0;
+            padding: 0;
+            font-family: 'Press Start 2P', monospace;
+            overflow: hidden;
+            color: white;
+        }
+
+        /* OVERLAY DE DÉBUT */
+        #intro-overlay-zone2 {
+            position: fixed;
+            inset: 0;
+            background: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            font-size: 1.5em;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        /* BOÎTES DE TEXTE */
+        #dialogue-box, #thought-box {
+            width: 90%;
+            position: fixed;
+            left: 50%;
+            bottom: 10px;
+            transform: translateX(-50%);
+            padding: 20px;
+            display: none;
+            z-index: 20;
+            box-sizing: border-box;
+        }
+
+        #dialogue-box {
+            background: rgba(0,0,0,0.85);
+            border: 3px solid white;
+            height: 20vh;
+        }
+
+        #thought-box {
+            background: rgba(0,0,0,0.65);
+            border: 2px dashed #ffffff;
+            color: #ffffff;
+        }
+
+        #dialogue-text, #thought-text {
+            font-size: 0.75em;
+            line-height: 1.5;
+            white-space: normal;
+        }
+
+        /* EFFET CURSEUR */
+        .cursor-active {
+            border-right: 0.15em solid white;
+            animation: blink 0.5s infinite step-end;
+        }
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+        /* IMAGES FLOTTANTES (GIF TRANSPARENTS QUI POP) */
+        .glitch-gif {
+            position: absolute;
+            width: 180px;
+            height: auto;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        /* IMAGES DU SCÉNARIO */
+        .scene-img {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 60%;
+            height: auto;
+            display: none;
+            z-index: 30;
+        }
+
+        /* NOIR FINAL */
+        #fade-black {
+            position: fixed;
+            inset: 0;
+            background: black;
+            opacity: 0;
+            pointer-events: none;
+            transition: 1.2s ease-in-out;
+            z-index: 200;
+        }
+    </style>
+</head>
+
+<body>
+
+    <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?rlkey=q1hljzkfdh6b4qjj89yut92oy&st=8d2bqys3&dl=0"></audio>
+    <audio id="type-sound-thought" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=u3fz7wy8&dl=0"></audio>
+
+    <div id="fade-black"></div>
+
+    <div id="intro-overlay-zone2">...</div>
+
+    <div id="dialogue-box"><span id="dialogue-text"></span></div>
+    <div id="thought-box"><span id="thought-text"></span></div>
+
+    <!-- Images de la séquence -->
+    <img id="img1" class="scene-img" src="https://i.imgur.com/LHb0oXX.png">
+    <img id="img2" class="scene-img" src="https://i.imgur.com/eUtYYag.png">
+    <img id="img3" class="scene-img" src="https://i.imgur.com/72KkopR.png">
+    <img id="img4" class="scene-img" src="https://i.imgur.com/beA11BA.png">
+    <img id="img5" class="scene-img" src="https://i.imgur.com/oBwbwxW.png">
+    <img id="img6" class="scene-img" src="https://i.imgur.com/kuEm3Fv.png">
+
+    <script>
+        /* ---------------------- OUTILS TEXTES ---------------------- */
+
+        let isTyping = false, skipTyping = false;
+        const dBox = document.getElementById("dialogue-box");
+        const dText = document.getElementById("dialogue-text");
+        const tBox = document.getElementById("thought-box");
+        const tText = document.getElementById("thought-text");
+        const typeSound = document.getElementById("type-sound");
+        const typeSoundThought = document.getElementById("type-sound-thought");
+
+        typeSound.volume = 0.5;
+        typeSoundThought.volume = 0.5;
+
+        function typeWriter(text, element, sound, callback) {
+            isTyping = true;
+            skipTyping = false;
+            element.innerHTML = "";
+            element.classList.add("cursor-active");
+
+            sound.currentTime = 0;
+            sound.play().catch(()=>{});
+
+            let i = 0;
+            const interval = setInterval(() => {
+                if (skipTyping) {
+                    element.innerHTML = text;
+                    end();
+                } else if (i < text.length) {
+                    element.innerHTML += text[i++];
+                } else {
+                    end();
+                }
+            }, 28);
+
+            function end() {
+                clearInterval(interval);
+                element.classList.remove("cursor-active");
+                sound.pause();
+                isTyping = false;
+                if (callback) callback();
+            }
+        }
+
+        function showDialogue(t) {
+            tBox.style.display="none";
+            dBox.style.display="block";
+            typeWriter(t, dText, typeSound);
+        }
+
+        function showThought(t) {
+            dBox.style.display="none";
+            tBox.style.display="block";
+            typeWriter(t, tText, typeSoundThought);
+        }
+
+        /* ---------------------- IMAGES ---------------------- */
+
+        function showImage(id) {
+            document.querySelectorAll(".scene-img").forEach(img => img.style.display="none");
+            const img = document.getElementById(id);
+            img.style.display="block";
+        }
+
+        /* ---------------------- GLITCH GIFS ---------------------- */
+
+        function spawnGlitch(amount) {
+            for (let i = 0; i < amount; i++) {
+                const g = document.createElement("img");
+                g.src = "https://i.imgur.com/UsrQHo8.gif";
+                g.className = "glitch-gif";
+                g.style.top = Math.random() * 80 + "vh";
+                g.style.left = Math.random() * 80 + "vw";
+                document.body.appendChild(g);
+            }
+        }
+
+        function removeGlitch(percent) {
+            const gifs = document.querySelectorAll(".glitch-gif");
+            const count = Math.floor(gifs.length * percent);
+            for (let i = 0; i < count; i++) gifs[i].remove();
+        }
+
+        /* ---------------------- SEQUENCE ---------------------- */
+
+        const seq = [
+            ()=>showThought("Oula, c'est, particulier disons"),
+            ()=>showDialogue("Alice fut abasourdie, elle qui pensais être tiré d'affaire était en fait sur le point de réellement sombrer"),
+            ()=>showThought("Ah bah t'es de retour toi !"),
+            ()=>showThought("Et encourageant en plus !"),
+            ()=>showDialogue("Alice avais beau se cacher sous sous sarcasme, elle était terrorisé"),
+
+            ()=>spawnGlitch(6),
+
+            ()=>showDialogue("Et elle avais raison d'avoir aussi peur, car elle savais très bien qu'un jour ça finirais par se produite"),
+            ()=>showThought("Euh, quoi ?"),
+
+            ()=>showDialogue("Guilian t'abandonne Alice."),
+            ()=>showDialogue("Ta vie est fini, abandonne, arrête d'essayer d'être heureuse, c'est vain."),
+            ()=>showThought("Oui, je sais."),
+
+            ()=>spawnGlitch(10),
+
+            ()=>showThought("Je commence à me sentir mal là, arrête."),
+            ()=>showDialogue("Alice savais que je ne fessai que dire la vérité mais continuais de nier"),
+            ()=>showThought("Non par pitié, je t'en supplie, ARRÊTE."),
+
+            ()=>showImage("img1"),
+            ()=>showThought("Quoi ? T'es pas censé m'avoir abandonné toi ?"),
+            ()=>showThought("Arrête de faire semblant de m'aimer, je sais que je ne te mérite pas."),
+
+            ()=>showImage("img2"),
+            ()=>showImage("img3"),
+
+            ()=>showThought("Je me déteste"),
+
+            ()=>showImage("img4"),
+
+            ()=>removeGlitch(0.4),
+
+            ()=>showThought("Belle formulation j'avoue, t'es doué."),
+            ()=>showThought("Mais ça ne changera pas le fait que je suis qu'une merde."),
+
+            ()=>showImage("img5"),
+
+            ()=>removeGlitch(0.7),
+
+            ()=>showThought("Merci beaucoup, je sais pas ce que je ferais sans toi"),
+
+            ()=>showImage("img6"),
+
+            ()=>removeGlitch(1),
+
+            ()=>fadeToEnd
+        ];
+
+        let index = 0;
+
+        function next() {
+            if (isTyping) { skipTyping = true; return; }
+            if (index < seq.length) { seq[index++](); }
+        }
+
+        /* FIN & REDIRECTION */
+
+        function fadeToEnd() {
+            const black = document.getElementById("fade-black");
+            black.style.opacity = 1;
+            setTimeout(()=>{
+                document.body.style.backgroundImage = "url('https://c.tenor.com/ZL7fgNaWWXMAAAAd/tenor.gif')";
+                document.querySelectorAll(".scene-img").forEach(img=>img.style.display="none");
+                black.style.opacity = 0;
+
+                document.getElementById("img6").style.display="block";
+                document.getElementById("img6").style.opacity=0;
+
+                setTimeout(()=>{
+                    document.getElementById("img6").style.transition="1s";
+                    document.getElementById("img6").style.opacity=1;
+                },50);
+
+                setTimeout(()=>{
+                    window.location.href="fin.html";
+                },3000);
+
+            },1200);
+        }
+
+        /* START */
+
+        document.getElementById("intro-overlay-zone2").onclick=()=>{
+            document.getElementById("intro-overlay-zone2").style.display="none";
+            next();
+        };
+
+        document.body.onclick = next;
+    </script>
+</body>
+</html>
