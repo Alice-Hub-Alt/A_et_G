@@ -1,516 +1,711 @@
 <!DOCTYPE html>
+
 <html lang="fr">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Zone 3 : C'est la merde</title>
 
+
+
 <style>
+
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
+
+
 body {
+
     /* MODIFICATION 1: Correction du fond pour qu'il remplisse bien l'écran */
+
     background-image: url('https://neocardmaker.com/uploads/monthly_2019_10/1502293590_Spooky2.gif.aa0118140c56d49b8ecc4294d9e4bd34.gif');
+
     background-size: cover;
+
     background-repeat: no-repeat;
-    background-attachment: fixed; /* Ajouté pour s'assurer que ça couvre bien */
-    height: 100vh;
-    margin: 0;
-    overflow: hidden; /* Pour éviter les barres de défilement */
-    font-family: 'Press Start 2P', cursive;
-    cursor: pointer;
-}
 
-/* Styles pour les boîtes de texte (dialogue et pensée) */
-#dialogue-box, #thought-box {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80%;
-    max-width: 800px;
-    background-color: rgba(0, 0, 0, 0.85);
-    border: 3px solid white;
-    padding: 20px;
-    color: white;
-    font-size: 0.8em;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-    display: none;
-    z-index: 100;
-}
+@@ -107,6 +106,23 @@
 
-#thought-box {
-    border-style: dashed;
-    background-color: rgba(50, 50, 50, 0.85);
-    font-size: 0.7em;
-}
-
-/* Effet de curseur clignotant */
-.cursor-active:after {
-    content: '_';
-    animation: blink 0.7s infinite step-end;
-}
-
-@keyframes blink {
-    from, to { color: transparent }
-    50% { color: white }
-}
-
-/* Écran noir de transition */
-#fade-black {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: black;
-    opacity: 0;
-    transition: opacity 1.2s;
     pointer-events: none;
+
     z-index: 5000;
+
 }
+
+
 
 /* NOUVEAU: Style du bouton final */
+
 #final-button {
+
     position: fixed;
+
     top: 50%;
+
     left: 50%;
+
     transform: translate(-50%, -50%);
+
     padding: 15px 30px;
-    font-size: 1.2em; /* Augmenté un peu pour l'impact */
+
+    font-size: 1em;
+
     background: black;
+
     color: white;
+
     border: 3px solid white;
+
     cursor: pointer;
+
     z-index: 6000;
+
     display: none;
-    opacity: 0; /* Géré par JS */
+
     transition: opacity 0.5s;
-    font-family: 'Press Start 2P', cursive;
+
 }
 
-/* Styles pour les images de scène */
-.scene-img {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    max-width: 90%;
-    max-height: 90vh;
-    display: none;
-    z-index: 50;
-    cursor: pointer; /* Indiquer que l'image est cliquable */
-}
-
-/* Styles pour les gifs de glitch */
-.glitch-gif {
-    position: absolute;
-    width: 200px; /* MODIFICATION: Taille largement augmentée */
-    height: 200px; /* MODIFICATION: Taille largement augmentée */
-    object-fit: cover;
-    z-index: 40; /* Sous les boîtes de texte */
-    pointer-events: none;
-    opacity: 0.9;
-}
 </style>
+
 </head>
 
-<body>
 
-<div id="intro-overlay-zone2">
-    </div>
 
-<div id="dialogue-box">
-    <span id="dialogue-text"></span>
-</div>
-<div id="thought-box">
-    <span id="thought-text"></span>
-</div>
+@@ -129,6 +145,8 @@
 
-<div id="fade-black"></div>
+<img id="img5" class="scene-img" src="https://i.imgur.com/oBwbwxW.png">
 
-<audio id="type-sound" src="https://assets.mixkit.co/sfx/preview/mixkit-typewriter-line-return-1616.mp3" preload="auto"></audio>
-<audio id="type-sound-thought" src="https://assets.mixkit.co/sfx/preview/mixkit-game-click-1442.mp3" preload="auto"></audio>
-
-<img id="img1" class="scene-img" src="https://i.imgur.com/Jj5fWl4.png">
-<img id="img2" class="scene-img" src="https://i.imgur.com/U3qU3H1.png">
-<img id="img3" class="scene-img" src="https://i.imgur.com/wW5c5nJ.png">
-<img id="img4" class="scene-img" src="https://i.imgur.com/oBwbwxW.png">
-<img id="img5" class="scene-img" src="https://i.imgur.com/kuEm3Fv.png">
 <img id="img6" class="scene-img" src="https://i.imgur.com/kuEm3Fv.png">
+
+
 
 <button id="final-button" onclick="window.location.href='fin.html'">Dormir</button>
 
+
+
 <script>
+
 /* ---------------------- TEXT ENGINE ---------------------- */
 
-const dBox = document.getElementById("dialogue-box");
-const dText = document.getElementById("dialogue-text");
-const tBox = document.getElementById("thought-box");
-const tText = document.getElementById("thought-text");
-const typeSound = document.getElementById("type-sound");
-const typeSoundThought = document.getElementById("type-sound-thought");
 
-let seqIndex = 0;
-let isTyping = false;
-let skipTyping = false;
-let currentImageShown = null;
-let interval;
+
+@@ -146,7 +164,6 @@
 
 typeSound.volume = 0.5;
+
 typeSoundThought.volume = 0.5;
 
+
+
 // Fonction pour arrêter le son
+
 function stopSound(soundEl) {
+
     soundEl.pause();
+
     soundEl.currentTime = 0;
-}
 
-// Fonction générique pour l'affichage de texte
-function typeWriter(text, box, span, sound, isLongSound) {
-    if (isTyping) return;
-    isTyping = true;
-    skipTyping = false;
-    let i = 0;
+@@ -159,6 +176,9 @@
 
-    // S'assurer qu'aucun autre écouteur n'est actif sur la boîte
-    box.removeEventListener('click', next);
+    tBox.removeEventListener('click', next);
+
     dBox.onclick = null;
+
     tBox.onclick = null;
+
     
+
     // Cache le bouton final si jamais il était là
+
     document.getElementById("final-button").style.display = "none";
 
+
+
     span.innerHTML = "";
+
     box.style.display = "block";
-    
+
+@@ -170,13 +190,10 @@
+
+
+
     span.classList.add("cursor-active");
 
-    // Gestion du son pour le narrateur (long) vs la pensée (court)
-    if (isLongSound) {
-        // Pour le narrateur (long son de 6 min), on le lance une seule fois au début
-        sound.currentTime = 0;
-        sound.play().catch(()=>{});
-    } else {
-        // Pour la pensée, on le joue en boucle pendant la frappe
-        if(sound.paused) {
-            sound.currentTime = 0;
-            sound.play().catch(()=>{});
-        }
-    }
 
-    interval = setInterval(() => {
-        if (skipTyping) {
-            span.innerHTML = text;
-            end();
+
+    // NOUVEAU: Gestion du son pour le narrateur (long) vs la pensée (court)
+
+    if (isLongSound) {
+
+        // Pour le narrateur (long son de 6 min), on le lance une seule fois au début
+
+        sound.currentTime = 0;
+
+        sound.play().catch(()=>{});
+
+    } else {
+
+        // Pour la pensée, on le joue en boucle pendant la frappe
+
+        if(sound.paused) {
+
+            sound.currentTime = 0;
+
+            sound.play().catch(()=>{});
+
+@@ -191,15 +208,12 @@
+
         } else if (i < text.length) {
+
             span.innerHTML += text[i++];
 
+
+
             // Si c'est le narrateur (son long), on coupe le son s'il n'y a plus de lettres.
+
+            // S'il ne reste qu'une seule lettre à afficher après celle-ci, on peut couper le son.
+
             if (isLongSound && i >= text.length - 1) {
+
                 stopSound(sound);
+
             }
+
         } else end();
+
     }, 28);
 
-    // Écouteur pour skipper le texte au clic sur la boîte
-    box.onclick = (e) => {
-        if (isTyping) {
-            skipTyping = true;
-            e.stopPropagation();
-        }
-    }
 
-    function end() {
+
+    // NOUVEAU: Écouteur pour skipper le texte au clic sur la boîte
+
+    box.onclick = (e) => {
+
+        if (isTyping) {
+
+            skipTyping = true;
+
+@@ -211,25 +225,17 @@
+
         clearInterval(interval);
+
         span.classList.remove("cursor-active");
 
+
+
         // On s'assure que le son est coupé, surtout si c'est la pensée (son court)
+
         if (!isLongSound) {
+
             stopSound(sound);
+
         }
 
+
+
         isTyping = false;
+
         // Une fois terminé, le clic sur la boîte sert à avancer la séquence
+
         box.onclick = next;
+
     }
+
+}
+
+
+
+function showDialogue(t) { 
+
+    // Le narrateur est un "long son" (true)
+
+    typeWriter(t, dBox, dText, typeSound, true); 
+
+}
+
+function showThought(t) { 
+
+    // La pensée est un "court son" (false)
+
+    typeWriter(t, tBox, tText, typeSoundThought, false); 
+
 }
 
 function showDialogue(t) { typeWriter(t, dBox, dText, typeSound, true); }
+
 function showThought(t) { typeWriter(t, tBox, tText, typeSoundThought, false); }
+
+
 
 /* ---------------------- SCENE IMAGES ---------------------- */
 
-function hideAllImages() {
-    document.querySelectorAll(".scene-img").forEach(img => img.style.display = "none");
+
+
+@@ -238,14 +244,12 @@
+
     currentImageShown = null;
+
 }
 
-// Fonction appelée au clic n'importe où pour masquer l'image
+
+
+// NOUVEAU: Fonction appelée au clic n'importe où pour masquer l'image
+
 function hideImageAndContinue(e) {
+
     if (currentImageShown) {
+
         hideAllImages();
+
         // On enlève l'écouteur général du body pour cacher l'image
+
         document.body.removeEventListener('click', hideImageAndContinue, true);
+
         next(); // On passe à l'étape suivante
+
         e.stopPropagation(); // Évite que le clic n'appelle next() une seconde fois
+
+        next();
+
+        e.stopPropagation();
+
     }
+
 }
 
-function showImage(id) {
-    hideAllImages();
-    dBox.style.display = "none";
-    tBox.style.display = "none";
 
-    const imgElement = document.getElementById(id);
+
+@@ -259,11 +263,9 @@
+
     imgElement.style.display = "block";
+
     currentImageShown = imgElement;
 
-    // Le clic n'importe où sur l'écran (le body) fait disparaître l'image
-    // On utilise {once: true} pour qu'il ne s'active qu'une seule fois
+
+
+    // NOUVEAU: Le clic n'importe où sur l'écran (le body) fait disparaître l'image
+
     document.body.addEventListener('click', hideImageAndContinue, {once: true, capture: true}); 
+
 }
 
+
+
 // Fonction pour changer le fond (point 3)
+
 function changeBackground(url) {
+
     document.body.style.backgroundImage = `url('${url}')`;
+
     next();
-}
+
+@@ -272,26 +274,107 @@
+
+
 
 /* ---------------------- GLITCH ---------------------- */
 
-// NOUVEAU: Tableau pour stocker les positions de grille déjà utilisées (col-row)
-let usedPositions = new Set();
-// Dimensions souhaitées pour les gifs (largement augmentées)
-const GIF_SIZE_W = 200; 
-const GIF_SIZE_H = 200; 
-// Nombre max de gifs par défaut (ajusté pour couvrir l'écran avec une grande taille)
-const MAX_TOTAL_GIFS = 10; 
 
-/**
- * Calcule une position aléatoire sur une grille pour éviter les superpositions.
- * @param {number} currentCount Nombre de gifs déjà affichés.
- * @returns {{x: number, y: number}|null} Coordonnées ou null si pas de place.
- */
-function getRandomGlitchPosition(currentCount) {
-    // Calculer le nombre de colonnes et de lignes pour une grille qui couvre l'écran
-    const cols = Math.floor(window.innerWidth / GIF_SIZE_W);
-    const rows = Math.floor(window.innerHeight / GIF_SIZE_H);
-    
-    // MODIFICATION: On s'assure qu'on ne dépasse pas un maximum raisonnable
+
+// NOUVEAU: Tableau pour stocker les positions déjà utilisées
+
+let usedPositions = [];
+
+// Dimensions d'un gif (approx. 180px)
+
+const GIF_SIZE = 180; 
+
+
+
+function getRandomGlitchPosition(existingGifsCount) {
+
+    // Calculer le nombre de colonnes et de lignes pour une grille de base
+
+    const cols = Math.floor(window.innerWidth / GIF_SIZE) - 1;
+
+    const rows = Math.floor(window.innerHeight / GIF_SIZE) - 1;
+
     const maxSlots = cols * rows;
 
-    if (currentCount >= MAX_TOTAL_GIFS || currentCount >= maxSlots) {
-        // S'il y a trop de gifs ou plus de place sur la grille
-        return null; 
-    }
 
-    let col, row, positionKey;
+
+    if (existingGifsCount >= maxSlots) return null; // Plus de place
+
+
+
+    let x, y, positionKey;
+
     let attempts = 0;
+
     
+
     do {
+
         // Sélection d'une position de grille
-        col = Math.floor(Math.random() * cols);
-        row = Math.floor(Math.random() * rows);
+
+        const col = Math.floor(Math.random() * cols);
+
+        const row = Math.floor(Math.random() * rows);
+
+
+
+        // Conversion en coordonnées px
+
+        x = col * GIF_SIZE + (Math.random() * 50);
+
+        y = row * GIF_SIZE + (Math.random() * 50);
+
+
 
         positionKey = `${col}-${row}`;
-        attempts++;
-        if (attempts > 100) return null; // Sécurité si ça boucle trop
-    } while (usedPositions.has(positionKey));
 
-    usedPositions.add(positionKey);
-    
-    // Conversion en coordonnées px + un petit offset aléatoire pour le côté "glitch"
-    const x = col * GIF_SIZE_W + (Math.random() * (window.innerWidth - cols * GIF_SIZE_W) / cols);
-    const y = row * GIF_SIZE_H + (Math.random() * (window.innerHeight - rows * GIF_SIZE_H) / rows);
+        attempts++;
+
+        if (attempts > 100) return null; // Sécurité si ça boucle trop
+
+    } while (usedPositions.includes(positionKey));
+
+
+
+    usedPositions.push(positionKey);
 
     return {x, y};
+
 }
 
-/**
- * Fait apparaître des gifs de glitch.
- * @param {number} amount Nombre de gifs à ajouter.
- */
+
+
 function spawnGlitch(amount) {
-    // Si c'est la première fois, on s'assure que le set est vide (bonne pratique)
+
+    amount *= 5;
+
+    for (let i = 0; i < amount; i++) {
+
+    // Si c'est la première fois, on réinitialise les positions
+
     if (document.querySelectorAll(".glitch-gif").length === 0) {
-        usedPositions.clear();
+
+        usedPositions = [];
+
     }
+
     
+
+    // On garde un max raisonnable pour le temps de calcul
+
+    const MAX_GIFS = 30; 
+
     let currentCount = document.querySelectorAll(".glitch-gif").length;
-    // NOUVEAU: On limite l'ajout au MAX_TOTAL_GIFS (ici 10)
-    let actualAmount = Math.min(amount, MAX_TOTAL_GIFS - currentCount); 
+
+    let actualAmount = Math.min(amount, MAX_GIFS - currentCount);
+
+
 
     for (let i = 0; i < actualAmount; i++) {
+
         const pos = getRandomGlitchPosition(currentCount + i);
-        if (!pos) break; // Si on ne trouve plus de place
+
+        if (!pos) break;
+
+
 
         const g = document.createElement("img");
+
         g.src = "https://i.imgur.com/UsrQHo8.gif";
+
         g.className = "glitch-gif";
-        g.style.width = GIF_SIZE_W + "px";
-        g.style.height = GIF_SIZE_H + "px";
+
+        g.style.top = Math.random()*90+"vh";
+
+        g.style.left = Math.random()*90+"vw";
+
         g.style.top = pos.y + "px";
+
         g.style.left = pos.x + "px";
+
         document.body.appendChild(g);
+
     }
+
     next(); 
+
+    next();
+
 }
 
-/**
- * Retire des gifs de glitch.
- * @param {number} percent Pourcentage (de 0 à 1) à retirer du total actuel.
- */
+
+
 function removeGlitch(percent) {
+
+    const gifs = [...document.querySelectorAll(".glitch-gif")];
+
+    const count = Math.floor(gifs.length * percent);
+
+    for (let i = 0; i < count; i++) gifs[i].remove();
+
+    // MODIFICATION: On cible tous les gifs, puis on sélectionne ceux à retirer
+
     let gifs = [...document.querySelectorAll(".glitch-gif")];
+
     
+
     // NOUVEAU: Si percent est 1, on retire TOUS les gifs et on vide les positions.
+
     if (percent >= 1) {
+
         gifs.forEach(g => g.remove());
-        usedPositions.clear(); // MODIFICATION: Très important de vider le set
+
+        usedPositions = [];
+
     } else {
+
         const countToRemove = Math.floor(gifs.length * percent);
+
         
+
         // Pour s'assurer qu'on retire une bonne dispersion, on les mélange
+
         gifs.sort(() => Math.random() - 0.5); 
+
         
+
         for (let i = 0; i < countToRemove; i++) {
+
             if (gifs[i]) {
-                const gif = gifs[i];
-                // On essaie de retrouver la position pour la libérer
-                const rect = gif.getBoundingClientRect();
-                const col = Math.floor(rect.left / GIF_SIZE_W);
-                const row = Math.floor(rect.top / GIF_SIZE_H);
-                const positionKey = `${col}-${row}`;
-                usedPositions.delete(positionKey);
-                
-                gif.remove();
+
+                // On pourrait rendre la suppression plus propre en retirant les positions, 
+
+                // mais pour la simplicité et la nature temporaire, on se concentre sur l'élément DOM.
+
+                gifs[i].remove();
+
             }
+
         }
+
     }
+
     next(); 
+
 }
+
+
 
 /* ---------------------- FONCTION FINALE ---------------------- */
 
-// NOUVEAU: Fonction pour afficher le bouton et préparer la fin.
+
+
 function createButton() {
-    // On s'assure que le body n'appelle plus next() au clic
+
+    // Enlève l'écouteur du body
+
     document.body.removeEventListener('click', next);
+
     
+
     // Affiche le bouton
+
     const button = document.getElementById("final-button");
+
+    button.style.opacity = 0;
+
     button.style.display = "block";
+
     
+
     // Fondu d'apparition
+
     setTimeout(() => {
+
         button.style.opacity = 1;
+
     }, 50);
+
 }
+
 
 
 /* ---------------------- SEQUENCE ---------------------- */
 
+
+
 const seq = [
-    // ... [Début de la séquence]
+
+@@ -301,7 +384,7 @@
 
     ()=>showThought("Et encourageant en plus !"),
+
     ()=>showDialogue("Alice avais beau se cacher sous sous sarcasme, elle était terrorisé"),
 
-    // Première vague (ajusté à 6, mais il n'y aura MAX_TOTAL_GIFS (10) au final)
-    ()=>spawnGlitch(6), 
+
+
+    ()=>spawnGlitch(6),
+
+    ()=>spawnGlitch(6), // Première vague
+
+
 
     ()=>showDialogue("Et elle avais raison d'avoir aussi peur, car elle savais très bien qu'un jour ça finirais par se produite"),
+
     ()=>showThought("Euh, quoi ?"),
-    ()=>showDialogue("Un jour tu n'y arriveras plus, et tu t'effondreras."),
+
+@@ -310,7 +393,7 @@
+
     ()=>showDialogue("Ta vie est fini, abandonne, arrête d'essayer d'être heureuse, c'est vain."),
+
     ()=>showThought("Oui, je sais."),
 
-    // Deuxième vague (comble les trous jusqu'à MAX_TOTAL_GIFS)
-    ()=>spawnGlitch(10), 
+
+
+    ()=>spawnGlitch(10),
+
+    ()=>spawnGlitch(10), // Deuxième vague (comble les trous)
+
+
 
     ()=>showThought("Je commence à me sentir mal là, arrête."),
+
     ()=>showDialogue("Alice savais que je ne fessai que dire la vérité mais continuais de nier"),
-    ()=>showThought("C'est qui Alice ?"),
-    ()=>showDialogue("Tu n'est qu'une poupée brisé"),
-    ()=>showThought("Et alors ? Qu'est-ce que ça peut te faire ?"),
-    ()=>showDialogue("Rien, mais c'est amusant de voir une poupée essayer de se réparer seule"),
+
+@@ -327,23 +410,22 @@
+
+
 
     ()=>showImage("img4"),
 
+
+
+    ()=>removeGlitch(0.4),
+
     ()=>removeGlitch(0.4), // Retire 40% de TOUS les glitches actifs
 
+
+
     ()=>showThought("Belle formulation j'avoue, t'es doué."),
+
     ()=>showThought("Mais ça ne changera pas le fait que je suis qu'une merde."),
 
-    // Changement du fond
+
+
+    // NOUVEAU: Changement du fond avec la bonne URL
+
     ()=>changeBackground('https://c.tenor.com/ZL7fgNaWWXMAAAAd/tenor.gif'),
+
+
 
     ()=>showImage("img5"),
 
+
+
+    ()=>removeGlitch(0.7),
+
     ()=>removeGlitch(0.7), // Retire 70% de ceux qui restent
+
+
 
     ()=>showThought("Merci beaucoup, je sais pas ce que je ferais sans toi"),
 
+
+
     ()=>showImage("img6"),
 
-    ()=>removeGlitch(1), // MODIFICATION: Retire 100% de TOUS les glitches actifs
+
+
+    ()=>removeGlitch(1),
+
+    ()=>removeGlitch(1), // Retire 100% de ceux qui restent
+
+
 
     ()=>fadeToEnd
+
 ];
 
-function next() {
-    // On s'assure qu'on est pas en train de taper (sauf si on veut skipper)
-    if (isTyping) return; 
-    
-    if (seqIndex < seq.length) {
-        // S'assurer qu'on cache les boîtes de dialogue/pensée s'il y a une action non textuelle
-        if (!seq[seqIndex].name.includes("showDialogue") && !seq[seqIndex].name.includes("showThought")) {
-            dBox.style.display = "none";
-            tBox.style.display = "none";
-        }
-        seq[seqIndex++]();
-    }
-}
+@@ -361,33 +443,30 @@
 
 /* ---------------------- FIN ---------------------- */
 
+
+
 function fadeToEnd() {
+
     // La dernière image devrait être cachée par hideImageAndContinue, 
+
     // mais on le fait une dernière fois pour être sûr.
+
     hideAllImages(); 
 
-    // On s'assure qu'il n'y a plus d'écouteurs d'images/boîtes actifs
-    document.body.removeEventListener('click', hideImageAndContinue, true);
-    dBox.onclick = null;
-    tBox.onclick = null;
-    document.body.removeEventListener('click', next); // Celui du body qui gère l'avancement
 
-    // On retire tous les gifs une dernière fois au cas où
-    removeGlitch(1); 
+
+    // On s'assure qu'il n'y a plus d'écouteurs actifs sur le body
+
+    
+
+    // On s'assure qu'il n'y a plus d'écouteurs d'images/boîtes actifs
+
+    document.body.removeEventListener('click', hideImageAndContinue, true);
+
+    dBox.onclick = null;
+
+    tBox.onclick = null;
+
+    document.body.removeEventListener('click', next);
+
+
 
     const black = document.getElementById("fade-black");
+
     black.style.opacity = 1;
 
+
+
     setTimeout(()=>{
+
         // Laisse le fond noir 1.2s, puis :
+
         black.style.opacity = 0; 
-        
+
+
+
+        // Correction 4: Redirection vers fin.html
+
+        window.location.href="fin.html"; 
+
+    }, 1200); // Laisse le temps pour le fondu noir
+
         // NOUVEAU: Affiche le bouton "Dormir" pour la redirection manuelle
+
         setTimeout(createButton, 100); 
+
     }, 1200);
+
 }
 
+
+
 // L'écouteur initial est changé pour lancer la séquence au clic, 
+
 // puis on ajoute un écouteur général sur le body pour l'avancement.
+
 document.getElementById("intro-overlay-zone2").onclick = () => {
+
     document.getElementById("intro-overlay-zone2").style.display = "none";
+
     // Après que l'overlay ait disparu, le premier clic lance la séquence (qui commence par showThought)
+
     // On ajoute un écouteur général pour gérer l'avancement des étapes qui n'ont pas de boîte de dialogue/pensée (ex: glitch)
+
     document.body.addEventListener('click', next);
+
     // On lance la première action tout de suite
+
     next(); 
+
 };
+
 </script>
-</body>
-</html>
