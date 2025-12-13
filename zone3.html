@@ -1,28 +1,30 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zone 3 : C'est la merde</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zone 3 : C'est la merde</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 body {
+    /* MODIFICATION 1: Correction du fond pour qu'il remplisse bien l'écran */
     background-image: url('https://neocardmaker.com/uploads/monthly_2019_10/1502293590_Spooky2.gif.aa0118140c56d49b8ecc4294d9e4bd34.gif');
     background-size: cover;
     background-repeat: no-repeat;
-    background-position: center;
+    background-position: center; 
     background-attachment: fixed;
     margin: 0;
     padding: 0;
     font-family: 'Press Start 2P', monospace;
     overflow: hidden;
     color: white;
+    z-index: 1;
     transition: background-image 1s ease-in-out;
 }
 
-/* INTRO */
+/* INTRO OVERLAY */
 #intro-overlay-zone2 {
     position: fixed;
     inset: 0;
@@ -31,10 +33,11 @@ body {
     justify-content: center;
     align-items: center;
     z-index: 9999;
+    font-size: 1.5em;
     cursor: pointer;
 }
 
-/* TEXT BOXES */
+/* BOITES DE TEXTE */
 #dialogue-box, #thought-box {
     width: 90%;
     position: fixed;
@@ -44,6 +47,7 @@ body {
     padding: 20px;
     display: none;
     z-index: 3000;
+    box-sizing: border-box;
     cursor: pointer;
 }
 
@@ -51,6 +55,7 @@ body {
     background: rgba(0,0,0,0.85);
     border: 3px solid white;
     height: 20vh;
+    color: white;
 }
 
 #thought-box {
@@ -59,21 +64,28 @@ body {
     color: #ff99ff;
 }
 
+#dialogue-text, #thought-text {
+    font-size: 0.75em;
+    line-height: 1.5;
+}
+
+/* CURSEUR */
 .cursor-active {
     border-right: 0.15em solid currentColor;
     animation: blink 0.5s infinite step-end;
 }
 @keyframes blink {50%{border-color:transparent;}}
 
-/* GLITCH GIFS */
+/* GLITCH GIFS (derrière tout sauf le fond) */
 .glitch-gif {
     position: absolute;
     width: 180px;
+    height: auto;
     z-index: 1500;
     pointer-events: none;
 }
 
-/* SCENE IMAGES */
+/* IMAGES SCENE (devant gif, derrière texte) */
 .scene-img {
     position: fixed;
     top: 50%;
@@ -82,101 +94,208 @@ body {
     max-width: 60%;
     display: none;
     z-index: 2500;
-    border: 2px solid white;
+    border: 2px solid white; 
 }
 
-/* FADE */
+/* FONDU FINAL */
 #fade-black {
     position: fixed;
     inset: 0;
     background: black;
     opacity: 0;
-    transition: 1.3s ease-in-out;
+    transition: opacity 1.3s ease-in-out; /* Correction: J'ai ajouté l'opacité pour que ça fonctionne bien */
     pointer-events: none;
     z-index: 5000;
 }
 
-/* END BUTTON */
+/* BOUTON FIN (Ajout pour le point 2) */
 #end-button {
     position: fixed;
-    inset: 0;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 6000;
-}
-
-#end-button button {
-    font-family: 'Press Start 2P', monospace;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 15px 30px;
+    background: #FF00FF; /* Une couleur flashy pour le style */
+    border: 3px solid white;
+    color: black;
     font-size: 1em;
-    padding: 20px 40px;
     cursor: pointer;
+    z-index: 6000;
+    display: none;
+    text-decoration: none; /* S'assurer qu'il ressemble à un bouton, même si c'est un lien */
+    text-align: center;
 }
 </style>
 </head>
 
 <body>
 
+<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?rlkey=q1hljzkfdh6b4qjj89yut92oy&dl=1"></audio>
+<audio id="type-sound-thought" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=183ys2rx&dl=1"></audio>
+
 <div id="fade-black"></div>
+
 <div id="intro-overlay-zone2">...</div>
 
 <div id="dialogue-box"><span id="dialogue-text"></span></div>
 <div id="thought-box"><span id="thought-text"></span></div>
 
-<div id="end-button">
-    <button onclick="window.location.href='fin.html'">Continuer</button>
-</div>
-
-<img id="img1" class="scene-img" src="https://i.imgur.com/LHb0oXX.png">
+<a id="end-button" href="fin.html">FIN</a> <img id="img1" class="scene-img" src="https://i.imgur.com/LHb0oXX.png">
 <img id="img2" class="scene-img" src="https://i.imgur.com/eUtYYag.png">
 <img id="img3" class="scene-img" src="https://i.imgur.com/72KkopR.png">
 <img id="img4" class="scene-img" src="https://i.imgur.com/beA11BA.png">
 <img id="img5" class="scene-img" src="https://i.imgur.com/oBwbwxW.png">
-<img id="img6" class="scene-img" src="https://i.imgur.com/kuEm3Fv.png">
+<img id="img6" class="scene-img" class="scene-img" src="https://i.imgur.com/kuEm3Fv.png">
 
 <script>
-let isTyping = false;
+/* ---------------------- TEXT ENGINE ---------------------- */
+
+let isTyping = false, skipTyping = false;
 let currentImageShown = null;
-let index = 0;
 
 const dBox = document.getElementById("dialogue-box");
+const dText = document.getElementById("dialogue-text");
 const tBox = document.getElementById("thought-box");
+const tText = document.getElementById("thought-text");
+const typeSound = document.getElementById("type-sound");
+const typeSoundThought = document.getElementById("type-sound-thought");
 const allImages = document.querySelectorAll(".scene-img");
 
-/* -------- IMAGES -------- */
+typeSound.volume = 0.5;
+typeSoundThought.volume = 0.5;
+
+// Fonction pour arrêter le son
+function stopSound(soundEl) {
+    soundEl.pause();
+    soundEl.currentTime = 0;
+}
+
+function typeWriter(text, box, span, sound, isLongSound = false) {
+    // Nettoyage des écouteurs précédents
+    document.body.removeEventListener('click', hideImageAndContinue, true);
+    dBox.removeEventListener('click', next);
+    tBox.removeEventListener('click', next);
+    dBox.onclick = null;
+    tBox.onclick = null;
+
+    span.innerHTML = "";
+    box.style.display = "block";
+    tBox.style.display = (box === dBox ? "none" : tBox.style.display);
+    dBox.style.display = (box === tBox ? "none" : dBox.style.display);
+
+    isTyping = true;
+    skipTyping = false;
+
+    span.classList.add("cursor-active");
+    
+    // NOUVEAU: Gestion du son pour le narrateur (long) vs la pensée (court)
+    if (isLongSound) {
+        // Pour le narrateur (long son de 6 min), on le lance une seule fois au début
+        sound.currentTime = 0;
+        sound.play().catch(()=>{});
+    } else {
+        // Pour la pensée, on le joue en boucle pendant la frappe
+        if(sound.paused) {
+            sound.currentTime = 0;
+            sound.play().catch(()=>{});
+        }
+    }
+
+    let i = 0;
+    const interval = setInterval(() => {
+        if (skipTyping) {
+            span.innerHTML = text;
+            end();
+        } else if (i < text.length) {
+            span.innerHTML += text[i++];
+            
+            // Si c'est le narrateur (son long), on coupe le son s'il n'y a plus de lettres.
+            // S'il ne reste qu'une seule lettre à afficher après celle-ci, on peut couper le son.
+            if (isLongSound && i >= text.length - 1) {
+                stopSound(sound);
+            }
+        } else end();
+    }, 28);
+
+    // NOUVEAU: Écouteur pour skipper le texte au clic sur la boîte
+    box.onclick = (e) => {
+        if (isTyping) {
+            skipTyping = true;
+            e.stopPropagation(); 
+        }
+    };
+
+    function end() {
+        clearInterval(interval);
+        span.classList.remove("cursor-active");
+        
+        // On s'assure que le son est coupé, surtout si c'est la pensée (son court)
+        if (!isLongSound) {
+            stopSound(sound);
+        }
+        
+        isTyping = false;
+        // Une fois terminé, le clic sur la boîte sert à avancer la séquence
+        box.onclick = next;
+    }
+}
+
+function showDialogue(t) { 
+    // Le narrateur est un "long son" (true)
+    typeWriter(t, dBox, dText, typeSound, true); 
+}
+function showThought(t) { 
+    // La pensée est un "court son" (false)
+    typeWriter(t, tBox, tText, typeSoundThought, false); 
+}
+
+/* ---------------------- SCENE IMAGES ---------------------- */
 
 function hideAllImages() {
-    if (currentImageShown && currentImageShown.id === "img4") {
-        removeAllGlitch();
-    }
-
-    if (currentImageShown && currentImageShown.id === "img6") {
-        showEndButton();
-    }
-
     allImages.forEach(img => img.style.display = "none");
     currentImageShown = null;
 }
 
-function showImage(id) {
-    hideAllImages();
-    const img = document.getElementById(id);
-    img.style.display = "block";
-    currentImageShown = img;
-
-    document.body.addEventListener('click', hideImageAndContinue, { once:true, capture:true });
-}
-
+// NOUVEAU: Fonction appelée au clic n'importe où pour masquer l'image
 function hideImageAndContinue(e) {
-    hideAllImages();
-    next();
-    e.stopPropagation();
+    if (currentImageShown) {
+        hideAllImages();
+        // On enlève l'écouteur général du body pour cacher l'image
+        document.body.removeEventListener('click', hideImageAndContinue, true);
+        next(); // On passe à l'étape suivante
+        e.stopPropagation(); // Évite que le clic n'appelle next() une seconde fois
+    }
 }
 
-/* -------- GLITCH -------- */
+function showImage(id) {
+    dBox.style.display = "none";
+    tBox.style.display = "none";
+
+    hideAllImages();
+    
+    const imgElement = document.getElementById(id);
+    imgElement.style.display = "block";
+    currentImageShown = imgElement;
+
+    // NOUVEAU: Le clic n'importe où sur l'écran (le body) fait disparaître l'image
+    document.body.addEventListener('click', hideImageAndContinue, {once: true, capture: true}); 
+}
+
+// Fonction pour changer le fond (point 3)
+function changeBackground(url) {
+    document.body.style.backgroundImage = `url('${url}')`;
+    
+    // Le changement de fond n'attend pas de clic, il doit donc appeler next()
+    // après le temps de transition
+    setTimeout(next, 1200); // 1s de transition + marge
+}
+
+
+/* ---------------------- GLITCH ---------------------- */
 
 function spawnGlitch(amount) {
-    for (let i = 0; i < amount * 5; i++) {
+    amount *= 5;
+    for (let i = 0; i < amount; i++) {
         const g = document.createElement("img");
         g.src = "https://i.imgur.com/UsrQHo8.gif";
         g.className = "glitch-gif";
@@ -184,49 +303,136 @@ function spawnGlitch(amount) {
         g.style.left = Math.random()*90+"vw";
         document.body.appendChild(g);
     }
-    next();
+    next(); 
 }
 
-function removeAllGlitch() {
-    document.querySelectorAll(".glitch-gif").forEach(g => g.remove());
+// MODIFICATION: removeGlitch n'appelle PLUS next(). L'appel est géré dans la séquence.
+function removeGlitch(percent) {
+    const gifs = [...document.querySelectorAll(".glitch-gif")];
+    const count = Math.floor(gifs.length * percent);
+    // On retire en partant de la fin (moins d'impact sur le DOM)
+    for (let i = 0; i < count; i++) {
+        const indexToRemove = gifs.length - 1 - i;
+        if(indexToRemove >= 0) gifs[indexToRemove].remove();
+    }
+    // NE PAS APPELER next() ICI
 }
 
-/* -------- END -------- */
-
-function showEndButton() {
-    const black = document.getElementById("fade-black");
-    black.style.opacity = 1;
-
-    setTimeout(() => {
-        document.getElementById("end-button").style.display = "flex";
-    }, 1300);
-}
-
-/* -------- SEQUENCE -------- */
+/* ---------------------- SEQUENCE ---------------------- */
 
 const seq = [
+    ()=>showThought("Oula, c'est, particulier disons"),
+    ()=>showDialogue("Alice fut abasourdie, elle qui pensais être tiré d'affaire était en fait sur le point de réellement sombrer"),
+    ()=>showThought("Ah bah t'es de retour toi !"),
+    ()=>showThought("Et encourageant en plus !"),
+    ()=>showDialogue("Alice avais beau se cacher sous sous sarcasme, elle était terrorisé"),
+
     ()=>spawnGlitch(6),
+
+    ()=>showDialogue("Et elle avais raison d'avoir aussi peur, car elle savais très bien qu'un jour ça finirais par se produite"),
+    ()=>showThought("Euh, quoi ?"),
+
+    ()=>showDialogue("Guilian t'abandonne Alice."),
+    ()=>showDialogue("Ta vie est fini, abandonne, arrête d'essayer d'être heureuse, c'est vain."),
+    ()=>showThought("Oui, je sais."),
+
+    ()=>spawnGlitch(10),
+
+    ()=>showThought("Je commence à me sentir mal là, arrête."),
+    ()=>showDialogue("Alice savais que je ne fessai que dire la vérité mais continuais de nier"),
+    ()=>showThought("Non par pitié, je t'en supplie, ARRÊTE."),
+
     ()=>showImage("img1"),
+    ()=>showThought("Quoi ? T'es pas censé m'avoir abandonné toi ?"),
+    ()=>showThought("Arrête de faire semblant de m'aimer, je sais que je ne te mérite pas."),
+
     ()=>showImage("img2"),
     ()=>showImage("img3"),
+
+    ()=>showThought("Je me déteste"),
+
     ()=>showImage("img4"),
-    ()=>showImage("img5"),
-    ()=>showImage("img6")
+
+    ()=>removeGlitch(0.4), // Disparition des 40% des glitches
+    ()=>next(), // On passe à l'étape suivante car removeGlitch n'appelle plus next()
+
+    ()=>showThought("Belle formulation j'avoue, t'es doué."),
+    ()=>showThought("Mais ça ne changera pas le fait que je suis qu'une merde."),
+    
+    // Après le clic sur l'image 4 et le texte
+    ()=>showImage("img5"), // Image 5 est l'avant-avant-dernière image
+    ()=>showThought("Merci beaucoup, je sais pas ce que je ferais sans toi"), // Texte sous l'image 5
+    
+    // Le clic sur le thought box fait disparaître l'image 5 et appelle next().
+    // À ce moment, tous les glitches restants doivent disparaître en même temps que le fond transitionne.
+    // L'étape suivante sera appelée APRÈS que l'image 5 soit cachée.
+    ()=>removeGlitch(1), // Supprime TOUS les glitches restants
+    // NOUVEAU: Changement du fond juste après la suppression des glitches restants
+    ()=>changeBackground('https://c.tenor.com/ZL7fgNaWWXMAAAAd/tenor.gif'), // changeBackground appelle next() après transition
+
+    ()=>showImage("img6"), // Image 6 est l'avant-dernière image
+    
+    ()=>fadeToEnd, // Final : le fondu noir après la dernière image (img6)
+    
+    // NOUVELLE ÉTAPE : Affichage du bouton après le fondu
+    ()=>endGame 
 ];
 
+let index = 0;
+
 function next() {
-    if (isTyping || currentImageShown) return;
+    if (isTyping || currentImageShown) { 
+        return; 
+    }
+
     if (index < seq.length) seq[index++]();
 }
 
-/* -------- START -------- */
+/* ---------------------- FIN ---------------------- */
 
+function fadeToEnd() {
+    // S'assurer que la boîte de dialogue/pensée est cachée
+    dBox.style.display = "none";
+    tBox.style.display = "none";
+    
+    // La dernière image devrait être cachée par hideImageAndContinue, 
+    // mais on le fait une dernière fois pour être sûr.
+    hideAllImages(); 
+
+    // On s'assure qu'il n'y a plus d'écouteurs actifs sur le body
+    document.body.removeEventListener('click', hideImageAndContinue, true);
+    document.body.removeEventListener('click', next); // On retire l'écouteur next global
+    
+    const black = document.getElementById("fade-black");
+    black.style.opacity = 1;
+
+    // Après le fondu noir (1.3s de transition), on passe à l'étape suivante (endGame)
+    setTimeout(next, 1300); 
+}
+
+// NOUVELLE FONCTION: Affichage du bouton final (Point 2)
+function endGame() {
+    const black = document.getElementById("fade-black");
+    const endButton = document.getElementById("end-button");
+    
+    black.style.opacity = 0; // On retire le fondu noir
+    endButton.style.display = "block"; // Affichage du bouton
+
+    // Optionnel: Empêcher de cliquer n'importe où après la fin
+    document.body.onclick = null;
+}
+
+
+// L'écouteur initial est changé pour lancer la séquence au clic, 
+// puis on ajoute un écouteur général sur le body pour l'avancement.
 document.getElementById("intro-overlay-zone2").onclick = () => {
     document.getElementById("intro-overlay-zone2").style.display = "none";
+    // Après que l'overlay ait disparu, le premier clic lance la séquence (qui commence par showThought)
+    // On ajoute un écouteur général pour gérer l'avancement des étapes qui n'ont pas de boîte de dialogue/pensée (ex: glitch)
     document.body.addEventListener('click', next);
-    next();
+    // On lance la première action tout de suite
+    next(); 
 };
 </script>
-
 </body>
 </html>
