@@ -169,10 +169,19 @@ const allImages = document.querySelectorAll(".scene-img");
 typeSound.volume = 0.5;
 typeSoundThought.volume = 0.5;
 
+/* ---------------------- UTILS ---------------------- */
 
-/* ---------------------- TEXT ENGINE (Corrigé pour le son) ---------------------- */
+function stopSound(soundEl) {
+    soundEl.pause();
+    soundEl.currentTime = 0;
+    soundEl.loop = false; // Sécurité anti-boucle
+}
 
-// ... (fonctions stopSound, showDialogue, showThought restent inchangées)
+function showDialogue(t) { typeWriter(t, dBox, dText, typeSound, true); }
+function showThought(t) { typeWriter(t, tBox, tText, typeSoundThought, false); }
+
+
+/* ---------------------- TEXT ENGINE (CORRIGÉ) ---------------------- */
 
 function typeWriter(text, box, span, sound, isLongSound = false) {
     // Nettoyage des écouteurs précédents (IMPORTANT pour éviter les bugs)
@@ -189,15 +198,14 @@ function typeWriter(text, box, span, sound, isLongSound = false) {
     skipTyping = false;
     span.classList.add("cursor-active");
     
-    // 🔊 RÉTABLISSEMENT ET STABILISATION DU SON 🔊
+    // 🔊 GESTION DU SON 🔊
     if (isLongSound) {
-        // Pour le narrateur (long son)
+        // Pour le narrateur (son long), on joue une seule fois
         sound.currentTime = 0;
         sound.play().catch(()=>{});
     } else {
-        // Pour la pensée (son court), on le lance et on le met en boucle jusqu'à la fin de la frappe
-        if(sound.paused) {
-            sound.loop = true; // Ajout pour la boucle
+        // Pour la pensée (son court), on le joue une seule fois au début de la frappe
+        if(sound.paused || sound.currentTime > 0) { // Si déjà joué/en pause, on relance
             sound.currentTime = 0;
             sound.play().catch(()=>{});
         }
@@ -211,11 +219,13 @@ function typeWriter(text, box, span, sound, isLongSound = false) {
         } else if (i < text.length) {
             span.innerHTML += text[i++];
             
-            // Si c'est le narrateur (son long), on coupe le son s'il n'y a plus de lettres.
+            // Si c'est le narrateur (son long), on coupe le son quand il ne reste plus qu'une lettre.
             if (isLongSound && i >= text.length - 1) {
                 stopSound(sound);
             }
         } else end();
+        
+        // Arrêt immédiat du son court dès que la frappe est finie (dans end())
     }, 28);
 
     box.onclick = (e) => {
@@ -229,54 +239,15 @@ function typeWriter(text, box, span, sound, isLongSound = false) {
         clearInterval(interval);
         span.classList.remove("cursor-active");
         
-        // On s'assure que le son est coupé, surtout la boucle de la pensée
+        // On s'assure que le son est coupé, surtout la pensée pour éviter le décalage
         if (!isLongSound) {
             stopSound(sound);
-            sound.loop = false; // Désactiver la boucle
         }
         
         isTyping = false;
         box.onclick = next; // Rétablit l'appel à next()
     }
 }
-// ... (le reste du script en bas)
-    
-    // Gestion du son
-    // ... (Logique de son inchangée)
-
-    let i = 0;
-    const interval = setInterval(() => {
-        if (skipTyping) {
-            span.innerHTML = text;
-            end();
-        } else if (i < text.length) {
-            span.innerHTML += text[i++];
-            if (isLongSound && i >= text.length - 1) {
-                stopSound(sound);
-            }
-        } else end();
-    }, 28);
-
-    box.onclick = (e) => {
-        if (isTyping) {
-            skipTyping = true;
-            e.stopPropagation(); 
-        }
-    };
-
-    function end() {
-        clearInterval(interval);
-        span.classList.remove("cursor-active");
-        if (!isLongSound) {
-            stopSound(sound);
-        }
-        isTyping = false;
-        box.onclick = next; // Rétablit l'appel à next()
-    }
-}
-
-function showDialogue(t) { typeWriter(t, dBox, dText, typeSound, true); }
-function showThought(t) { typeWriter(t, tBox, tText, typeSoundThought, false); }
 
 
 /* ---------------------- SCENE IMAGES & GESTION DU FLUX ---------------------- */
@@ -401,6 +372,10 @@ function initiateFinalSequence() {
     document.body.removeEventListener('click', next);
     dBox.onclick = null;
     tBox.onclick = null;
+    
+    // S'assurer qu'aucun son ne traîne
+    stopSound(typeSound);
+    stopSound(typeSoundThought);
     
     // Sortie visuelle du moteur
     dBox.style.display = "none";
