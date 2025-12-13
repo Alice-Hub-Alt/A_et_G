@@ -1,28 +1,30 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zone 3 : C'est la merde</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zone 3 : C'est la merde</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 body {
+    /* MODIFICATION 1: Correction du fond pour qu'il remplisse bien l'écran */
     background-image: url('https://neocardmaker.com/uploads/monthly_2019_10/1502293590_Spooky2.gif.aa0118140c56d49b8ecc4294d9e4bd34.gif');
     background-size: cover;
     background-repeat: no-repeat;
-    background-position: center;
+    background-position: center; 
     background-attachment: fixed;
     margin: 0;
     padding: 0;
     font-family: 'Press Start 2P', monospace;
     overflow: hidden;
     color: white;
+    z-index: 1;
     transition: background-image 1s ease-in-out;
 }
 
-/* INTRO */
+/* INTRO OVERLAY */
 #intro-overlay-zone2 {
     position: fixed;
     inset: 0;
@@ -31,10 +33,11 @@ body {
     justify-content: center;
     align-items: center;
     z-index: 9999;
+    font-size: 1.5em;
     cursor: pointer;
 }
 
-/* BOITES TEXTE */
+/* BOITES DE TEXTE */
 #dialogue-box, #thought-box {
     width: 90%;
     position: fixed;
@@ -44,12 +47,15 @@ body {
     padding: 20px;
     display: none;
     z-index: 3000;
+    box-sizing: border-box;
+    cursor: pointer;
 }
 
 #dialogue-box {
     background: rgba(0,0,0,0.85);
     border: 3px solid white;
     height: 20vh;
+    color: white;
 }
 
 #thought-box {
@@ -58,21 +64,28 @@ body {
     color: #ff99ff;
 }
 
+#dialogue-text, #thought-text {
+    font-size: 0.75em;
+    line-height: 1.5;
+}
+
+/* CURSEUR */
 .cursor-active {
     border-right: 0.15em solid currentColor;
     animation: blink 0.5s infinite step-end;
 }
-@keyframes blink { 50% { border-color: transparent; } }
+@keyframes blink {50%{border-color:transparent;}}
 
-/* GLITCH */
+/* GLITCH GIFS (derrière tout sauf le fond) */
 .glitch-gif {
     position: absolute;
     width: 180px;
+    height: auto;
     z-index: 1500;
     pointer-events: none;
 }
 
-/* IMAGES */
+/* IMAGES SCENE (devant gif, derrière texte) */
 .scene-img {
     position: fixed;
     top: 50%;
@@ -81,144 +94,308 @@ body {
     max-width: 60%;
     display: none;
     z-index: 2500;
-    border: 2px solid white;
+    border: 2px solid white; 
 }
 
-/* FADE */
+/* FONDU FINAL */
 #fade-black {
     position: fixed;
     inset: 0;
     background: black;
     opacity: 0;
-    transition: opacity 1.5s ease-in-out;
-    z-index: 5000;
+    transition: opacity 1.3s ease-in-out; 
     pointer-events: none;
+    z-index: 5000;
 }
 
-/* BOUTON FIN */
+/* BOUTON FIN (Hors Système de jeu, z-index très haut) */
 #end-button {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     padding: 15px 30px;
-    background: #FF00FF;
+    background: #FF00FF; 
     border: 3px solid white;
     color: black;
     font-size: 1em;
     cursor: pointer;
-    z-index: 10000;
+    z-index: 6000; 
     display: none;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    text-decoration: none;
+    text-decoration: none; 
+    text-align: center;
+    transition: opacity 0.5s; 
+    opacity: 0; 
 }
 </style>
 </head>
 
 <body>
 
+<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?rlkey=q1hljzkfdh6b4qjj89yut92oy&dl=1"></audio>
+<audio id="type-sound-thought" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=183ys2rx&dl=1"></audio>
+
+<div id="fade-black"></div>
+
 <div id="intro-overlay-zone2">...</div>
 
 <div id="dialogue-box"><span id="dialogue-text"></span></div>
 <div id="thought-box"><span id="thought-text"></span></div>
 
-<div id="fade-black"></div>
-
-<a id="end-button" href="fin.html">FIN</a>
+<a id="end-button" href="fin.html">FIN</a> 
 
 <img id="img1" class="scene-img" src="https://i.imgur.com/LHb0oXX.png">
 <img id="img2" class="scene-img" src="https://i.imgur.com/eUtYYag.png">
 <img id="img3" class="scene-img" src="https://i.imgur.com/72KkopR.png">
 <img id="img4" class="scene-img" src="https://i.imgur.com/beA11BA.png">
 <img id="img5" class="scene-img" src="https://i.imgur.com/oBwbwxW.png">
-<img id="img6" class="scene-img" src="https://i.imgur.com/kuEm3Fv.png">
+<img id="img6" class="scene-img" class="scene-img" src="https://i.imgur.com/kuEm3Fv.png">
 
 <script>
-let isTyping = false;
-let skipTyping = false;
+/* ---------------------- CONSTANTES & ETAT ---------------------- */
+
+let isTyping = false, skipTyping = false;
 let currentImageShown = null;
-let index = 0;
+const LAST_IMAGE_ID = "img6"; // ID de la dernière image
 
 const dBox = document.getElementById("dialogue-box");
 const dText = document.getElementById("dialogue-text");
 const tBox = document.getElementById("thought-box");
 const tText = document.getElementById("thought-text");
+const typeSound = document.getElementById("type-sound");
+const typeSoundThought = document.getElementById("type-sound-thought");
 const allImages = document.querySelectorAll(".scene-img");
+
+typeSound.volume = 0.5;
+typeSoundThought.volume = 0.5;
+
+
+/* ---------------------- TEXT ENGINE ---------------------- */
+
+function stopSound(soundEl) {
+    soundEl.pause();
+    soundEl.currentTime = 0;
+}
+
+function typeWriter(text, box, span, sound, isLongSound = false) {
+    // Nettoyage des écouteurs précédents (IMPORTANT pour éviter les bugs)
+    document.body.removeEventListener('click', hideImageAndContinue, true);
+    dBox.onclick = null;
+    tBox.onclick = null;
+    // La fonction next() sera rétablie en fin de frappe
+
+    span.innerHTML = "";
+    box.style.display = "block";
+    tBox.style.display = (box === dBox ? "none" : tBox.style.display);
+    dBox.style.display = (box === tBox ? "none" : dBox.style.display);
+
+    isTyping = true;
+    skipTyping = false;
+    span.classList.add("cursor-active");
+    
+    // Gestion du son
+    // ... (Logique de son inchangée)
+
+    let i = 0;
+    const interval = setInterval(() => {
+        if (skipTyping) {
+            span.innerHTML = text;
+            end();
+        } else if (i < text.length) {
+            span.innerHTML += text[i++];
+            if (isLongSound && i >= text.length - 1) {
+                stopSound(sound);
+            }
+        } else end();
+    }, 28);
+
+    box.onclick = (e) => {
+        if (isTyping) {
+            skipTyping = true;
+            e.stopPropagation(); 
+        }
+    };
+
+    function end() {
+        clearInterval(interval);
+        span.classList.remove("cursor-active");
+        if (!isLongSound) {
+            stopSound(sound);
+        }
+        isTyping = false;
+        box.onclick = next; // Rétablit l'appel à next()
+    }
+}
+
+function showDialogue(t) { typeWriter(t, dBox, dText, typeSound, true); }
+function showThought(t) { typeWriter(t, tBox, tText, typeSoundThought, false); }
+
+
+/* ---------------------- SCENE IMAGES & GESTION DU FLUX ---------------------- */
 
 function hideAllImages() {
     allImages.forEach(img => img.style.display = "none");
     currentImageShown = null;
 }
 
+// Fonction appelée au clic pour masquer l'image
 function hideImageAndContinue(e) {
-    if (!currentImageShown) return;
-    hideAllImages();
-    document.body.removeEventListener('click', hideImageAndContinue, true);
-    next();
-    e.stopPropagation();
+    if (currentImageShown) {
+        const isLastImage = currentImageShown.id === LAST_IMAGE_ID; // Vérifie si c'est la dernière image
+        
+        hideAllImages();
+        document.body.removeEventListener('click', hideImageAndContinue, true);
+        e.stopPropagation(); 
+
+        if (isLastImage) {
+            // PRINCIPE 1: IDENTIFIER LE DERNIER ÉVÉNEMENT FIABLE
+            initiateFinalSequence(); // Appel de la fonction de fin statique
+        } else {
+            next(); // Sinon, continue dans le moteur narratif normal
+        }
+    }
 }
 
 function showImage(id) {
     dBox.style.display = "none";
     tBox.style.display = "none";
     hideAllImages();
+    
+    const imgElement = document.getElementById(id);
+    imgElement.style.display = "block";
+    currentImageShown = imgElement;
 
-    const img = document.getElementById(id);
-    img.style.display = "block";
-    currentImageShown = img;
-
-    document.body.addEventListener('click', hideImageAndContinue, { once: true, capture: true });
+    // Le clic n'importe où sur l'écran fait disparaître l'image
+    document.body.addEventListener('click', hideImageAndContinue, {once: true, capture: true}); 
 }
 
-/* ---------------- FIN SOLIDE ---------------- */
-
-function fadeToEnd() {
-    dBox.style.display = "none";
-    tBox.style.display = "none";
-    hideAllImages();
-
-    document.body.removeEventListener('click', next);
-    document.body.removeEventListener('click', hideImageAndContinue, true);
-
-    const black = document.getElementById("fade-black");
-    black.style.opacity = 1;
-
-    // FIX : on ne dépend PLUS de next()
-    setTimeout(forceEndGame, 1600);
+function changeBackground(url) {
+    document.body.style.backgroundImage = `url('${url}')`;
+    setTimeout(next, 1200); 
 }
 
-function forceEndGame() {
-    const black = document.getElementById("fade-black");
-    const btn = document.getElementById("end-button");
-
-    black.style.display = "none";
-    document.body.style.background = "black";
-
-    btn.style.display = "block";
-    requestAnimationFrame(() => btn.style.opacity = 1);
+function spawnGlitch(amount) {
+    amount *= 5;
+    for (let i = 0; i < amount; i++) {
+        const g = document.createElement("img");
+        g.src = "https://i.imgur.com/UsrQHo8.gif";
+        g.className = "glitch-gif";
+        g.style.top = Math.random()*90+"vh";
+        g.style.left = Math.random()*90+"vw";
+        document.body.appendChild(g);
+    }
+    next(); 
 }
 
-/* ---------------- SEQUENCE ---------------- */
+function removeGlitch(percent) {
+    const gifs = [...document.querySelectorAll(".glitch-gif")];
+    const count = Math.floor(gifs.length * percent);
+    for (let i = 0; i < count; i++) {
+        const indexToRemove = gifs.length - 1 - i;
+        if(indexToRemove >= 0) gifs[indexToRemove].remove();
+    }
+}
+
+function runActionsAndContinue(actions, delay=10) {
+    actions.forEach(action => action());
+    setTimeout(next, delay);
+}
+
+
+/* ---------------------- SEQUENCE ---------------------- */
 
 const seq = [
-    () => showImage("img6"),
-    () => fadeToEnd()
+    ()=>showThought("Oula, c'est, particulier disons"),
+    ()=>showDialogue("Alice fut abasourdie, elle qui pensais être tiré d'affaire était en fait sur le point de réellement sombrer"),
+    ()=>showThought("Ah bah t'es de retour toi !"),
+    ()=>showThought("Et encourageant en plus !"),
+    ()=>showDialogue("Alice avais beau se cacher sous sous sarcasme, elle était terrorisé"),
+    ()=>spawnGlitch(6),
+    ()=>showDialogue("Et elle avais raison d'avoir aussi peur, car elle savais très bien qu'un jour ça finirais par se produite"),
+    ()=>showThought("Euh, quoi ?"),
+    ()=>showDialogue("Guilian t'abandonne Alice."),
+    ()=>showDialogue("Ta vie est fini, abandonne, arrête d'essayer d'être heureuse, c'est vain."),
+    ()=>showThought("Oui, je sais."),
+    ()=>spawnGlitch(10),
+    ()=>showThought("Je commence à me sentir mal là, arrête."),
+    ()=>showDialogue("Alice savais que je ne fessai que dire la vérité mais continuais de nier"),
+    ()=>showThought("Non par pitié, je t'en supplie, ARRÊTE."),
+    ()=>showImage("img1"),
+    ()=>showThought("Quoi ? T'es pas censé m'avoir abandonné toi ?"),
+    ()=>showThought("Arrête de faire semblant de m'aimer, je sais que je ne te mérite pas."),
+    ()=>showImage("img2"),
+    ()=>showImage("img3"),
+    ()=>showThought("Je me déteste"),
+    ()=>showImage("img4"),
+    ()=>runActionsAndContinue([()=>removeGlitch(0.4)]), 
+    ()=>showThought("Belle formulation j'avoue, t'es doué."),
+    ()=>showThought("Mais ça ne changera pas le fait que je suis qu'une merde."),
+    ()=>showImage("img5"), 
+    ()=>showThought("Merci beaucoup, je sais pas ce que je ferais sans toi"), 
+    ()=>runActionsAndContinue([()=>removeGlitch(1), ()=>changeBackground('https://c.tenor.com/ZL7fgNaWWXMAAAAd/tenor.gif')]),
+    ()=>showImage("img6"), 
+    // FIN DU SYSTÈME NARRATIF. Après le clic sur img6, on sort du flux 'next()'.
 ];
 
+let index = 0;
+
 function next() {
-    if (isTyping || currentImageShown) return;
-    if (index < seq.length) seq[index++]();
+    // Le moteur narratif est mort, on ne le consulte plus (PRINCIPE 2)
+    if (index < seq.length && !isTyping && !currentImageShown) {
+        seq[index++]();
+    }
 }
 
-/* ---------------- START ---------------- */
+/* ---------------------- FIN D'URGENCE (STATIQUE) ---------------------- */
 
+function initiateFinalSequence() {
+    // PRINCIPE 3: NETTOYER TOUS LES ÉCOUTEURS GLOBAUX
+    document.body.removeEventListener('click', next);
+    dBox.onclick = null;
+    tBox.onclick = null;
+    
+    // Sortie visuelle du moteur
+    dBox.style.display = "none";
+    tBox.style.display = "none";
+    
+    // Démarrage du fondu
+    const black = document.getElementById("fade-black");
+    black.style.opacity = 1;
+    
+    // Après le fondu, on affiche le bouton (état terminal statique)
+    setTimeout(showEndButton, 1500); 
+}
+
+function showEndButton() {
+    const black = document.getElementById("fade-black");
+    const endButton = document.getElementById("end-button");
+    
+    // PRINCIPE 4: Affichage du bouton comme un élément hors système
+
+    // Assurer que le fond est noir uni (nettoyage visuel total)
+    black.style.display = "none";
+    document.body.style.backgroundColor = "black";
+    document.body.style.backgroundImage = "none";
+
+    // Affichage du bouton
+    endButton.style.display = "block";
+    
+    // On le rend opaque (avec la transition) pour l'effet d'apparition
+    setTimeout(() => {
+        endButton.style.opacity = 1; 
+    }, 50); 
+
+    // PRINCIPE 5: ZÉRO logique JS sur le bouton (il est déjà un lien statique)
+}
+
+
+// Lancement initial du moteur
 document.getElementById("intro-overlay-zone2").onclick = () => {
     document.getElementById("intro-overlay-zone2").style.display = "none";
-    document.body.addEventListener('click', next);
-    next();
+    // Écouteur global pour avancer les étapes sans boîte de dialogue/image
+    document.body.addEventListener('click', next); 
+    next(); 
 };
 </script>
-
 </body>
 </html>
