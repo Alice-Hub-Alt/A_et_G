@@ -119,11 +119,13 @@
 </head>
 <body>
 
-    <audio id="zone-audio" loop>
-    <source src="https://www.dropbox.com/scl/fi/ticd071iz11o9lv0kmaty/.mp3?rlkey=e67f66l111f675geyuobarpdr&st=28km2129&dl=0" type="audio/mpeg">
+  <!-- Audio : zone ambiant -->
+  <audio id="zone-audio" loop>
+    <source src="https://www.dropbox.com/scl/fi/ticd071iz11o9lv0kmaty/.mp3?rlkey=e67f66l111f675geyuobarpdr&st=28km2129&dl=1" type="audio/mpeg">
   </audio>
 
-  <audio id="type-sound"
+  <!-- Son de "dialogue" -->
+<audio id="type-sound"
        src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=u3fz7wy8&dl=0">
 </audio>
 
@@ -171,11 +173,8 @@ let skipRequested = false;
 function stopTypeSound(){
   try{
     typeSound.pause();
-    // reset si possible
     typeSound.currentTime = 0;
-  }catch(e){
-    // ignore
-  }
+  }catch(e){}
 }
 
 /* skip onclick pendant la frappe */
@@ -190,25 +189,19 @@ function skipHandler(e){
 function typeWriter(text, target, onFinish){
   if(typingInterval) clearInterval(typingInterval);
   skipRequested = false;
-
-  // start
   isTyping = true;
   target.innerHTML = "";
   target.classList.add('cursor-active');
 
-  // lance le son (essayer, sinon on ignore l'erreur)
   try{
-    // veiller à ce que le son ne boucle pas
     typeSound.loop = false;
     typeSound.currentTime = 0;
-    const p = typeSound.play();
-    if(p && p.catch) p.catch(()=>{/* autoplay blocked, OK */});
-  }catch(e){ /* silent */ }
+    typeSound.play().catch(()=>{});
+  }catch(e){}
 
   let i = 0;
   typingInterval = setInterval(() => {
     if(skipRequested){
-      // on force l'affichage complet et on stoppe le son
       target.innerHTML = text;
       clearInterval(typingInterval);
       stopTypeSound();
@@ -217,18 +210,16 @@ function typeWriter(text, target, onFinish){
       if(typeof onFinish === 'function') onFinish();
       return;
     }
-
     if(i < text.length){
       target.innerHTML += text.charAt(i++);
     } else {
-      // fini normalement -> stop son et callback
       clearInterval(typingInterval);
       stopTypeSound();
       target.classList.remove('cursor-active');
       isTyping = false;
       if(typeof onFinish === 'function') onFinish();
     }
-  }, 28); // vitesse de frappe
+  }, 28);
 }
 
 /* version silencieuse pour l'overlay */
@@ -248,10 +239,8 @@ function showMessage(message, callback){
   dialogueBox.addEventListener('click', skipHandler, false);
 
   typeWriter(message, dialogueTextElement, ()=>{
-    // quand la frappe est finie : on attend un clic pour fermer
     dialogueBox.addEventListener('click', () => {
       dialogueBox.style.display = "none";
-      // toujours s'assurer que le son est arrêté
       stopTypeSound();
       if(callback) callback();
     }, { once:true });
@@ -276,23 +265,19 @@ doorExit.addEventListener('click', ()=>{
   } else {
     showMessage(doorExitLocked, ()=>{
       zoneAudio.pause();
-      // J'ai retiré le double appel à window.location.href, ne laissant que le dernier (zone2_1.html)
-      // Si tu souhaites aller à zone3_2.html après ce message, remplace cette ligne.
-      window.location.href = 'zone2_1.html';
+      window.location.href = 'zone2_1.html'; // je laisse une seule redirection
     });
   }
 });
 
-/* démarrage scène : overlay + click pour enlever */
+/* démarrage scène */
 function startScene(){
-  // Correction : On utilise la version typeWriter avec son et on corrige les accolades/parenthèses
-  typeWriter(overlayText, overlayTextElement, ()=>{
+  typeWriterSilent(overlayText, overlayTextElement, ()=>{
     overlay.addEventListener('click', ()=>{
       overlay.style.transition = 'opacity .6s';
       overlay.style.opacity = 0;
       setTimeout(()=>{
         overlay.style.display = 'none';
-        // play ambient if present
         try{ zoneAudio.play().catch(()=>{}); }catch(e){}
         showMessage(initialDoorMessage, ()=> initialDoorMessageShown = true);
       },600);
@@ -300,8 +285,7 @@ function startScene(){
   });
 }
 
-/* prévenir si le fichier dropbox met trop de temps : on le précharge un peu */
-typeSound.addEventListener('canplay', ()=>{ /* ok */ });
+typeSound.addEventListener('canplay', ()=>{});
 typeSound.addEventListener('error', ()=>{ console.warn('Type sound error or blocked.'); });
 
 startScene();
