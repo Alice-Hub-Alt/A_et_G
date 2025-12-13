@@ -19,6 +19,7 @@ body {
     font-family: 'Press Start 2P', monospace;
     overflow: hidden;
     color: white;
+    transition: background-image 1s ease-in-out;
 }
 
 /* INTRO */
@@ -33,7 +34,7 @@ body {
     cursor: pointer;
 }
 
-/* TEXTE */
+/* BOITES TEXTE */
 #dialogue-box, #thought-box {
     width: 90%;
     position: fixed;
@@ -61,9 +62,14 @@ body {
     border-right: 0.15em solid currentColor;
     animation: blink 0.5s infinite step-end;
 }
+@keyframes blink { 50% { border-color: transparent; } }
 
-@keyframes blink {
-    50% { border-color: transparent; }
+/* GLITCH */
+.glitch-gif {
+    position: absolute;
+    width: 180px;
+    z-index: 1500;
+    pointer-events: none;
 }
 
 /* IMAGES */
@@ -92,21 +98,20 @@ body {
 /* BOUTON FIN */
 #end-button {
     position: fixed;
-    inset: 0;
-    margin: auto;
-    width: 200px;
-    height: 60px;
-    display: none;
-    background: #ff00ff;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 15px 30px;
+    background: #FF00FF;
     border: 3px solid white;
     color: black;
     font-size: 1em;
-    text-align: center;
-    line-height: 60px;
-    text-decoration: none;
+    cursor: pointer;
     z-index: 10000;
+    display: none;
     opacity: 0;
     transition: opacity 0.5s ease;
+    text-decoration: none;
 }
 </style>
 </head>
@@ -114,68 +119,103 @@ body {
 <body>
 
 <div id="intro-overlay-zone2">...</div>
+
 <div id="dialogue-box"><span id="dialogue-text"></span></div>
 <div id="thought-box"><span id="thought-text"></span></div>
+
 <div id="fade-black"></div>
 
 <a id="end-button" href="fin.html">FIN</a>
 
+<img id="img1" class="scene-img" src="https://i.imgur.com/LHb0oXX.png">
+<img id="img2" class="scene-img" src="https://i.imgur.com/eUtYYag.png">
+<img id="img3" class="scene-img" src="https://i.imgur.com/72KkopR.png">
+<img id="img4" class="scene-img" src="https://i.imgur.com/beA11BA.png">
+<img id="img5" class="scene-img" src="https://i.imgur.com/oBwbwxW.png">
 <img id="img6" class="scene-img" src="https://i.imgur.com/kuEm3Fv.png">
 
 <script>
 let isTyping = false;
-let currentImage = null;
+let skipTyping = false;
+let currentImageShown = null;
 let index = 0;
 
-const fade = document.getElementById("fade-black");
-const endButton = document.getElementById("end-button");
-const img6 = document.getElementById("img6");
+const dBox = document.getElementById("dialogue-box");
+const dText = document.getElementById("dialogue-text");
+const tBox = document.getElementById("thought-box");
+const tText = document.getElementById("thought-text");
+const allImages = document.querySelectorAll(".scene-img");
 
-function clearAllClicks() {
-    document.body.replaceWith(document.body.cloneNode(true));
+function hideAllImages() {
+    allImages.forEach(img => img.style.display = "none");
+    currentImageShown = null;
 }
 
-function showImage(img) {
+function hideImageAndContinue(e) {
+    if (!currentImageShown) return;
+    hideAllImages();
+    document.body.removeEventListener('click', hideImageAndContinue, true);
+    next();
+    e.stopPropagation();
+}
+
+function showImage(id) {
+    dBox.style.display = "none";
+    tBox.style.display = "none";
+    hideAllImages();
+
+    const img = document.getElementById(id);
     img.style.display = "block";
-    currentImage = img;
+    currentImageShown = img;
 
-    document.body.onclick = () => {
-        img.style.display = "none";
-        currentImage = null;
-        document.body.onclick = null;
-        next();
-    };
+    document.body.addEventListener('click', hideImageAndContinue, { once: true, capture: true });
 }
+
+/* ---------------- FIN SOLIDE ---------------- */
 
 function fadeToEnd() {
-    clearAllClicks();
-    fade.style.opacity = 1;
+    dBox.style.display = "none";
+    tBox.style.display = "none";
+    hideAllImages();
 
+    document.body.removeEventListener('click', next);
+    document.body.removeEventListener('click', hideImageAndContinue, true);
+
+    const black = document.getElementById("fade-black");
+    black.style.opacity = 1;
+
+    // FIX : on ne dépend PLUS de next()
     setTimeout(forceEndGame, 1600);
 }
 
 function forceEndGame() {
-    fade.style.display = "none";
+    const black = document.getElementById("fade-black");
+    const btn = document.getElementById("end-button");
+
+    black.style.display = "none";
     document.body.style.background = "black";
 
-    endButton.style.display = "block";
-    requestAnimationFrame(() => {
-        endButton.style.opacity = 1;
-    });
+    btn.style.display = "block";
+    requestAnimationFrame(() => btn.style.opacity = 1);
 }
 
+/* ---------------- SEQUENCE ---------------- */
+
 const seq = [
-    () => showImage(img6),
+    () => showImage("img6"),
     () => fadeToEnd()
 ];
 
 function next() {
-    if (isTyping || currentImage) return;
+    if (isTyping || currentImageShown) return;
     if (index < seq.length) seq[index++]();
 }
 
+/* ---------------- START ---------------- */
+
 document.getElementById("intro-overlay-zone2").onclick = () => {
     document.getElementById("intro-overlay-zone2").style.display = "none";
+    document.body.addEventListener('click', next);
     next();
 };
 </script>
