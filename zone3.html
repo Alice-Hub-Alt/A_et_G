@@ -108,7 +108,7 @@ body {
     z-index: 5000;
 }
 
-/* BOUTON FIN (Ajout pour le point 2) */
+/* BOUTON FIN (Le Z-index doit être très haut pour le bouton) */
 #end-button {
     position: fixed;
     top: 50%;
@@ -120,10 +120,12 @@ body {
     color: black;
     font-size: 1em;
     cursor: pointer;
-    z-index: 6000;
+    z-index: 6000; /* Assurez-vous qu'il est au-dessus du #fade-black */
     display: none;
     text-decoration: none; 
     text-align: center;
+    transition: opacity 0.5s; /* Ajout d'une transition pour le bouton aussi */
+    opacity: 0; /* Il commence invisible pour l'effet d'apparition */
 }
 </style>
 </head>
@@ -361,27 +363,25 @@ const seq = [
 
     ()=>showImage("img4"),
     
-    // NOUVEAU : Après le clic sur l'Image 4, on arrive ici. 
-    // On retire les 40% des glitches puis on passe au Thought.
+    // Le clic retire l'image 4 et appelle next()
     ()=>runActionsAndContinue([()=>removeGlitch(0.4)]), 
 
     ()=>showThought("Belle formulation j'avoue, t'es doué."),
     ()=>showThought("Mais ça ne changera pas le fait que je suis qu'une merde."),
     
-    // Après le clic sur le Thought
-    ()=>showImage("img5"), // Image 5 est l'avant-avant-dernière image
+    // Après le clic sur le Thought Box
+    ()=>showImage("img5"), 
     
-    ()=>showThought("Merci beaucoup, je sais pas ce que je ferais sans toi"), // Texte sous l'image 5
+    ()=>showThought("Merci beaucoup, je sais pas ce que je ferais sans toi"), 
     
-    // NOUVEAU : Après le clic sur le Thought Box (qui a caché l'image 5).
-    // On retire TOUS les glitches restants (Point 1) et on change le fond.
+    // Le clic retire le Thought Box (qui a caché l'image 5). On arrive ici :
     ()=>runActionsAndContinue([()=>removeGlitch(1), ()=>changeBackground('https://c.tenor.com/ZL7fgNaWWXMAAAAd/tenor.gif')]),
     
-    ()=>showImage("img6"), // Image 6 est l'avant-dernière image
+    ()=>showImage("img6"), // L'image 6 est affichée. Le clic la retire et appelle next().
     
-    ()=>fadeToEnd, // Final : le fondu noir après la dernière image (img6)
+    ()=>fadeToEnd, // Le fondu noir s'opacifie.
     
-    ()=>endGame 
+    ()=>endGame // Le bouton apparaît.
 ];
 
 let index = 0;
@@ -397,31 +397,34 @@ function next() {
 /* ---------------------- FIN ---------------------- */
 
 function fadeToEnd() {
-    // S'assurer que la boîte de dialogue/pensée est cachée
     dBox.style.display = "none";
     tBox.style.display = "none";
-    
-    // La dernière image devrait être cachée par hideImageAndContinue, 
     hideAllImages(); 
 
-    // On s'assure qu'il n'y a plus d'écouteurs actifs sur le body
     document.body.removeEventListener('click', hideImageAndContinue, true);
     document.body.removeEventListener('click', next); 
     
     const black = document.getElementById("fade-black");
     black.style.opacity = 1;
 
-    // Après le fondu noir (1.3s de transition), on passe à l'étape suivante (endGame)
-    setTimeout(next, 1300); 
+    // MODIFICATION 1: On augmente légèrement le délai pour s'assurer que la transition CSS soit finie
+    setTimeout(next, 1500); // 1.5s au lieu de 1.3s
 }
 
-// NOUVELLE FONCTION: Affichage du bouton final 
+// MODIFICATION 2: Affichage correct du bouton sur le fond noir
 function endGame() {
     const black = document.getElementById("fade-black");
     const endButton = document.getElementById("end-button");
     
-    black.style.opacity = 0; // On retire le fondu noir
-    endButton.style.display = "block"; // Affichage du bouton
+    // Le fond noir reste à 1 (opaque)
+    // black.style.opacity = 0; <--- On retire cette ligne !
+
+    endButton.style.display = "block"; // On le rend visible dans le flux
+    
+    // On ajoute un petit délai pour le faire apparaître en douceur
+    setTimeout(() => {
+        endButton.style.opacity = 1; 
+    }, 50); 
 }
 
 
