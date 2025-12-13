@@ -103,7 +103,7 @@ body {
     inset: 0;
     background: black;
     opacity: 0;
-    transition: opacity 1.3s ease-in-out; /* Correction: J'ai ajouté l'opacité pour que ça fonctionne bien */
+    transition: opacity 1.3s ease-in-out; 
     pointer-events: none;
     z-index: 5000;
 }
@@ -115,14 +115,14 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     padding: 15px 30px;
-    background: #FF00FF; /* Une couleur flashy pour le style */
+    background: #FF00FF; 
     border: 3px solid white;
     color: black;
     font-size: 1em;
     cursor: pointer;
     z-index: 6000;
     display: none;
-    text-decoration: none; /* S'assurer qu'il ressemble à un bouton, même si c'est un lien */
+    text-decoration: none; 
     text-align: center;
 }
 </style>
@@ -140,7 +140,9 @@ body {
 <div id="dialogue-box"><span id="dialogue-text"></span></div>
 <div id="thought-box"><span id="thought-text"></span></div>
 
-<a id="end-button" href="fin.html">FIN</a> <img id="img1" class="scene-img" src="https://i.imgur.com/LHb0oXX.png">
+<a id="end-button" href="fin.html">FIN</a> 
+
+<img id="img1" class="scene-img" src="https://i.imgur.com/LHb0oXX.png">
 <img id="img2" class="scene-img" src="https://i.imgur.com/eUtYYag.png">
 <img id="img3" class="scene-img" src="https://i.imgur.com/72KkopR.png">
 <img id="img4" class="scene-img" src="https://i.imgur.com/beA11BA.png">
@@ -281,7 +283,7 @@ function showImage(id) {
     document.body.addEventListener('click', hideImageAndContinue, {once: true, capture: true}); 
 }
 
-// Fonction pour changer le fond (point 3)
+// Fonction pour changer le fond 
 function changeBackground(url) {
     document.body.style.backgroundImage = `url('${url}')`;
     
@@ -306,17 +308,23 @@ function spawnGlitch(amount) {
     next(); 
 }
 
-// MODIFICATION: removeGlitch n'appelle PLUS next(). L'appel est géré dans la séquence.
+// removeGlitch n'appelle PLUS next(). 
 function removeGlitch(percent) {
     const gifs = [...document.querySelectorAll(".glitch-gif")];
     const count = Math.floor(gifs.length * percent);
-    // On retire en partant de la fin (moins d'impact sur le DOM)
     for (let i = 0; i < count; i++) {
         const indexToRemove = gifs.length - 1 - i;
         if(indexToRemove >= 0) gifs[indexToRemove].remove();
     }
     // NE PAS APPELER next() ICI
 }
+
+// NOUVELLE FONCTION: Gère les actions sans texte/image juste après une image
+function runActionsAndContinue(actions, delay=10) {
+    actions.forEach(action => action());
+    setTimeout(next, delay);
+}
+
 
 /* ---------------------- SEQUENCE ---------------------- */
 
@@ -352,29 +360,27 @@ const seq = [
     ()=>showThought("Je me déteste"),
 
     ()=>showImage("img4"),
-
-    ()=>removeGlitch(0.4), // Disparition des 40% des glitches
-    ()=>next(), // On passe à l'étape suivante car removeGlitch n'appelle plus next()
+    
+    // NOUVEAU : Après le clic sur l'Image 4, on arrive ici. 
+    // On retire les 40% des glitches puis on passe au Thought.
+    ()=>runActionsAndContinue([()=>removeGlitch(0.4)]), 
 
     ()=>showThought("Belle formulation j'avoue, t'es doué."),
     ()=>showThought("Mais ça ne changera pas le fait que je suis qu'une merde."),
     
-    // Après le clic sur l'image 4 et le texte
+    // Après le clic sur le Thought
     ()=>showImage("img5"), // Image 5 est l'avant-avant-dernière image
+    
     ()=>showThought("Merci beaucoup, je sais pas ce que je ferais sans toi"), // Texte sous l'image 5
     
-    // Le clic sur le thought box fait disparaître l'image 5 et appelle next().
-    // À ce moment, tous les glitches restants doivent disparaître en même temps que le fond transitionne.
-    // L'étape suivante sera appelée APRÈS que l'image 5 soit cachée.
-    ()=>removeGlitch(1), // Supprime TOUS les glitches restants
-    // NOUVEAU: Changement du fond juste après la suppression des glitches restants
-    ()=>changeBackground('https://c.tenor.com/ZL7fgNaWWXMAAAAd/tenor.gif'), // changeBackground appelle next() après transition
-
+    // NOUVEAU : Après le clic sur le Thought Box (qui a caché l'image 5).
+    // On retire TOUS les glitches restants (Point 1) et on change le fond.
+    ()=>runActionsAndContinue([()=>removeGlitch(1), ()=>changeBackground('https://c.tenor.com/ZL7fgNaWWXMAAAAd/tenor.gif')]),
+    
     ()=>showImage("img6"), // Image 6 est l'avant-dernière image
     
     ()=>fadeToEnd, // Final : le fondu noir après la dernière image (img6)
     
-    // NOUVELLE ÉTAPE : Affichage du bouton après le fondu
     ()=>endGame 
 ];
 
@@ -396,12 +402,11 @@ function fadeToEnd() {
     tBox.style.display = "none";
     
     // La dernière image devrait être cachée par hideImageAndContinue, 
-    // mais on le fait une dernière fois pour être sûr.
     hideAllImages(); 
 
     // On s'assure qu'il n'y a plus d'écouteurs actifs sur le body
     document.body.removeEventListener('click', hideImageAndContinue, true);
-    document.body.removeEventListener('click', next); // On retire l'écouteur next global
+    document.body.removeEventListener('click', next); 
     
     const black = document.getElementById("fade-black");
     black.style.opacity = 1;
@@ -410,16 +415,13 @@ function fadeToEnd() {
     setTimeout(next, 1300); 
 }
 
-// NOUVELLE FONCTION: Affichage du bouton final (Point 2)
+// NOUVELLE FONCTION: Affichage du bouton final 
 function endGame() {
     const black = document.getElementById("fade-black");
     const endButton = document.getElementById("end-button");
     
     black.style.opacity = 0; // On retire le fondu noir
     endButton.style.display = "block"; // Affichage du bouton
-
-    // Optionnel: Empêcher de cliquer n'importe où après la fin
-    document.body.onclick = null;
 }
 
 
@@ -427,8 +429,6 @@ function endGame() {
 // puis on ajoute un écouteur général sur le body pour l'avancement.
 document.getElementById("intro-overlay-zone2").onclick = () => {
     document.getElementById("intro-overlay-zone2").style.display = "none";
-    // Après que l'overlay ait disparu, le premier clic lance la séquence (qui commence par showThought)
-    // On ajoute un écouteur général pour gérer l'avancement des étapes qui n'ont pas de boîte de dialogue/pensée (ex: glitch)
     document.body.addEventListener('click', next);
     // On lance la première action tout de suite
     next(); 
