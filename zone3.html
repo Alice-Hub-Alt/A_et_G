@@ -124,7 +124,7 @@ body {
     display: none;
     text-decoration: none; 
     text-align: center;
-    transition: opacity 0.5s; /* Ajout d'une transition pour le bouton aussi */
+    transition: opacity 0.5s; 
     opacity: 0; /* Il commence invisible pour l'effet d'apparition */
 }
 </style>
@@ -407,21 +407,25 @@ function fadeToEnd() {
     const black = document.getElementById("fade-black");
     black.style.opacity = 1;
 
-    // MODIFICATION 1: On augmente légèrement le délai pour s'assurer que la transition CSS soit finie
-    setTimeout(next, 1500); // 1.5s au lieu de 1.3s
+    // On donne assez de temps pour que le fondu soit complet
+    setTimeout(next, 1500); 
 }
 
-// MODIFICATION 2: Affichage correct du bouton sur le fond noir
 function endGame() {
     const black = document.getElementById("fade-black");
     const endButton = document.getElementById("end-button");
     
-    // Le fond noir reste à 1 (opaque)
-    // black.style.opacity = 0; <--- On retire cette ligne !
-
-    endButton.style.display = "block"; // On le rend visible dans le flux
+    // MODIFICATION CRUCIALE 1 : On désactive complètement le fond noir
+    black.style.display = "none";
     
-    // On ajoute un petit délai pour le faire apparaître en douceur
+    // MODIFICATION CRUCIALE 2 : On s'assure que le body devient noir
+    document.body.style.backgroundColor = "black";
+    document.body.style.backgroundImage = "none";
+
+    // Affichage du bouton
+    endButton.style.display = "block";
+    
+    // On le rend opaque pour l'effet de transition
     setTimeout(() => {
         endButton.style.opacity = 1; 
     }, 50); 
