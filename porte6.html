@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>Porte 4 - L'Inventaire de Survie</title>
+<title>Porte 4 - L'Inventaire de Survie (Sélectif)</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -13,7 +13,6 @@ html, body{
   margin:0; padding:0; height:100%;
   font-family:'Press Start 2P', monospace;
   overflow:hidden;
-  /* Nouveau fond */
   background:url('https://c.tenor.com/VXK2tjK7Uh0AAAAd/tenor.gif') center/cover no-repeat;
   user-select: none;
 }
@@ -78,6 +77,8 @@ html, body{
     align-content: flex-start;
     gap: 5px;
     position: relative;
+    /* Rendre la boîte un peu scrollable si le contenu est trop grand */
+    overflow-y: auto; 
 }
 .inventory-box.dragover {
     border-color: #ff00ff; /* Surbrillance quand on drague dessus */
@@ -95,26 +96,31 @@ html, body{
     white-space: nowrap;
 }
 
-/* Objets (Items) */
+/* Conteneur de l'objet déplaçable */
 .draggable-item {
-    width: 65px; /* Taille fixe pour chaque image */
-    height: 65px;
+    /* Nouvelle taille de base du conteneur pour mieux gérer les images */
+    width: 70px; 
+    height: 70px;
     cursor: grab;
     transition: transform 0.1s;
     box-sizing: border-box;
-    /* Pour que les images transparentes aient un contour au survol */
     border: 1px solid transparent; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .draggable-item:hover {
     border: 1px solid rgba(255, 255, 255, 0.5); 
 }
 
-/* L'image de la qualité/défaut */
+/* L'image elle-même pour respecter les proportions (correction ici) */
 .draggable-item img {
-    width: 100%;
-    height: 100%;
+    max-width: 100%; /* S'assure que l'image ne dépasse pas la largeur du conteneur */
+    max-height: 100%; /* S'assure que l'image ne dépasse pas la hauteur du conteneur */
+    width: auto; /* Permet de conserver les proportions (l'élément clé) */
+    height: auto; /* Permet de conserver les proportions */
     display: block;
-    pointer-events: none; /* Important pour que le Drag soit sur l'objet et non l'image */
+    pointer-events: none; /* Important pour que le Drag soit sur le DIV et non l'image */
 }
 
 
@@ -178,7 +184,7 @@ html, body{
 <button id="validate-btn">VALIDER</button>
 
 <div id="win-image-container">
-    <img id="win-img" src="https://i.imgur.com/mGro9Au.png" alt="Victoire">
+    <img id="win-img" src="https://i.imgur.com/xnhXVcZ.png" alt="Victoire">
 </div>
 
 <div id="dialogue-box"><div id="dialogue-text"></div></div>
@@ -273,27 +279,39 @@ const btnValidate = document.getElementById('validate-btn');
 const winContainer = document.getElementById('win-image-container');
 
 // Définition des objets (items) avec leurs liens d'image
+// L'attribut 'type' est crucial pour la validation
 const itemsData = [
-    { id: 'gentillesse', name: 'Gentillesse', src: 'https://i.imgur.com/LMsf1Ls.png' },
-    { id: 'naivete', name: 'Naïveté', src: 'https://i.imgur.com/oarptPK.png' },
-    { id: 'imagination', name: 'Imagination', src: 'https://i.imgur.com/QsxRiq8.png' },
-    { id: 'determination', name: 'Détermination', src: 'https://i.imgur.com/bnhctZw.png' },
-    { id: 'entetement', name: 'Entêtement', src: 'https://i.imgur.com/4R9PzPz.png' },
-    { id: 'sentiments', name: 'Sentiments', src: 'https://i.imgur.com/nSsHglB.png' },
-    { id: 'impulsivite', name: 'Impulsivité', src: 'https://i.imgur.com/kfnToUT.png' },
-    { id: 'hatif', name: 'Hâtif', src: 'https://i.imgur.com/PBuSRTi.png' }
+    // VRAIS TRAITS (8 au total)
+    { id: 'gentillesse', name: 'Gentillesse', src: 'https://i.imgur.com/LMsf1Ls.png', type: 'core' },
+    { id: 'naivete', name: 'Naïveté', src: 'https://i.imgur.com/oarptPK.png', type: 'core' },
+    { id: 'imagination', name: 'Imagination', src: 'https://i.imgur.com/QsxRiq8.png', type: 'core' },
+    { id: 'determination', name: 'Détermination', src: 'https://i.imgur.com/bnhctZw.png', type: 'core' },
+    { id: 'entetement', name: 'Entêtement', src: 'https://i.imgur.com/4R9PzPz.png', type: 'core' },
+    { id: 'sentiments', name: 'Sentiments', src: 'https://i.imgur.com/nSsHglB.png', type: 'core' },
+    { id: 'impulsivite', name: 'Impulsivité', src: 'https://i.imgur.com/kfnToUT.png', type: 'core' },
+    { id: 'hatif', name: 'Hâtif', src: 'https://i.imgur.com/PBuSRTi.png', type: 'core' },
+    
+    // TRAITS PARASITES (4 au total)
+    { id: 'discernement', name: 'Discernement', src: 'https://i.imgur.com/uqIqkuK.png', type: 'parasite' },
+    { id: 'loquacite', name: 'Loquacité', src: 'https://i.imgur.com/dQu6Lga.png', type: 'parasite' },
+    { id: 'susceptibilite', name: 'Susceptibilité', src: 'https://i.imgur.com/dQu6Lga.png', type: 'parasite' }, /* Image réutilisée pour le style */
+    { id: 'tyrannie', name: 'Tyrannie', src: 'https://i.imgur.com/fc4QXTq.png', type: 'parasite' }
 ];
 
 let draggedItem = null;
 
-// Fonction pour initialiser les objets dans le conteneur source
+// Fonction pour initialiser les objets dans le conteneur source (Mélange pour rendre l'énigme plus dure)
 function setupInventory() {
-    itemsData.forEach(item => {
+    // Mélange des items avant l'affichage
+    const shuffledItems = itemsData.sort(() => Math.random() - 0.5);
+
+    shuffledItems.forEach(item => {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'draggable-item';
         itemDiv.setAttribute('draggable', true);
         itemDiv.id = item.id;
-        itemDiv.title = item.name; // Le nom s'affiche au survol (tooltip)
+        itemDiv.title = item.name; 
+        itemDiv.dataset.type = item.type; // Ajout du type pour la vérification
 
         const img = document.createElement('img');
         img.src = item.src;
@@ -306,14 +324,13 @@ function setupInventory() {
     addDragListeners();
 }
 
-// Ajout des écouteurs de D&D
+// Ajout des écouteurs de D&D (inchangé, fonctionne pour toutes les boîtes)
 function addDragListeners() {
     document.querySelectorAll('.draggable-item').forEach(item => {
         item.addEventListener('dragstart', handleDragStart);
         item.addEventListener('dragend', handleDragEnd);
     });
 
-    // Écouteurs pour la zone de dépôt (les deux boîtes sont des zones de dépôt)
     const dropZones = [itemSource, inventoryTarget];
     dropZones.forEach(zone => {
         zone.addEventListener('dragover', handleDragOver);
@@ -326,7 +343,6 @@ function addDragListeners() {
 function handleDragStart(e) {
     draggedItem = this;
     e.dataTransfer.effectAllowed = 'move';
-    // Pour ne pas le voir pendant le drag (petite astuce visuelle)
     setTimeout(() => this.style.opacity = '0.5', 0); 
 }
 
@@ -339,7 +355,7 @@ function handleDragEnd(e) {
 }
 
 function handleDragOver(e) {
-    e.preventDefault(); // Permet le drop
+    e.preventDefault(); 
     e.dataTransfer.dropEffect = 'move';
 }
 
@@ -353,25 +369,41 @@ function handleDragLeave(e) {
 }
 
 function handleDrop(e) {
-    e.stopPropagation(); // Stop la propagation aux parents
+    e.stopPropagation(); 
     this.classList.remove('dragover');
 
     if (draggedItem) {
-        // Déplace l'élément vers la zone de dépôt actuelle
         this.appendChild(draggedItem);
     }
 }
 
 
-// --- VALIDATION DU PUZZLE ---
+// --- VALIDATION DU PUZZLE SÉLECTIF ---
 
 btnValidate.addEventListener('click', ()=>{
     
-    // Le puzzle est réussi si le conteneur cible contient EXACTEMENT 8 éléments
-    const itemsInInventory = inventoryTarget.querySelectorAll('.draggable-item').length;
-    const totalItems = itemsData.length;
+    // Compter les items dans l'inventaire cible
+    const itemsInInventory = inventoryTarget.querySelectorAll('.draggable-item');
+    
+    let coreItemsCount = 0;
+    let parasiteItemsCount = 0;
 
-    if (itemsInInventory === totalItems) {
+    itemsInInventory.forEach(item => {
+        if (item.dataset.type === 'core') {
+            coreItemsCount++;
+        } else if (item.dataset.type === 'parasite') {
+            parasiteItemsCount++;
+        }
+    });
+
+    const totalCoreItems = itemsData.filter(item => item.type === 'core').length; // 8
+    
+    // Condition de Victoire :
+    // 1. Tous les 8 traits "core" sont dans l'inventaire.
+    // 2. Aucun trait "parasite" n'est dans l'inventaire.
+    const victory = (coreItemsCount === totalCoreItems) && (parasiteItemsCount === 0);
+
+    if (victory) {
         // VICTOIRE
         itemSource.style.display = "none";
         inventoryTarget.style.display = "none";
@@ -379,10 +411,7 @@ btnValidate.addEventListener('click', ()=>{
         winContainer.style.display = "block"; 
         typeWriter(winDialogue, closeDialogue);
     } else {
-        // ECHEC
-        // Afficher combien il manque d'éléments si Guilian se rabaisse (c'est une option)
-        // typeWriter(`Il te manque encore ${totalItems - itemsInInventory} élément(s) !`, closeDialogue); 
-        // Ou juste le dialogue "Perdu"
+        // ECHEC (On peut ajouter un feedback simple ici si on veut)
         typeWriter(failDialogue, closeDialogue); 
     }
 });
