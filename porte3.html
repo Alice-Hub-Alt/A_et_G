@@ -255,11 +255,14 @@ const typeSound = document.getElementById("type-sound");
 let isTyping=false, skip=false;
 // Nouvelle variable pour gérer l'étape des dialogues au chargement
 let introStep = 0; 
-// Tableau des dialogues d'introduction (MIS À JOUR)
+// Tableau des dialogues d'introduction
 const introDialogues = [
     "Tiens, on dirait un panneau de configuration... Est-ce que c'est censé représenté ma personnalité via les émotions ?",
     "C'est pas un peu simpliste ? Et puis pourquoi cynisme ?! C'est pas une émotion de base ça ! Attention, tu ne peux régler les jauges que par pas de 5 !"
 ];
+// Dialogues de victoire/échec mis à jour
+const winDialogue = "A ce point là ?!!! Nan mais c'est bon c'est abusé je suis plus heureuse que ça quand même c'est pas bien fait ce truc !";
+const failDialogue = "Ah nan clairement pas c'est n'importe quoi là ! Mais je me conais mal c'est pas ma faute aussi si j'ai pas de recul sur moi même !";
 
 function stopSound(){
   try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){}
@@ -290,8 +293,9 @@ function typeWriter(text){
       dialogueText.classList.remove("cursor-active");
       stopSound();
       isTyping=false;
-      // Ajout de la logique d'enchaînement ici si on est à l'étape 0
-      if (introStep === 0) {
+      // La transition vers introStep = 1 doit se faire après le premier dialogue
+      // Mais seulement s'il s'agit du dialogue d'intro, pas des dialogues de validation
+      if (introStep === 0 && text === introDialogues[0]) {
           introStep = 1; // Prépare le dialogue suivant
       }
     }
@@ -304,10 +308,10 @@ dialogueBox.addEventListener("click", ()=>{
     return;
   }
   
-  // Logique d'enchaînement des dialogues au chargement
+  // Logique d'enchaînement des dialogues au chargement (au clic quand le premier est fini)
   if (introStep === 1) {
       typeWriter(introDialogues[1]);
-      introStep = 2; // Finit l'intro
+      introStep = 2; // Finit l'intro pour que le prochain clic ferme la boîte
       return;
   }
   
@@ -359,8 +363,9 @@ for (const emotion in sliders) {
     updatePercentage(emotion); 
 }
 
-// Intro au chargement (MODIFIÉE POUR UTILISER introDialogues[0])
+// Intro au chargement 
 window.onload = ()=>{
+  // Lance le premier dialogue d'introduction
   typeWriter(introDialogues[0]);
 }
 
@@ -385,10 +390,10 @@ btnValidate.addEventListener("click", ()=>{
     // VICTOIRE
     puzzleContainer.style.display = "none"; // Cache les jauges
     winContainer.style.display = "block"; // Affiche l'image
-    typeWriter("A ce point là ?!!! Nan mais c'est bon c'est abusé je suis plus heureuse que ça quand même c'est pas bien fait ce truc !");
+    typeWriter(winDialogue);
   } else {
     // ECHEC
-    typeWriter("Ah nan clairement pas c'est n'importe quoi là ! Mais je me conais mal c'est pas ma faute aussi si j'ai pas de recul sur moi même !");
+    typeWriter(failDialogue);
   }
 });
 
