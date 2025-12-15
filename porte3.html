@@ -90,7 +90,7 @@ html, body{
   text-shadow: 2px 2px 0px #000;
 }
 .percentage-display {
-    color: #FFFFFF; /* Couleur du dialogue pour la cohérence */
+    color: #ff66ff; /* Couleur du dialogue pour la cohérence */
     text-shadow: 2px 2px 0px #000;
 }
 
@@ -169,7 +169,7 @@ input[type=range]::-moz-range-thumb {
   transform: scale(0.95);
 }
 
-/* Image de victoire (MODIFIÉ) */
+/* Image de victoire */
 #win-image-container {
   position: fixed;
   top: 50%; left: 50%;
@@ -253,6 +253,13 @@ const dialogueText = document.getElementById("dialogue-text");
 const typeSound = document.getElementById("type-sound");
 
 let isTyping=false, skip=false;
+// Nouvelle variable pour gérer l'étape des dialogues au chargement
+let introStep = 0; 
+// Tableau des dialogues d'introduction (MIS À JOUR)
+const introDialogues = [
+    "Tiens, on dirait un panneau de configuration... Est-ce que c'est censé représenté ma personnalité via les émotions ?",
+    "C'est pas un peu simpliste ? Et puis pourquoi cynisme ?! C'est pas une émotion de base ça ! Attention, tu ne peux régler les jauges que par pas de 5 !"
+];
 
 function stopSound(){
   try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){}
@@ -283,6 +290,10 @@ function typeWriter(text){
       dialogueText.classList.remove("cursor-active");
       stopSound();
       isTyping=false;
+      // Ajout de la logique d'enchaînement ici si on est à l'étape 0
+      if (introStep === 0) {
+          introStep = 1; // Prépare le dialogue suivant
+      }
     }
   },28);
 }
@@ -292,7 +303,15 @@ dialogueBox.addEventListener("click", ()=>{
     skip = true;
     return;
   }
-  // Si le texte est fini, on ferme la boite (sauf si logique spéciale)
+  
+  // Logique d'enchaînement des dialogues au chargement
+  if (introStep === 1) {
+      typeWriter(introDialogues[1]);
+      introStep = 2; // Finit l'intro
+      return;
+  }
+  
+  // Si le texte est fini (et pas en mode intro), on ferme la boite
   dialogueBox.style.display = "none";
 });
 
@@ -340,13 +359,11 @@ for (const emotion in sliders) {
     updatePercentage(emotion); 
 }
 
-// Intro au chargement
+// Intro au chargement (MODIFIÉE POUR UTILISER introDialogues[0])
 window.onload = ()=>{
-  typeWriter("Tiens, on dirait un panneau de configuration... Est-ce que c'est censé représenté ma personnalité via les émotions ?");
-  typeWriter("C'est pas un peu simpliste ? Et puis pourquoi cynisme ?! C'est pas une émotion de base ça !");
+  typeWriter(introDialogues[0]);
 }
 
-  
 btnValidate.addEventListener("click", ()=>{
   // Récupération des valeurs
   let valJoie = parseInt(sliders.joie.value);
