@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>Porte 3 - Les Jauges</title>
+<title>Porte 3 - Les Jauges Corrigées</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -80,9 +80,18 @@ html, body{
   margin-bottom: 5px;
 }
 
+.label-wrapper {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 5px;
+}
 .label-text {
-  margin-bottom: 5px;
   text-shadow: 2px 2px 0px #000;
+}
+.percentage-display {
+    color: #ff66ff; /* Couleur du dialogue pour la cohérence */
+    text-shadow: 2px 2px 0px #000;
 }
 
 /* Style des Sliders */
@@ -187,28 +196,43 @@ input[type=range]::-moz-range-thumb {
 <div id="puzzle-container">
   
   <div class="slider-row">
-    <div class="label-text">JOIE</div>
-    <input type="range" id="range-joie" min="0" max="100" value="50">
+    <div class="label-wrapper">
+        <div class="label-text">JOIE</div>
+        <div class="percentage-display" id="perc-joie">50%</div>
+    </div>
+    <input type="range" id="range-joie" min="0" max="100" value="50" step="5">
   </div>
 
   <div class="slider-row">
-    <div class="label-text">TRISTESSE</div>
-    <input type="range" id="range-tristesse" min="0" max="100" value="50">
+    <div class="label-wrapper">
+        <div class="label-text">TRISTESSE</div>
+        <div class="percentage-display" id="perc-tristesse">50%</div>
+    </div>
+    <input type="range" id="range-tristesse" min="0" max="100" value="50" step="5">
   </div>
 
   <div class="slider-row">
-    <div class="label-text">PEUR</div>
-    <input type="range" id="range-peur" min="0" max="100" value="50">
+    <div class="label-wrapper">
+        <div class="label-text">PEUR</div>
+        <div class="percentage-display" id="perc-peur">50%</div>
+    </div>
+    <input type="range" id="range-peur" min="0" max="100" value="50" step="5">
   </div>
 
   <div class="slider-row">
-    <div class="label-text">COLÈRE</div>
-    <input type="range" id="range-colere" min="0" max="100" value="50">
+    <div class="label-wrapper">
+        <div class="label-text">COLÈRE</div>
+        <div class="percentage-display" id="perc-colere">50%</div>
+    </div>
+    <input type="range" id="range-colere" min="0" max="100" value="50" step="5">
   </div>
 
   <div class="slider-row">
-    <div class="label-text">CYNISME</div>
-    <input type="range" id="range-cynisme" min="0" max="100" value="50">
+    <div class="label-wrapper">
+        <div class="label-text">CYNISME</div>
+        <div class="percentage-display" id="perc-cynisme">50%</div>
+    </div>
+    <input type="range" id="range-cynisme" min="0" max="100" value="50" step="5">
   </div>
 
   <button id="validate-btn">VALIDER</button>
@@ -287,34 +311,64 @@ const targets = {
 };
 const margin = 5;
 
+// Elements des jauges et pourcentages
+const sliders = {
+    joie: document.getElementById("range-joie"),
+    tristesse: document.getElementById("range-tristesse"),
+    peur: document.getElementById("range-peur"),
+    colere: document.getElementById("range-colere"),
+    cynisme: document.getElementById("range-cynisme")
+};
+const displays = {
+    joie: document.getElementById("perc-joie"),
+    tristesse: document.getElementById("perc-tristesse"),
+    peur: document.getElementById("perc-peur"),
+    colere: document.getElementById("perc-colere"),
+    cynisme: document.getElementById("perc-cynisme")
+};
+
+// Fonction pour mettre à jour l'affichage des pourcentages
+function updatePercentage(emotion) {
+    displays[emotion].textContent = sliders[emotion].value + "%";
+}
+
+// Ajouter les écouteurs d'événements pour mettre à jour l'affichage en temps réel
+for (const emotion in sliders) {
+    sliders[emotion].addEventListener("input", () => updatePercentage(emotion));
+    // Mettre à jour l'affichage initial
+    updatePercentage(emotion); 
+}
+
 // Intro au chargement
 window.onload = ()=>{
-  typeWriter("Tiens, on dirait un panneau de configuration... 'Mélangeur d'émotions'. Est-ce que tu me connais assez bien pour régler ça ?");
+  typeWriter("Tiens, on dirait un panneau de configuration... 'Mélangeur d'émotions'. Est-ce que tu me connais assez bien pour régler ça ? Attention, tu ne peux régler les jauges que par pas de 5 !");
 }
 
 btnValidate.addEventListener("click", ()=>{
   // Récupération des valeurs
-  let valJoie = parseInt(document.getElementById("range-joie").value);
-  let valTristesse = parseInt(document.getElementById("range-tristesse").value);
-  let valPeur = parseInt(document.getElementById("range-peur").value);
-  let valColere = parseInt(document.getElementById("range-colere").value);
-  let valCynisme = parseInt(document.getElementById("range-cynisme").value);
+  let valJoie = parseInt(sliders.joie.value);
+  let valTristesse = parseInt(sliders.tristesse.value);
+  let valPeur = parseInt(sliders.peur.value);
+  let valColere = parseInt(sliders.colere.value);
+  let valCynisme = parseInt(sliders.cynisme.value);
 
-  // Vérification
-  let okJoie = (valJoie >= targets.joie - margin && valJoie <= targets.joie + margin);
-  let okTristesse = (valTristesse >= targets.tristesse - margin && valTristesse <= targets.tristesse + margin);
-  let okPeur = (valPeur >= targets.peur - margin && valPeur <= targets.peur + margin);
-  let okColere = (valColere >= targets.colere - margin && valColere <= targets.colere + margin);
-  let okCynisme = (valCynisme >= targets.cynisme - margin && valCynisme <= targets.cynisme + margin);
+  // Vérification avec la marge d'erreur
+  const checkValue = (val, target) => (val >= target - margin && val <= target + margin);
+
+  let okJoie = checkValue(valJoie, targets.joie);
+  let okTristesse = checkValue(valTristesse, targets.tristesse);
+  let okPeur = checkValue(valPeur, targets.peur);
+  let okColere = checkValue(valColere, targets.colere);
+  let okCynisme = checkValue(valCynisme, targets.cynisme);
 
   if(okJoie && okTristesse && okPeur && okColere && okCynisme) {
     // VICTOIRE
     puzzleContainer.style.display = "none"; // Cache les jauges
     winContainer.style.display = "block"; // Affiche l'image
-    typeWriter("Oui... C'est exactement ça. Un mélange instable, mais c'est moi. Voici la suite du code.");
+    typeWriter("Oui... C'est exactement ça. Un mélange instable, mais c'est moi. C'est adorable que tu me connaisses si bien. Voici la suite du code : [CODE_SECRET_ICI].");
   } else {
     // ECHEC
-    typeWriter("Hum, non. Ce n'est pas tout à fait ça. Regarde bien les pourcentages, tu sais que je ne suis pas si joyeuse que ça...");
+    typeWriter("Hum, non. Ce n'est pas tout à fait ça. Regarde bien les pourcentages, tu sais que je ne suis pas si joyeuse que ça... Essaie encore !");
   }
 });
 
