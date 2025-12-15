@@ -258,7 +258,7 @@ let skipRequested = false;
 // Tableau des dialogues d'introduction (MIS À JOUR)
 const introDialogues = [
     "Tiens, on dirait un panneau de configuration... Est-ce que c'est censé représenté ma personnalité via les émotions ?",
-    "C'est pas un peu simpliste ? Et puis pourquoi cynisme ?! C'est pas une émotion de base ça !"
+    "C'est pas un peu simpliste ? Et puis pourquoi cynisme ?! C'est pas une émotion de base ça ! Attention, tu ne peux régler les jauges que par pas de 5 !"
 ];
 
 // Dialogues de victoire/échec mis à jour
@@ -268,6 +268,13 @@ const failDialogue = "Ah nan clairement pas c'est n'importe quoi là ! Mais je m
 
 function stopSound(){
   try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){}
+}
+
+// Nouvelle fonction pour fermer la boîte de dialogue
+function closeDialogue(){
+    dialogueBox.style.display = "none";
+    // Important : On doit aussi enlever l'écouteur de clic qui a déclenché cette fermeture pour ne pas la laisser traîner
+    dialogueBox.removeEventListener('click', closeDialogue); 
 }
 
 // Fonction TypeWriter mise à jour avec Callback
@@ -280,6 +287,7 @@ function typeWriter(text, callback){
         stopSound();
         dialogueText.classList.remove("cursor-active");
         isTyping = false;
+        // Si un callback est fourni, on l'ajoute comme écouteur pour le clic suivant.
         if(callback) dialogueBox.addEventListener('click', callback, { once:true });
     };
 
@@ -317,11 +325,8 @@ dialogueBox.addEventListener("click", (event)=>{
 
 // Fonctions d'enchaînement des dialogues d'introduction
 function introSequenceStep2(){
-    // On ferme la boîte si le texte est déjà fini (pour éviter de re-cliquer pour la fermer)
-    dialogueBox.removeEventListener('click', introSequenceStep2); // Enlève l'écouteur après un clic
-    if(isTyping) return; // Sécurité
-
-    // Lance le deuxième dialogue
+    // La fonction introSequenceStep2 est déjà le callback du clic
+    // Elle lance le deuxième dialogue et appelle endIntroSequence au prochain clic
     typeWriter(introDialogues[1], endIntroSequence);
 }
 
@@ -404,12 +409,12 @@ btnValidate.addEventListener("click", ()=>{
     // VICTOIRE
     puzzleContainer.style.display = "none"; // Cache les jauges
     winContainer.style.display = "block"; // Affiche l'image
-    // typeWriter sans callback car on affiche le code, le dialogue peut rester ouvert
-    typeWriter(winDialogue, null);
+    // typeWriter doit appeler closeDialogue au clic suivant
+    typeWriter(winDialogue, closeDialogue);
   } else {
     // ECHEC
-    // typeWriter sans callback car le dialogue doit rester ouvert jusqu'au clic de l'utilisateur
-    typeWriter(failDialogue, null);
+    // typeWriter doit appeler closeDialogue au clic suivant
+    typeWriter(failDialogue, closeDialogue);
   }
 });
 
