@@ -1,25 +1,324 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Porte 3</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>Porte 3 - Les Jauges</title>
+
 <style>
-  body{
-    margin:0;
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background-color:#111;
-    color:#ff66ff;
-    font-family:'Press Start 2P', monospace;
-    font-size:3em;
-    text-align:center;
-  }
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+html, body{
+  margin:0; padding:0; height:100%;
+  font-family:'Press Start 2P', monospace;
+  overflow:hidden;
+  background:url('https://i.pinimg.com/originals/29/14/97/2914979d57cf620dbf74856235f6f704.gif') center/cover no-repeat;
+  user-select: none;
+}
+
+/* --- UI GLOBALE --- */
+
+/* Retour */
+#back-btn{
+  position:fixed; top:14px; left:14px;
+  font-size:32px; color:red;
+  cursor:pointer; z-index:6000;
+  text-shadow: 2px 2px 0px black;
+}
+
+/* Dialogue */
+#dialogue-box{
+  position:fixed;
+  left:50%; bottom:26px;
+  transform:translateX(-50%);
+  width:84%;
+  min-height:14vh; max-height:28vh;
+  background:rgba(0,0,0,0.55);
+  border:3px solid #ff00ff;
+  padding:18px;
+  color:#ff66ff;
+  display:none;
+  z-index:9000;
+  text-shadow:0 0 6px rgba(255,0,255,0.2);
+  overflow:auto;
+}
+#dialogue-text{ font-size:0.86em; line-height:1.45; }
+.cursor-active{
+  border-right:0.15em solid #ff66ff;
+  animation:blink 0.5s steps(1) infinite;
+  padding-right:6px;
+}
+@keyframes blink{
+  0%,100%{border-color:transparent;}
+  50%{border-color:#ff66ff;}
+}
+
+/* --- LOGIQUE DES JAUGES --- */
+
+#puzzle-container {
+  position: fixed;
+  top: 45%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%; max-width: 500px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 20px;
+  border: 4px solid white;
+  text-align: center;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.slider-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: white;
+  font-size: 0.8em;
+  margin-bottom: 5px;
+}
+
+.label-text {
+  margin-bottom: 5px;
+  text-shadow: 2px 2px 0px #000;
+}
+
+/* Style des Sliders */
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 20px;
+  background: transparent;
+  outline: none;
+  cursor: pointer;
+}
+
+/* La barre (Track) */
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 16px;
+  border: 2px solid black; /* Contour noir demandé */
+  border-radius: 0px;
+}
+input[type=range]::-moz-range-track {
+  width: 100%;
+  height: 16px;
+  border: 2px solid black;
+  border-radius: 0px;
+}
+
+/* Le curseur (Thumb) - On le fait ressortir un peu */
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 24px;
+  width: 12px;
+  background: white;
+  border: 2px solid black;
+  margin-top: -6px; /* Pour centrer le thumb sur la track */
+  box-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+}
+input[type=range]::-moz-range-thumb {
+  height: 24px;
+  width: 12px;
+  background: white;
+  border: 2px solid black;
+  box-shadow: 2px 2px 0px rgba(0,0,0,0.5);
+}
+
+/* Couleurs spécifiques des jauges */
+#range-joie::-webkit-slider-runnable-track { background: #ffff00; }
+#range-joie::-moz-range-track { background: #ffff00; }
+
+#range-tristesse::-webkit-slider-runnable-track { background: #0000ff; }
+#range-tristesse::-moz-range-track { background: #0000ff; }
+
+#range-peur::-webkit-slider-runnable-track { background: #00ff00; }
+#range-peur::-moz-range-track { background: #00ff00; }
+
+#range-colere::-webkit-slider-runnable-track { background: #ff0000; }
+#range-colere::-moz-range-track { background: #ff0000; }
+
+#range-cynisme::-webkit-slider-runnable-track { background: #9900cc; } /* Violet */
+#range-cynisme::-moz-range-track { background: #9900cc; }
+
+/* Bouton Valider */
+#validate-btn {
+  margin-top: 15px;
+  padding: 15px;
+  font-family: 'Press Start 2P', monospace;
+  background: black;
+  color: white;
+  border: 3px solid white;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-size: 0.9em;
+  transition: transform 0.1s;
+}
+#validate-btn:active {
+  transform: scale(0.95);
+}
+
+/* Image de victoire */
+#win-image-container {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5000;
+  display: none;
+  border: 4px solid white;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+#win-img {
+  display: block;
+  max-width: 90vw;
+  max-height: 80vh;
+}
+
 </style>
 </head>
+
 <body>
-  Porte 3
+
+<div id="back-btn" onclick="location.href='zone2_1.html'">⬅</div>
+<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=0"></audio>
+
+<div id="puzzle-container">
+  
+  <div class="slider-row">
+    <div class="label-text">JOIE</div>
+    <input type="range" id="range-joie" min="0" max="100" value="50">
+  </div>
+
+  <div class="slider-row">
+    <div class="label-text">TRISTESSE</div>
+    <input type="range" id="range-tristesse" min="0" max="100" value="50">
+  </div>
+
+  <div class="slider-row">
+    <div class="label-text">PEUR</div>
+    <input type="range" id="range-peur" min="0" max="100" value="50">
+  </div>
+
+  <div class="slider-row">
+    <div class="label-text">COLÈRE</div>
+    <input type="range" id="range-colere" min="0" max="100" value="50">
+  </div>
+
+  <div class="slider-row">
+    <div class="label-text">CYNISME</div>
+    <input type="range" id="range-cynisme" min="0" max="100" value="50">
+  </div>
+
+  <button id="validate-btn">VALIDER</button>
+
+</div>
+
+<div id="win-image-container">
+  <img id="win-img" src="https://i.imgur.com/mGro9Au.png" alt="Victoire">
+</div>
+
+<div id="dialogue-box"><div id="dialogue-text"></div></div>
+
+<script>
+/* --- CONFIGURATION DU TYPEWRITER --- */
+const dialogueBox = document.getElementById("dialogue-box");
+const dialogueText = document.getElementById("dialogue-text");
+const typeSound = document.getElementById("type-sound");
+
+let isTyping=false, skip=false;
+
+function stopSound(){
+  try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){}
+}
+
+function typeWriter(text){
+  if(isTyping) return;
+  skip=false;
+  isTyping=true;
+  dialogueText.innerHTML="";
+  dialogueBox.style.display="block";
+  dialogueText.classList.add("cursor-active");
+  try{ typeSound.play().catch(()=>{});}catch(e){}
+  let i=0;
+  let interval=setInterval(()=>{
+    if(skip){
+      dialogueText.innerHTML=text;
+      clearInterval(interval);
+      dialogueText.classList.remove("cursor-active");
+      stopSound();
+      isTyping=false;
+      return;
+    }
+    if(i<text.length){
+      dialogueText.innerHTML+=text.charAt(i++);
+    } else {
+      clearInterval(interval);
+      dialogueText.classList.remove("cursor-active");
+      stopSound();
+      isTyping=false;
+    }
+  },28);
+}
+
+dialogueBox.addEventListener("click", ()=>{
+  if(isTyping){
+    skip = true;
+    return;
+  }
+  // Si le texte est fini, on ferme la boite (sauf si logique spéciale)
+  dialogueBox.style.display = "none";
+});
+
+/* --- LOGIQUE DU PUZZLE --- */
+
+const btnValidate = document.getElementById("validate-btn");
+const puzzleContainer = document.getElementById("puzzle-container");
+const winContainer = document.getElementById("win-image-container");
+
+// Cibles et marge d'erreur
+const targets = {
+  joie: 15,
+  tristesse: 20,
+  peur: 25,
+  colere: 10,
+  cynisme: 30
+};
+const margin = 5;
+
+// Intro au chargement
+window.onload = ()=>{
+  typeWriter("Tiens, on dirait un panneau de configuration... 'Mélangeur d'émotions'. Est-ce que tu me connais assez bien pour régler ça ?");
+}
+
+btnValidate.addEventListener("click", ()=>{
+  // Récupération des valeurs
+  let valJoie = parseInt(document.getElementById("range-joie").value);
+  let valTristesse = parseInt(document.getElementById("range-tristesse").value);
+  let valPeur = parseInt(document.getElementById("range-peur").value);
+  let valColere = parseInt(document.getElementById("range-colere").value);
+  let valCynisme = parseInt(document.getElementById("range-cynisme").value);
+
+  // Vérification
+  let okJoie = (valJoie >= targets.joie - margin && valJoie <= targets.joie + margin);
+  let okTristesse = (valTristesse >= targets.tristesse - margin && valTristesse <= targets.tristesse + margin);
+  let okPeur = (valPeur >= targets.peur - margin && valPeur <= targets.peur + margin);
+  let okColere = (valColere >= targets.colere - margin && valColere <= targets.colere + margin);
+  let okCynisme = (valCynisme >= targets.cynisme - margin && valCynisme <= targets.cynisme + margin);
+
+  if(okJoie && okTristesse && okPeur && okColere && okCynisme) {
+    // VICTOIRE
+    puzzleContainer.style.display = "none"; // Cache les jauges
+    winContainer.style.display = "block"; // Affiche l'image
+    typeWriter("Oui... C'est exactement ça. Un mélange instable, mais c'est moi. Voici la suite du code.");
+  } else {
+    // ECHEC
+    typeWriter("Hum, non. Ce n'est pas tout à fait ça. Regarde bien les pourcentages, tu sais que je ne suis pas si joyeuse que ça...");
+  }
+});
+
+</script>
+
 </body>
 </html>
