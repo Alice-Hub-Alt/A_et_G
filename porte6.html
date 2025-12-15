@@ -1,25 +1,393 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Porte 6</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>Porte 4 - L'Inventaire de Survie</title>
+
 <style>
-  body{
-    margin:0;
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background-color:#111;
-    color:#ff66ff;
-    font-family:'Press Start 2P', monospace;
-    font-size:3em;
-    text-align:center;
-  }
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+html, body{
+  margin:0; padding:0; height:100%;
+  font-family:'Press Start 2P', monospace;
+  overflow:hidden;
+  /* Nouveau fond */
+  background:url('https://c.tenor.com/VXK2tjK7Uh0AAAAd/tenor.gif') center/cover no-repeat;
+  user-select: none;
+}
+
+/* --- UI GLOBALE --- */
+
+/* Retour */
+#back-btn{
+  position:fixed; top:14px; left:14px;
+  font-size:32px; color:red;
+  cursor:pointer; z-index:6000;
+  text-shadow: 2px 2px 0px black;
+}
+
+/* Dialogue */
+#dialogue-box{
+  position:fixed;
+  left:50%; bottom:26px;
+  transform:translateX(-50%);
+  width:84%;
+  min-height:14vh; max-height:28vh;
+  background:rgba(0,0,0,0.55);
+  border:3px solid #ff00ff;
+  padding:18px;
+  color:#ff66ff;
+  display:none;
+  z-index:9000;
+  text-shadow:0 0 6px rgba(255,0,255,0.2);
+  overflow:auto;
+}
+#dialogue-text{ font-size:0.86em; line-height:1.45; }
+.cursor-active{
+  border-right:0.15em solid #ff66ff;
+  animation:blink 0.5s steps(1) infinite;
+  padding-right:6px;
+}
+@keyframes blink{
+  0%,100%{border-color:transparent;}
+  50%{border-color:#ff66ff;}
+}
+
+/* --- LOGIQUE DE L'INVENTAIRE (D&D) --- */
+
+#dnd-container {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    gap: 20px;
+    z-index: 100;
+}
+
+.inventory-box {
+    width: 300px; /* Taille fixe pour les deux boîtes */
+    height: 300px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 4px solid white;
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 5px;
+    position: relative;
+}
+.inventory-box.dragover {
+    border-color: #ff00ff; /* Surbrillance quand on drague dessus */
+    box-shadow: 0 0 10px #ff00ff;
+}
+
+.box-title {
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 0.9em;
+    text-shadow: 2px 2px 0px black;
+    white-space: nowrap;
+}
+
+/* Objets (Items) */
+.draggable-item {
+    width: 65px; /* Taille fixe pour chaque image */
+    height: 65px;
+    cursor: grab;
+    transition: transform 0.1s;
+    box-sizing: border-box;
+    /* Pour que les images transparentes aient un contour au survol */
+    border: 1px solid transparent; 
+}
+.draggable-item:hover {
+    border: 1px solid rgba(255, 255, 255, 0.5); 
+}
+
+/* L'image de la qualité/défaut */
+.draggable-item img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none; /* Important pour que le Drag soit sur l'objet et non l'image */
+}
+
+
+/* Bouton Valider */
+#validate-btn {
+    position: fixed;
+    bottom: 20%; 
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px;
+    font-family: 'Press Start 2P', monospace;
+    background: black;
+    color: white;
+    border: 3px solid white;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-size: 0.9em;
+    transition: transform 0.1s;
+    z-index: 50;
+}
+#validate-btn:active {
+    transform: translateX(-50%) scale(0.95);
+}
+
+/* Image de victoire */
+#win-image-container {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5000;
+    display: none;
+    border: none; 
+    box-shadow: none;
+}
+#win-img {
+    display: block;
+    max-width: 90vw;
+    max-height: 80vh;
+}
+
 </style>
 </head>
+
 <body>
-  Porte 6
+
+<div id="back-btn" onclick="location.href='zone2_1.html'">⬅</div>
+<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=0"></audio>
+
+<div id="dnd-container">
+    
+    <div id="item-source" class="inventory-box">
+        <div class="box-title">Ressources à trier</div>
+        </div>
+
+    <div id="inventory-target" class="inventory-box">
+        <div class="box-title">Qui est-il ?</div>
+        </div>
+
+</div>
+
+<button id="validate-btn">VALIDER</button>
+
+<div id="win-image-container">
+    <img id="win-img" src="https://i.imgur.com/mGro9Au.png" alt="Victoire">
+</div>
+
+<div id="dialogue-box"><div id="dialogue-text"></div></div>
+
+<script>
+// --- CONFIGURATION DU TYPEWRITER (REPRIS DE L'EXEMPLE PRÉCÉDENT) ---
+
+const dialogueBox = document.getElementById("dialogue-box");
+const dialogueText = document.getElementById("dialogue-text");
+const typeSound = document.getElementById("type-sound");
+let typingInterval;
+let isTyping = false;
+let skipRequested = false;
+
+// Dialogues temporaires
+const introDialogues = ["intro 1", "intro 2"];
+const winDialogue = "Gagné";
+const failDialogue = "Perdu";
+
+function stopSound(){
+  try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){}
+}
+
+function closeDialogue(){
+    dialogueBox.style.display = "none";
+    dialogueBox.removeEventListener('click', closeDialogue); 
+}
+
+function typeWriter(text, callback){
+    if(typingInterval) clearInterval(typingInterval);
+    skipRequested = false;
+
+    const finalizeTyping = () => {
+        clearInterval(typingInterval);
+        stopSound();
+        dialogueText.classList.remove("cursor-active");
+        isTyping = false;
+        if(callback) dialogueBox.addEventListener('click', callback, { once:true });
+    };
+
+    isTyping = true;
+    dialogueText.innerHTML = "";
+    dialogueBox.style.display = "block";
+    dialogueText.classList.add("cursor-active");
+    
+    try{ typeSound.play().catch(()=>{});}catch(e){}
+    
+    let i=0;
+    typingInterval = setInterval(()=>{
+        if(skipRequested){
+            dialogueText.innerHTML = text;
+            finalizeTyping();
+            return;
+        }
+        if(i < text.length){
+            dialogueText.innerHTML += text.charAt(i++);
+        } else {
+            finalizeTyping();
+        }
+    }, 28);
+}
+
+dialogueBox.addEventListener("click", (event)=>{
+    if(isTyping){
+        skipRequested = true;
+        event.stopPropagation();
+        return;
+    }
+});
+
+function introSequenceStep2(){
+    typeWriter(introDialogues[1], endIntroSequence);
+}
+
+function endIntroSequence(){
+    dialogueBox.style.display = "none";
+    dialogueBox.removeEventListener('click', endIntroSequence); 
+}
+
+// Lancement de l'intro au chargement
+window.onload = ()=>{
+    setupInventory();
+    typeWriter(introDialogues[0], introSequenceStep2);
+}
+
+
+// --- LOGIQUE DU PUZZLE D&D ---
+
+const itemSource = document.getElementById('item-source');
+const inventoryTarget = document.getElementById('inventory-target');
+const btnValidate = document.getElementById('validate-btn');
+const winContainer = document.getElementById('win-image-container');
+
+// Définition des objets (items) avec leurs liens d'image
+const itemsData = [
+    { id: 'gentillesse', name: 'Gentillesse', src: 'https://i.imgur.com/LMsf1Ls.png' },
+    { id: 'naivete', name: 'Naïveté', src: 'https://i.imgur.com/oarptPK.png' },
+    { id: 'imagination', name: 'Imagination', src: 'https://i.imgur.com/QsxRiq8.png' },
+    { id: 'determination', name: 'Détermination', src: 'https://i.imgur.com/bnhctZw.png' },
+    { id: 'entetement', name: 'Entêtement', src: 'https://i.imgur.com/4R9PzPz.png' },
+    { id: 'sentiments', name: 'Sentiments', src: 'https://i.imgur.com/nSsHglB.png' },
+    { id: 'impulsivite', name: 'Impulsivité', src: 'https://i.imgur.com/kfnToUT.png' },
+    { id: 'hatif', name: 'Hâtif', src: 'https://i.imgur.com/PBuSRTi.png' }
+];
+
+let draggedItem = null;
+
+// Fonction pour initialiser les objets dans le conteneur source
+function setupInventory() {
+    itemsData.forEach(item => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'draggable-item';
+        itemDiv.setAttribute('draggable', true);
+        itemDiv.id = item.id;
+        itemDiv.title = item.name; // Le nom s'affiche au survol (tooltip)
+
+        const img = document.createElement('img');
+        img.src = item.src;
+        img.alt = item.name;
+
+        itemDiv.appendChild(img);
+        itemSource.appendChild(itemDiv);
+    });
+
+    addDragListeners();
+}
+
+// Ajout des écouteurs de D&D
+function addDragListeners() {
+    document.querySelectorAll('.draggable-item').forEach(item => {
+        item.addEventListener('dragstart', handleDragStart);
+        item.addEventListener('dragend', handleDragEnd);
+    });
+
+    // Écouteurs pour la zone de dépôt (les deux boîtes sont des zones de dépôt)
+    const dropZones = [itemSource, inventoryTarget];
+    dropZones.forEach(zone => {
+        zone.addEventListener('dragover', handleDragOver);
+        zone.addEventListener('dragenter', handleDragEnter);
+        zone.addEventListener('dragleave', handleDragLeave);
+        zone.addEventListener('drop', handleDrop);
+    });
+}
+
+function handleDragStart(e) {
+    draggedItem = this;
+    e.dataTransfer.effectAllowed = 'move';
+    // Pour ne pas le voir pendant le drag (petite astuce visuelle)
+    setTimeout(() => this.style.opacity = '0.5', 0); 
+}
+
+function handleDragEnd(e) {
+    this.style.opacity = '1';
+    draggedItem = null;
+    document.querySelectorAll('.inventory-box').forEach(box => {
+        box.classList.remove('dragover');
+    });
+}
+
+function handleDragOver(e) {
+    e.preventDefault(); // Permet le drop
+    e.dataTransfer.dropEffect = 'move';
+}
+
+function handleDragEnter(e) {
+    e.preventDefault();
+    this.classList.add('dragover');
+}
+
+function handleDragLeave(e) {
+    this.classList.remove('dragover');
+}
+
+function handleDrop(e) {
+    e.stopPropagation(); // Stop la propagation aux parents
+    this.classList.remove('dragover');
+
+    if (draggedItem) {
+        // Déplace l'élément vers la zone de dépôt actuelle
+        this.appendChild(draggedItem);
+    }
+}
+
+
+// --- VALIDATION DU PUZZLE ---
+
+btnValidate.addEventListener('click', ()=>{
+    
+    // Le puzzle est réussi si le conteneur cible contient EXACTEMENT 8 éléments
+    const itemsInInventory = inventoryTarget.querySelectorAll('.draggable-item').length;
+    const totalItems = itemsData.length;
+
+    if (itemsInInventory === totalItems) {
+        // VICTOIRE
+        itemSource.style.display = "none";
+        inventoryTarget.style.display = "none";
+        btnValidate.style.display = "none";
+        winContainer.style.display = "block"; 
+        typeWriter(winDialogue, closeDialogue);
+    } else {
+        // ECHEC
+        // Afficher combien il manque d'éléments si Guilian se rabaisse (c'est une option)
+        // typeWriter(`Il te manque encore ${totalItems - itemsInInventory} élément(s) !`, closeDialogue); 
+        // Ou juste le dialogue "Perdu"
+        typeWriter(failDialogue, closeDialogue); 
+    }
+});
+
+</script>
+
 </body>
 </html>
