@@ -251,73 +251,87 @@ input[type=range]::-moz-range-thumb {
 const dialogueBox = document.getElementById("dialogue-box");
 const dialogueText = document.getElementById("dialogue-text");
 const typeSound = document.getElementById("type-sound");
+let typingInterval;
+let isTyping = false;
+let skipRequested = false;
 
-let isTyping=false, skip=false;
-// Nouvelle variable pour gérer l'étape des dialogues au chargement
-let introStep = 0; 
-// Tableau des dialogues d'introduction
+// Tableau des dialogues d'introduction (MIS À JOUR)
 const introDialogues = [
     "Tiens, on dirait un panneau de configuration... Est-ce que c'est censé représenté ma personnalité via les émotions ?",
     "C'est pas un peu simpliste ? Et puis pourquoi cynisme ?! C'est pas une émotion de base ça ! Attention, tu ne peux régler les jauges que par pas de 5 !"
 ];
+
 // Dialogues de victoire/échec mis à jour
 const winDialogue = "A ce point là ?!!! Nan mais c'est bon c'est abusé je suis plus heureuse que ça quand même c'est pas bien fait ce truc !";
 const failDialogue = "Ah nan clairement pas c'est n'importe quoi là ! Mais je me conais mal c'est pas ma faute aussi si j'ai pas de recul sur moi même !";
+
 
 function stopSound(){
   try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){}
 }
 
-function typeWriter(text){
-  if(isTyping) return;
-  skip=false;
-  isTyping=true;
-  dialogueText.innerHTML="";
-  dialogueBox.style.display="block";
-  dialogueText.classList.add("cursor-active");
-  try{ typeSound.play().catch(()=>{});}catch(e){}
-  let i=0;
-  let interval=setInterval(()=>{
-    if(skip){
-      dialogueText.innerHTML=text;
-      clearInterval(interval);
-      dialogueText.classList.remove("cursor-active");
-      stopSound();
-      isTyping=false;
-      return;
-    }
-    if(i<text.length){
-      dialogueText.innerHTML+=text.charAt(i++);
-    } else {
-      clearInterval(interval);
-      dialogueText.classList.remove("cursor-active");
-      stopSound();
-      isTyping=false;
-      // La transition vers introStep = 1 doit se faire après le premier dialogue
-      // Mais seulement s'il s'agit du dialogue d'intro, pas des dialogues de validation
-      if (introStep === 0 && text === introDialogues[0]) {
-          introStep = 1; // Prépare le dialogue suivant
-      }
-    }
-  },28);
+// Fonction TypeWriter mise à jour avec Callback
+function typeWriter(text, callback){
+    if(typingInterval) clearInterval(typingInterval);
+    skipRequested = false;
+
+    const finalizeTyping = () => {
+        clearInterval(typingInterval);
+        stopSound();
+        dialogueText.classList.remove("cursor-active");
+        isTyping = false;
+        if(callback) dialogueBox.addEventListener('click', callback, { once:true });
+    };
+
+    isTyping = true;
+    dialogueText.innerHTML = "";
+    dialogueBox.style.display = "block";
+    dialogueText.classList.add("cursor-active");
+    
+    // Jouer le son
+    try{ typeSound.play().catch(()=>{});}catch(e){}
+    
+    let i=0;
+    typingInterval = setInterval(()=>{
+        if(skipRequested){
+            dialogueText.innerHTML = text;
+            finalizeTyping();
+            return;
+        }
+        if(i < text.length){
+            dialogueText.innerHTML += text.charAt(i++);
+        } else {
+            finalizeTyping();
+        }
+    }, 28);
 }
 
-dialogueBox.addEventListener("click", ()=>{
-  if(isTyping){
-    skip = true;
-    return;
-  }
-  
-  // Logique d'enchaînement des dialogues au chargement (au clic quand le premier est fini)
-  if (introStep === 1) {
-      typeWriter(introDialogues[1]);
-      introStep = 2; // Finit l'intro pour que le prochain clic ferme la boîte
-      return;
-  }
-  
-  // Si le texte est fini (et pas en mode intro), on ferme la boite
-  dialogueBox.style.display = "none";
+// Gestion du skip
+dialogueBox.addEventListener("click", (event)=>{
+    if(isTyping){
+        skipRequested = true;
+        event.stopPropagation();
+        return;
+    }
 });
+
+// Fonctions d'enchaînement des dialogues d'introduction
+function introSequenceStep2(){
+    // On ferme la boîte si le texte est déjà fini (pour éviter de re-cliquer pour la fermer)
+    dialogueBox.removeEventListener('click', introSequenceStep2); // Enlève l'écouteur après un clic
+    if(isTyping) return; // Sécurité
+
+    // Lance le deuxième dialogue
+    typeWriter(introDialogues[1], endIntroSequence);
+}
+
+function endIntroSequence(){
+    // Une fois que la deuxième phrase est finie et qu'on clique, on ferme la boîte
+    dialogueBox.style.display = "none";
+    // Supprime l'écouteur d'événement final pour ne pas interférer avec le bouton de validation
+    dialogueBox.removeEventListener('click', endIntroSequence); 
+}
+
 
 /* --- LOGIQUE DU PUZZLE --- */
 
@@ -363,10 +377,10 @@ for (const emotion in sliders) {
     updatePercentage(emotion); 
 }
 
-// Intro au chargement 
+// Intro au chargement (Lancement de la première étape de la cinématique)
 window.onload = ()=>{
-  // Lance le premier dialogue d'introduction
-  typeWriter(introDialogues[0]);
+    // Lance le premier dialogue et appelle introSequenceStep2 au clic suivant
+    typeWriter(introDialogues[0], introSequenceStep2);
 }
 
 btnValidate.addEventListener("click", ()=>{
@@ -390,10 +404,12 @@ btnValidate.addEventListener("click", ()=>{
     // VICTOIRE
     puzzleContainer.style.display = "none"; // Cache les jauges
     winContainer.style.display = "block"; // Affiche l'image
-    typeWriter(winDialogue);
+    // typeWriter sans callback car on affiche le code, le dialogue peut rester ouvert
+    typeWriter(winDialogue, null);
   } else {
     // ECHEC
-    typeWriter(failDialogue);
+    // typeWriter sans callback car le dialogue doit rester ouvert jusqu'au clic de l'utilisateur
+    typeWriter(failDialogue, null);
   }
 });
 
