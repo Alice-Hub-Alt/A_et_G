@@ -178,8 +178,8 @@ html, body{
 <div id="main-puzzle-wrapper">
     
     <div id="titles-wrapper">
-        <div class="box-title-text">Ressources à trier</div>
-        <div class="box-title-text">Qui est-il ?</div>
+        <div class="box-title-text">Essence de l'individualité</div>
+        <div class="box-title-text">Identifie sa nature</div>
     </div>
     
     <div id="dnd-container">
@@ -212,9 +212,9 @@ let typingInterval;
 let isTyping = false;
 let skipRequested = false;
 
-const introDialogues = ["intro 1", "intro 2"];
-const winDialogue = "Gagné";
-const failDialogue = "Perdu";
+const introDialogues = ["C'est quoi, une sorte de puzzle par trie sélectif de traits de caractères ?", "C'est au masculin, j'imagine que c'est pour Guilian. Toujours à mettre le bzard celui la !"];
+const winDialogue = "Youhou je le connais trop bien je suis juste trop frte en fait !";
+const failDialogue = "Mais non mais pas du tout je dit nim c'est pas du tout lui ça...";
 
 function stopSound(){
   try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){}
@@ -296,16 +296,16 @@ const coreItems = [
     { id: 'imagination', name: 'Imagination', src: 'https://i.imgur.com/QsxRiq8.png', type: 'core' },
     { id: 'determination', name: 'Détermination', src: 'https://i.imgur.com/bnhctZw.png', type: 'core' },
     { id: 'entetement', name: 'Entêtement', src: 'https://i.imgur.com/4R9PzPz.png', type: 'core' },
-    { id: 'sentiments', name: 'Sentimental', src: 'https://i.imgur.com/nSsHglB.png', type: 'core' },
+    { id: 'sentiments', name: 'Sentimentalilé', src: 'https://i.imgur.com/nSsHglB.png', type: 'core' },
     { id: 'impulsivite', name: 'Impulsivité', src: 'https://i.imgur.com/kfnToUT.png', type: 'core' },
-    { id: 'hatif', name: 'Hâtif', src: 'https://i.imgur.com/PBuSRTi.png', type: 'core' },
+    { id: 'hatif', name: 'Hâtivement', src: 'https://i.imgur.com/PBuSRTi.png', type: 'core' },
 ];
 
 const parasiteItems = [
     { id: 'discernement', name: 'Discernement', src: 'https://i.imgur.com/uqIqkuK.png', type: 'parasite' },
     { id: 'loquacite', name: 'Loquacité', src: 'https://i.imgur.com/dQu6Lga.png', type: 'parasite' },
     { id: 'susceptibilite', name: 'Susceptibilité', src: 'https://i.imgur.com/MLOLl1y.png', type: 'parasite' }, 
-    { id: 'tyrannie', name: 'Tyrannie', src: 'https://i.imgur.com/fc4QXTq.png', type: 'parasite' }
+    { id: 'tyrannie', name: 'Autoritaire', src: 'https://i.imgur.com/fc4QXTq.png', type: 'parasite' }
 ];
 
 // Reconstitution de l'ordre d'affichage désiré
