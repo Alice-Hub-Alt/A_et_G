@@ -188,7 +188,7 @@ html, body{
 <div id="dialogue-box"><div id="dialogue-text"></div></div>
 
 <script>
-// --- CONFIGURATION DU TYPEWRITER (Inchangée) ---
+// --- CONFIGURATION DU TYPEWRITER (CORRIGÉE) ---
 
 const dialogueBox = document.getElementById("dialogue-box");
 const dialogueText = document.getElementById("dialogue-text");
@@ -197,9 +197,10 @@ let typingInterval;
 let isTyping = false;
 let skipRequested = false;
 
-const introDialogues = ["intro 1", "intro 2"];
-const winDialogue = "Gagné";
-const failDialogue = "Perdu";
+// Dialogues mis à jour
+const introDialogues = ["C'est quoi, une sorte de puzzle par trie sélectif de traits de caractères ?", "C'est au masculin, j'imagine que c'est pour Guilian. Toujours à mettre le bazard celui la !"];
+const winDialogue = "Youhou je le connais trop bien je suis juste trop forte en fait !";
+const failDialogue = "Mais non mais pas du tout je dit nimp c'est pas du tout lui ça...";
 
 function stopSound(){
   try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){}
@@ -207,19 +208,33 @@ function stopSound(){
 
 function closeDialogue(){
     dialogueBox.style.display = "none";
-    dialogueBox.removeEventListener('click', closeDialogue); 
 }
 
 function typeWriter(text, callback){
     if(typingInterval) clearInterval(typingInterval);
     skipRequested = false;
 
+    // Suppression des anciens écouteurs pour éviter les doubles exécutions
+    dialogueBox.onclick = null; 
+    
     const finalizeTyping = () => {
         clearInterval(typingInterval);
         stopSound();
         dialogueText.classList.remove("cursor-active");
         isTyping = false;
-        if(callback) dialogueBox.addEventListener('click', callback, { once:true });
+        
+        // Exécute le callback (ou ferme le dialogue) au clic après la fin de la frappe
+        dialogueBox.onclick = callback || closeDialogue;
+    };
+
+    const handleInteraction = (event) => {
+        if(isTyping){
+            skipRequested = true;
+            event.stopPropagation();
+        } else {
+            // Si la frappe est terminée, le clic exécute la fonction de l'étape suivante
+            if (dialogueBox.onclick) dialogueBox.onclick();
+        }
     };
 
     isTyping = true;
@@ -242,23 +257,19 @@ function typeWriter(text, callback){
             finalizeTyping();
         }
     }, 28);
+
+    // Attache l'écouteur unique pour gérer le skip ou l'étape suivante
+    dialogueBox.onclick = handleInteraction;
 }
 
-dialogueBox.addEventListener("click", (event)=>{
-    if(isTyping){
-        skipRequested = true;
-        event.stopPropagation();
-        return;
-    }
-});
 
 function introSequenceStep2(){
+    // IMPORTANT : On passe la fonction de l'étape suivante (endIntroSequence) comme callback
     typeWriter(introDialogues[1], endIntroSequence);
 }
 
 function endIntroSequence(){
     dialogueBox.style.display = "none";
-    dialogueBox.removeEventListener('click', endIntroSequence); 
 }
 
 // Lancement de l'intro au chargement
@@ -268,7 +279,7 @@ window.onload = ()=>{
 }
 
 
-// --- LOGIQUE DU PUZZLE RUNE GA (Tracé de Forme Libre) ---
+// --- LOGIQUE DU PUZZLE RUNE GA (Tracé de Forme Stricte) ---
 
 const canvas = document.getElementById('rune-canvas');
 const ctx = canvas.getContext('2d');
@@ -278,7 +289,7 @@ const winContainer = document.getElementById('win-image-container');
 
 // Définition de la grille 10x9 (10 colonnes, 9 rangées)
 const GRID_COLS = 10;
-const GRID_ROWS = 9; // Suppression de la dernière rangée (91 à 100)
+const GRID_ROWS = 9;
 const SPACING = 40;
 const START_OFFSET = SPACING / 2; 
 
@@ -297,16 +308,26 @@ for (let y = 0; y < GRID_ROWS; y++) {
     }
 }
 
-// L'ENSEMBLE DES LIGNES EXACTES À TRACER (basé sur ta définition de 10 lignes directes)
+// L'ENSEMBLE DES LIGNES EXACTES À TRACER (CORRIGÉ selon ta dernière liste)
+// Nous ajoutons P48_P53 qui est la ligne centrale et fait partie de la rune.
 const SOLUTION_LINES = [
-    'P23_P43', 'P5_P23', 'P5_P27', 'P27_P35', 'P35_P45', 
-    'P43_P48', 'P53_P73', 'P55_P78', 'P55_P85', 'P48_P53' 
+    'P23_P43', 
+    'P5_P23', 
+    'P5_P27', 
+    'P27_P35', 
+    'P35_P45', 
+    'P43_P48', 
+    'P53_P73', 
+    'P55_P67', // Corrigé : P55_P67 remplace P55_P78 de l'ancien code
+    'P55_P85', 
+    'P48_P53' // Ligne centrale manquante
 ]; 
 
 let currentLines = new Map(); 
 let selectedPoint = null; 
 
 function getLineKey(idA, idB) {
+    // Assure un ordre alphabétique pour la clé pour que P23_P43 soit le même que P43_P23
     return [idA, idB].sort().join('_');
 }
 
@@ -393,6 +414,7 @@ function setupRunePuzzle() {
 
 btnValidate.addEventListener('click', ()=>{
     
+    // Récupération et tri des lignes de l'utilisateur et des lignes solution
     const userLines = Array.from(currentLines.keys()).sort();
     const solutionLines = SOLUTION_LINES.sort();
     
@@ -401,6 +423,8 @@ btnValidate.addEventListener('click', ()=>{
 
     if (isCorrectSize) {
         for (let i = 0; i < userLines.length; i++) {
+            // Vérification stricte: la ligne tracée par l'utilisateur doit correspondre exactement
+            // à l'une des lignes de la solution (grâce au tri et à getLineKey)
             if (userLines[i] !== solutionLines[i]) {
                 isSameContent = false;
                 break;
@@ -417,10 +441,10 @@ btnValidate.addEventListener('click', ()=>{
         document.getElementById('puzzle-container').style.display = "none";
         btnValidate.style.display = "none";
         winContainer.style.display = "block"; 
-        typeWriter(winDialogue, closeDialogue);
+        typeWriter(winDialogue); // Utilisation de typeWriter corrigé
     } else {
         // ECHEC
-        typeWriter(failDialogue, closeDialogue); 
+        typeWriter(failDialogue); // Utilisation de typeWriter corrigé
     }
 });
 
