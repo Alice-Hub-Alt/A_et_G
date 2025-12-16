@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>Porte 4 - L'Inventaire de Survie (Sélectif)</title>
+<title>Porte 4 - L'Inventaire de Survie (Sélectif) - V2</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -66,8 +66,9 @@ html, body{
 }
 
 .inventory-box {
-    width: 300px; /* Taille fixe pour les deux boîtes */
-    height: 300px;
+    /* Taille augmentée pour contenir tous les éléments sans scroll */
+    width: 350px; 
+    height: 400px;
     background: rgba(0, 0, 0, 0.7);
     border: 4px solid white;
     padding: 10px;
@@ -75,30 +76,30 @@ html, body{
     display: flex;
     flex-wrap: wrap;
     align-content: flex-start;
-    gap: 5px;
+    gap: 10px; /* Augmentation du gap pour aérer */
     position: relative;
-    /* Rendre la boîte un peu scrollable si le contenu est trop grand */
-    overflow-y: auto; 
+    overflow-y: hidden; /* Plus de scroll */
 }
 .inventory-box.dragover {
-    border-color: #ff00ff; /* Surbrillance quand on drague dessus */
+    border-color: #ff00ff;
     box-shadow: 0 0 10px #ff00ff;
 }
 
 .box-title {
     position: absolute;
-    top: -35px;
+    /* Ajustement de la position pour l'affichage */
+    top: -30px; 
     left: 50%;
     transform: translateX(-50%);
     color: white;
     font-size: 0.9em;
     text-shadow: 2px 2px 0px black;
     white-space: nowrap;
+    z-index: 101; /* Assure que le titre est au-dessus */
 }
 
 /* Conteneur de l'objet déplaçable */
 .draggable-item {
-    /* Nouvelle taille de base du conteneur pour mieux gérer les images */
     width: 70px; 
     height: 70px;
     cursor: grab;
@@ -113,14 +114,14 @@ html, body{
     border: 1px solid rgba(255, 255, 255, 0.5); 
 }
 
-/* L'image elle-même pour respecter les proportions (correction ici) */
+/* L'image elle-même pour respecter les proportions (correction de la déformation) */
 .draggable-item img {
-    max-width: 100%; /* S'assure que l'image ne dépasse pas la largeur du conteneur */
-    max-height: 100%; /* S'assure que l'image ne dépasse pas la hauteur du conteneur */
-    width: auto; /* Permet de conserver les proportions (l'élément clé) */
-    height: auto; /* Permet de conserver les proportions */
+    max-width: 100%; 
+    max-height: 100%; 
+    width: auto; 
+    height: auto; 
     display: block;
-    pointer-events: none; /* Important pour que le Drag soit sur le DIV et non l'image */
+    pointer-events: none;
 }
 
 
@@ -190,7 +191,7 @@ html, body{
 <div id="dialogue-box"><div id="dialogue-text"></div></div>
 
 <script>
-// --- CONFIGURATION DU TYPEWRITER (REPRIS DE L'EXEMPLE PRÉCÉDENT) ---
+// --- CONFIGURATION DU TYPEWRITER ---
 
 const dialogueBox = document.getElementById("dialogue-box");
 const dialogueText = document.getElementById("dialogue-text");
@@ -279,9 +280,7 @@ const btnValidate = document.getElementById('validate-btn');
 const winContainer = document.getElementById('win-image-container');
 
 // Définition des objets (items) avec leurs liens d'image
-// L'attribut 'type' est crucial pour la validation
-const itemsData = [
-    // VRAIS TRAITS (8 au total)
+const coreItems = [
     { id: 'gentillesse', name: 'Gentillesse', src: 'https://i.imgur.com/LMsf1Ls.png', type: 'core' },
     { id: 'naivete', name: 'Naïveté', src: 'https://i.imgur.com/oarptPK.png', type: 'core' },
     { id: 'imagination', name: 'Imagination', src: 'https://i.imgur.com/QsxRiq8.png', type: 'core' },
@@ -290,28 +289,62 @@ const itemsData = [
     { id: 'sentiments', name: 'Sentiments', src: 'https://i.imgur.com/nSsHglB.png', type: 'core' },
     { id: 'impulsivite', name: 'Impulsivité', src: 'https://i.imgur.com/kfnToUT.png', type: 'core' },
     { id: 'hatif', name: 'Hâtif', src: 'https://i.imgur.com/PBuSRTi.png', type: 'core' },
-    
-    // TRAITS PARASITES (4 au total)
+];
+
+// TRAITS PARASITES (4 au total)
+const parasiteItems = [
     { id: 'discernement', name: 'Discernement', src: 'https://i.imgur.com/uqIqkuK.png', type: 'parasite' },
     { id: 'loquacite', name: 'Loquacité', src: 'https://i.imgur.com/dQu6Lga.png', type: 'parasite' },
-    { id: 'susceptibilite', name: 'Susceptibilité', src: 'https://i.imgur.com/dQu6Lga.png', type: 'parasite' }, /* Image réutilisée pour le style */
+    { id: 'susceptibilite', name: 'Susceptibilité', src: 'https://i.imgur.com/MLOLl1y.png', type: 'parasite' }, // Image corrigée
     { id: 'tyrannie', name: 'Tyrannie', src: 'https://i.imgur.com/fc4QXTq.png', type: 'parasite' }
 ];
 
+// Reconstitution de l'ordre d'affichage désiré (8 core, 4 parasites)
+function getShuffledItems() {
+    let allItems = [];
+    let coreIndex = 0;
+    let parasiteIndex = 0;
+
+    // Schéma : Vrais (x2), Faux, Vrais, Faux, Vrais (x2), Faux, Vrais, Faux, Vrais (x2)
+    const orderPattern = [
+        { type: 'core', count: 2 },
+        { type: 'parasite', count: 1 },
+        { type: 'core', count: 1 },
+        { type: 'parasite', count: 1 },
+        { type: 'core', count: 2 },
+        { type: 'parasite', count: 1 },
+        { type: 'core', count: 1 },
+        { type: 'parasite', count: 1 },
+        { type: 'core', count: 2 }
+    ];
+
+    orderPattern.forEach(part => {
+        for (let i = 0; i < part.count; i++) {
+            if (part.type === 'core' && coreIndex < coreItems.length) {
+                allItems.push(coreItems[coreIndex++]);
+            } else if (part.type === 'parasite' && parasiteIndex < parasiteItems.length) {
+                allItems.push(parasiteItems[parasiteIndex++]);
+            }
+        }
+    });
+
+    return allItems;
+}
+
+
 let draggedItem = null;
 
-// Fonction pour initialiser les objets dans le conteneur source (Mélange pour rendre l'énigme plus dure)
+// Fonction pour initialiser les objets dans le conteneur source
 function setupInventory() {
-    // Mélange des items avant l'affichage
-    const shuffledItems = itemsData.sort(() => Math.random() - 0.5);
+    const itemsToDisplay = getShuffledItems();
 
-    shuffledItems.forEach(item => {
+    itemsToDisplay.forEach(item => {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'draggable-item';
         itemDiv.setAttribute('draggable', true);
         itemDiv.id = item.id;
         itemDiv.title = item.name; 
-        itemDiv.dataset.type = item.type; // Ajout du type pour la vérification
+        itemDiv.dataset.type = item.type; 
 
         const img = document.createElement('img');
         img.src = item.src;
@@ -324,7 +357,7 @@ function setupInventory() {
     addDragListeners();
 }
 
-// Ajout des écouteurs de D&D (inchangé, fonctionne pour toutes les boîtes)
+// Les fonctions de Drag & Drop (inchangées)
 function addDragListeners() {
     document.querySelectorAll('.draggable-item').forEach(item => {
         item.addEventListener('dragstart', handleDragStart);
@@ -382,7 +415,6 @@ function handleDrop(e) {
 
 btnValidate.addEventListener('click', ()=>{
     
-    // Compter les items dans l'inventaire cible
     const itemsInInventory = inventoryTarget.querySelectorAll('.draggable-item');
     
     let coreItemsCount = 0;
@@ -396,11 +428,9 @@ btnValidate.addEventListener('click', ()=>{
         }
     });
 
-    const totalCoreItems = itemsData.filter(item => item.type === 'core').length; // 8
+    const totalCoreItems = coreItems.length; // 8
     
-    // Condition de Victoire :
-    // 1. Tous les 8 traits "core" sont dans l'inventaire.
-    // 2. Aucun trait "parasite" n'est dans l'inventaire.
+    // Condition de Victoire : 8 "core" et 0 "parasite" dans la cible
     const victory = (coreItemsCount === totalCoreItems) && (parasiteItemsCount === 0);
 
     if (victory) {
@@ -411,7 +441,7 @@ btnValidate.addEventListener('click', ()=>{
         winContainer.style.display = "block"; 
         typeWriter(winDialogue, closeDialogue);
     } else {
-        // ECHEC (On peut ajouter un feedback simple ici si on veut)
+        // ECHEC
         typeWriter(failDialogue, closeDialogue); 
     }
 });
