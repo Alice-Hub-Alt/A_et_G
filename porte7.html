@@ -13,8 +13,9 @@ html, body{
     margin:0; padding:0; height:100%;
     font-family:'Press Start 2P', monospace;
     overflow:hidden;
+    /* Nouveau fond GIF */
     background:url('https://i.redd.it/5oqqs8imr6s41.gif') center/cover no-repeat;
-    background-size: cover; 
+    background-size: cover; /* Ajuster la taille du fond */
     user-select: none;
 }
 
@@ -71,7 +72,7 @@ html, body{
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
     display: inline-block;
     width: 400px;
-    height: 360px;
+    height: 360px; /* Réduit à 9 rangées */
 }
 
 #rune-canvas {
@@ -79,6 +80,7 @@ html, body{
     display: block;
 }
 
+/* Style des points de la grille */
 .connection-point {
     position: absolute;
     width: 10px;
@@ -91,6 +93,7 @@ html, body{
     transform: translate(-50%, -50%); 
 }
 
+/* Afficher le numéro au survol (utilise l'attribut title) */
 .connection-point:hover::after {
     content: attr(title);
     position: absolute;
@@ -107,12 +110,14 @@ html, body{
     border: 1px solid white;
 }
 
+/* Point sélectionné */
 .connection-point.selected {
     background-color: #ff00ff; 
     border: 2px solid white;
     box-shadow: 0 0 8px #ff00ff;
 }
 
+/* Titre des portes */
 .box-title-text {
     color: white;
     font-size: 0.9em;
@@ -121,6 +126,7 @@ html, body{
     margin-bottom: 20px;
 }
 
+/* Bouton Valider */
 #validate-btn {
     position: fixed;
     bottom: 20%; 
@@ -141,6 +147,7 @@ html, body{
     transform: translateX(-50%) scale(0.95);
 }
 
+/* Image de victoire */
 #win-image-container {
     position: fixed;
     top: 50%; left: 50%;
@@ -181,7 +188,7 @@ html, body{
 <div id="dialogue-box"><div id="dialogue-text"></div></div>
 
 <script>
-// --- CONFIGURATION DU TYPEWRITER (CORRIGÉE) ---
+// --- CONFIGURATION DU TYPEWRITER (Inchangée) ---
 
 const dialogueBox = document.getElementById("dialogue-box");
 const dialogueText = document.getElementById("dialogue-text");
@@ -190,11 +197,9 @@ let typingInterval;
 let isTyping = false;
 let skipRequested = false;
 
-// Dialogues par défaut de l'inventaire
-const introDialogues = ["C'est quoi, une sorte de puzzle par trie sélectif de traits de caractères ?", "C'est au masculin, j'imagine que c'est pour Guilian. Toujours à mettre le bazard celui la !"];
-const winDialogue = "Youhou je le connais trop bien je suis juste trop forte en fait !";
-const failDialogue = "Mais non mais pas du tout je dit nimp c'est pas du tout lui ça...";
-
+const introDialogues = ["intro 1", "intro 2"];
+const winDialogue = "Gagné";
+const failDialogue = "Perdu";
 
 function stopSound(){
   try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){}
@@ -202,36 +207,19 @@ function stopSound(){
 
 function closeDialogue(){
     dialogueBox.style.display = "none";
-    // Évite les écouteurs multiples, doit être géré dans typeWriter
+    dialogueBox.removeEventListener('click', closeDialogue); 
 }
 
 function typeWriter(text, callback){
     if(typingInterval) clearInterval(typingInterval);
     skipRequested = false;
-    
-    // S'assurer que les anciens écouteurs sont retirés avant d'en ajouter de nouveaux
-    dialogueBox.removeEventListener('click', skipOrNext); 
 
     const finalizeTyping = () => {
         clearInterval(typingInterval);
         stopSound();
         dialogueText.classList.remove("cursor-active");
         isTyping = false;
-        
-        // Ajoute l'écouteur pour passer au callback (ou fermer)
-        if(callback) {
-            dialogueBox.addEventListener('click', callback, { once:true });
-        } else {
-            dialogueBox.addEventListener('click', closeDialogue, { once:true });
-        }
-    };
-
-    const skipOrNext = (event) => {
-        if(isTyping){
-            skipRequested = true;
-            event.stopPropagation();
-            return;
-        }
+        if(callback) dialogueBox.addEventListener('click', callback, { once:true });
     };
 
     isTyping = true;
@@ -254,30 +242,33 @@ function typeWriter(text, callback){
             finalizeTyping();
         }
     }, 28);
-    
-    // L'écouteur principal est toujours actif pour skip
-    dialogueBox.addEventListener("click", skipOrNext, { once:true });
 }
 
+dialogueBox.addEventListener("click", (event)=>{
+    if(isTyping){
+        skipRequested = true;
+        event.stopPropagation();
+        return;
+    }
+});
+
 function introSequenceStep2(){
-    // IMPORTANT: On retire l'écouteur du dialogue précédent avant de lancer le nouveau
-    dialogueBox.removeEventListener('click', introSequenceStep2); 
     typeWriter(introDialogues[1], endIntroSequence);
 }
 
 function endIntroSequence(){
-    dialogueBox.removeEventListener('click', endIntroSequence);
     dialogueBox.style.display = "none";
+    dialogueBox.removeEventListener('click', endIntroSequence); 
 }
 
+// Lancement de l'intro au chargement
 window.onload = ()=>{
     setupRunePuzzle();
-    // Lance la première étape de l'introduction
     typeWriter(introDialogues[0], introSequenceStep2);
 }
 
 
-// --- LOGIQUE DU PUZZLE RUNE GA (Grille 10x9) ---
+// --- LOGIQUE DU PUZZLE RUNE GA (Tracé de Forme Libre) ---
 
 const canvas = document.getElementById('rune-canvas');
 const ctx = canvas.getContext('2d');
@@ -285,8 +276,9 @@ const wrapper = document.getElementById('canvas-wrapper');
 const btnValidate = document.getElementById('validate-btn');
 const winContainer = document.getElementById('win-image-container');
 
+// Définition de la grille 10x9 (10 colonnes, 9 rangées)
 const GRID_COLS = 10;
-const GRID_ROWS = 9; 
+const GRID_ROWS = 9; // Suppression de la dernière rangée (91 à 100)
 const SPACING = 40;
 const START_OFFSET = SPACING / 2; 
 
@@ -305,40 +297,15 @@ for (let y = 0; y < GRID_ROWS; y++) {
     }
 }
 
-// DEFINITION DU CHEMIN DE SOLUTION ATOMIQUE (18 segments basés sur la correction d'Alice)
-const ATOMIC_SOLUTION_SEGMENTS = [
-    // P43 et P23: P33
-    'P43_P33', 'P33_P23',
-    // P23 et P5: P14
-    'P23_P14', 'P14_P5',
-    // P5 et P27: P16 
-    'P5_P16', 'P16_P27',
-    // P27 et P35: RIEN (Direct)
-    'P27_P35',
-    // P35 et P45: RIEN (Direct)
-    'P35_P45',
-    // P43 et P48: P44, P45, P46, P47
-    'P43_P44', 'P44_P45', 'P45_P46', 'P46_P47', 'P47_P48',
-    // P53 et P73: P63 
-    'P53_P63', 'P63_P73',
-    // P55 et P67: RIEN (Direct)
-    'P55_P67',
-    // P55 et P85: P65, P75
-    'P55_P65', 'P65_P75', 'P75_P85',
-    // P48 et P53: RIEN (Ligne centrale Directe)
-    'P48_P53',
-];
-
-// Nettoyage et tri des segments de solution
-const SOLUTION_SEGMENTS = Array.from(new Set(ATOMIC_SOLUTION_SEGMENTS)).sort();
-const SOLUTION_POINTS = new Set();
-SOLUTION_SEGMENTS.forEach(key => key.split('_').forEach(id => SOLUTION_POINTS.add(id)));
-
+// L'ENSEMBLE DES LIGNES EXACTES À TRACER (basé sur ta définition de 10 lignes directes)
+const SOLUTION_LINES = [
+    'P23_P43', 'P5_P23', 'P5_P27', 'P27_P35', 'P35_P45', 
+    'P43_P48', 'P53_P73', 'P55_P78', 'P55_P85', 'P48_P53' 
+]; 
 
 let currentLines = new Map(); 
 let selectedPoint = null; 
 
-// Utilitaires
 function getLineKey(idA, idB) {
     return [idA, idB].sort().join('_');
 }
@@ -347,30 +314,13 @@ function getPointById(id) {
     return POINTS_CONFIG.find(p => p.id === id);
 }
 
-// Fonction pour vérifier si un point (px, py) est sur un segment (p1, p2)
-// Utilisation d'une tolérance pour les flottants
-const isPointOnSegment = (px, py, p1, p2) => {
-    // Vérification de la colinéarité (produit croisé proche de zéro)
-    const crossProduct = (py - p1.y) * (p2.x - p1.x) - (px - p1.x) * (p2.y - p1.y);
-    if (Math.abs(crossProduct) > 1) return false; 
-
-    // Vérification de la projection (doit être entre les extrémités)
-    const dotProduct = (px - p1.x) * (p2.x - p1.x) + (py - p1.y) * (p2.y - p1.y);
-    if (dotProduct < 0) return false; 
-
-    const squaredLength = (p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y);
-    if (dotProduct > squaredLength) return false; 
-
-    return true;
-};
-
-
-// Fonctions de rendu et d'interaction (INCHANGÉES)
 function drawCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
     ctx.strokeStyle = 'white';
     ctx.lineWidth = 4;
     ctx.lineCap = 'round';
+    
     currentLines.forEach(line => {
         ctx.beginPath();
         ctx.moveTo(line.x1, line.y1);
@@ -387,17 +337,24 @@ function handlePointClick() {
     if (!selectedPoint) {
         selectedPoint = pointId;
         pointElement.classList.add('selected');
-    } else if (selectedPoint === pointId) {
+    } 
+    
+    else if (selectedPoint === pointId) {
         selectedPoint = null;
         pointElement.classList.remove('selected');
-    } else {
+    }
+    
+    else {
         const lineKey = getLineKey(selectedPoint, pointId);
         const prevSelectedElement = document.getElementById(selectedPoint);
         const prevPointData = getPointById(selectedPoint);
 
         if (currentLines.has(lineKey)) {
+            // EFFACEMENT DE LIGNE
             currentLines.delete(lineKey);
-        } else {
+        } 
+        else {
+            // TRACÉ DE LIGNE
             currentLines.set(lineKey, {
                 x1: prevPointData.x, 
                 y1: prevPointData.y, 
@@ -415,83 +372,55 @@ function handlePointClick() {
 }
 
 function setupRunePuzzle() {
+    // 1. Création des 90 points de la grille 
     POINTS_CONFIG.forEach(point => {
         const pointDiv = document.createElement('div');
         pointDiv.className = 'connection-point';
         pointDiv.id = point.id;
         pointDiv.style.left = point.x + 'px';
         pointDiv.style.top = point.y + 'px';
-        pointDiv.title = point.id.substring(1); 
+        pointDiv.title = point.id.substring(1); // Retire le 'P' pour l'affichage au survol
         
         pointDiv.addEventListener('click', handlePointClick);
         wrapper.appendChild(pointDiv);
     });
+
     drawCanvas(); 
 }
 
 
-// --- VALIDATION DU PUZZLE RUNE GA (LOGIQUE TOLÉRANTE CORRIGÉE) ---
+// --- VALIDATION DU PUZZLE RUNE GA ---
 
 btnValidate.addEventListener('click', ()=>{
     
-    let allSegmentsCovered = true;
-    let hasInvalidSegments = false;
-
-    // Étape 1 : Vérifier que TOUS les segments atomiques sont couverts par le tracé de l'utilisateur
-    for (const solutionSegmentKey of SOLUTION_SEGMENTS) {
-        const [idA_sol, idB_sol] = solutionSegmentKey.split('_');
-        let segmentIsCovered = false;
-
-        const A_sol = getPointById(idA_sol);
-        const B_sol = getPointById(idB_sol);
-
-        // Parcourir toutes les lignes tracées par l'utilisateur (currentLines)
-        for (const userLineKey of currentLines.keys()) {
-            const [idA_user, idB_user] = userLineKey.split('_');
-            const A_user = getPointById(idA_user);
-            const B_user = getPointById(idB_user);
-
-            // Vérifier si A_sol et B_sol sont sur la ligne tracée par l'utilisateur
-            if (isPointOnSegment(A_sol.x, A_sol.y, A_user, B_user) && isPointOnSegment(B_sol.x, B_sol.y, A_user, B_user)) {
-                segmentIsCovered = true;
-                break;
-            }
-        }
-
-        if (!segmentIsCovered) {
-            allSegmentsCovered = false;
-            break;
-        }
-    }
-
-    // Étape 2 : Vérifier que l'utilisateur n'a pas utilisé des points qui ne font pas partie de la solution
-    // On vérifie que les extrémités de chaque ligne tracée sont bien des points faisant partie de l'ensemble de la rune (SOLUTION_POINTS)
-    if (allSegmentsCovered) {
-        for (const userLineKey of currentLines.keys()) {
-            const [idA_user, idB_user] = userLineKey.split('_');
-            
-            // Si l'une des extrémités n'est pas un point valide de la solution
-            if (!SOLUTION_POINTS.has(idA_user) || !SOLUTION_POINTS.has(idB_user)) {
-                 // On peut affiner en vérifiant que les points ne sont pas juste "proches" mais bien les points précis Px
-                 // Mais pour cette version, si les extrémités sont en dehors des points de la solution, c'est faux.
-                hasInvalidSegments = true;
-                break;
-            }
-        }
-    }
+    const userLines = Array.from(currentLines.keys()).sort();
+    const solutionLines = SOLUTION_LINES.sort();
     
-    const victory = allSegmentsCovered && !hasInvalidSegments;
+    const isCorrectSize = userLines.length === solutionLines.length;
+    let isSameContent = true;
 
+    if (isCorrectSize) {
+        for (let i = 0; i < userLines.length; i++) {
+            if (userLines[i] !== solutionLines[i]) {
+                isSameContent = false;
+                break;
+            }
+        }
+    } else {
+        isSameContent = false;
+    }
+
+    const victory = isCorrectSize && isSameContent;
 
     if (victory) {
         // VICTOIRE
         document.getElementById('puzzle-container').style.display = "none";
         btnValidate.style.display = "none";
         winContainer.style.display = "block"; 
-        typeWriter(winDialogue);
+        typeWriter(winDialogue, closeDialogue);
     } else {
         // ECHEC
-        typeWriter(failDialogue); 
+        typeWriter(failDialogue, closeDialogue); 
     }
 });
 
