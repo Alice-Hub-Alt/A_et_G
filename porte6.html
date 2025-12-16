@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>Porte 4 - L'Inventaire de Survie (Sélectif) - V2</title>
+<title>Porte 6</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -56,17 +56,35 @@ html, body{
 
 /* --- LOGIQUE DE L'INVENTAIRE (D&D) --- */
 
-#dnd-container {
+#main-puzzle-wrapper {
     position: fixed;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    display: flex;
-    gap: 20px;
+    width: 720px; /* Largeur pour contenir les deux boîtes + l'espacement */
     z-index: 100;
 }
 
+#titles-wrapper {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px; /* Espacement entre le titre et la boîte */
+    width: 100%;
+}
+
+.box-title-text {
+    color: white;
+    font-size: 0.9em;
+    text-shadow: 2px 2px 0px black;
+    text-align: center;
+    width: 350px; /* Aligné avec la largeur des boîtes d'inventaire */
+}
+
+#dnd-container {
+    display: flex;
+    gap: 20px;
+}
+
 .inventory-box {
-    /* Taille augmentée pour contenir tous les éléments sans scroll */
     width: 350px; 
     height: 400px;
     background: rgba(0, 0, 0, 0.7);
@@ -76,26 +94,13 @@ html, body{
     display: flex;
     flex-wrap: wrap;
     align-content: flex-start;
-    gap: 10px; /* Augmentation du gap pour aérer */
+    gap: 10px; 
     position: relative;
-    overflow-y: hidden; /* Plus de scroll */
+    overflow-y: hidden;
 }
 .inventory-box.dragover {
     border-color: #ff00ff;
     box-shadow: 0 0 10px #ff00ff;
-}
-
-.box-title {
-    position: absolute;
-    /* Ajustement de la position pour l'affichage */
-    top: -30px; 
-    left: 50%;
-    transform: translateX(-50%);
-    color: white;
-    font-size: 0.9em;
-    text-shadow: 2px 2px 0px black;
-    white-space: nowrap;
-    z-index: 101; /* Assure que le titre est au-dessus */
 }
 
 /* Conteneur de l'objet déplaçable */
@@ -170,15 +175,22 @@ html, body{
 <div id="back-btn" onclick="location.href='zone2_1.html'">⬅</div>
 <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=0"></audio>
 
-<div id="dnd-container">
+<div id="main-puzzle-wrapper">
     
-    <div id="item-source" class="inventory-box">
-        <div class="box-title">Ressources à trier</div>
-        </div>
+    <div id="titles-wrapper">
+        <div class="box-title-text">Ressources à trier</div>
+        <div class="box-title-text">Qui est-il ?</div>
+    </div>
+    
+    <div id="dnd-container">
+        
+        <div id="item-source" class="inventory-box">
+            </div>
+    
+        <div id="inventory-target" class="inventory-box">
+            </div>
 
-    <div id="inventory-target" class="inventory-box">
-        <div class="box-title">Qui est-il ?</div>
-        </div>
+    </div>
 
 </div>
 
@@ -191,7 +203,7 @@ html, body{
 <div id="dialogue-box"><div id="dialogue-text"></div></div>
 
 <script>
-// --- CONFIGURATION DU TYPEWRITER ---
+// --- CONFIGURATION DU TYPEWRITER (Inchangée) ---
 
 const dialogueBox = document.getElementById("dialogue-box");
 const dialogueText = document.getElementById("dialogue-text");
@@ -200,7 +212,6 @@ let typingInterval;
 let isTyping = false;
 let skipRequested = false;
 
-// Dialogues temporaires
 const introDialogues = ["intro 1", "intro 2"];
 const winDialogue = "Gagné";
 const failDialogue = "Perdu";
@@ -272,14 +283,13 @@ window.onload = ()=>{
 }
 
 
-// --- LOGIQUE DU PUZZLE D&D ---
+// --- LOGIQUE DU PUZZLE D&D (Inchangée) ---
 
 const itemSource = document.getElementById('item-source');
 const inventoryTarget = document.getElementById('inventory-target');
 const btnValidate = document.getElementById('validate-btn');
 const winContainer = document.getElementById('win-image-container');
 
-// Définition des objets (items) avec leurs liens d'image
 const coreItems = [
     { id: 'gentillesse', name: 'Gentillesse', src: 'https://i.imgur.com/LMsf1Ls.png', type: 'core' },
     { id: 'naivete', name: 'Naïveté', src: 'https://i.imgur.com/oarptPK.png', type: 'core' },
@@ -291,15 +301,14 @@ const coreItems = [
     { id: 'hatif', name: 'Hâtif', src: 'https://i.imgur.com/PBuSRTi.png', type: 'core' },
 ];
 
-// TRAITS PARASITES (4 au total)
 const parasiteItems = [
     { id: 'discernement', name: 'Discernement', src: 'https://i.imgur.com/uqIqkuK.png', type: 'parasite' },
     { id: 'loquacite', name: 'Loquacité', src: 'https://i.imgur.com/dQu6Lga.png', type: 'parasite' },
-    { id: 'susceptibilite', name: 'Susceptibilité', src: 'https://i.imgur.com/MLOLl1y.png', type: 'parasite' }, // Image corrigée
+    { id: 'susceptibilite', name: 'Susceptibilité', src: 'https://i.imgur.com/MLOLl1y.png', type: 'parasite' }, 
     { id: 'tyrannie', name: 'Tyrannie', src: 'https://i.imgur.com/fc4QXTq.png', type: 'parasite' }
 ];
 
-// Reconstitution de l'ordre d'affichage désiré (8 core, 4 parasites)
+// Reconstitution de l'ordre d'affichage désiré
 function getShuffledItems() {
     let allItems = [];
     let coreIndex = 0;
@@ -334,7 +343,6 @@ function getShuffledItems() {
 
 let draggedItem = null;
 
-// Fonction pour initialiser les objets dans le conteneur source
 function setupInventory() {
     const itemsToDisplay = getShuffledItems();
 
@@ -411,7 +419,7 @@ function handleDrop(e) {
 }
 
 
-// --- VALIDATION DU PUZZLE SÉLECTIF ---
+// --- VALIDATION DU PUZZLE SÉLECTIF (Inchangée) ---
 
 btnValidate.addEventListener('click', ()=>{
     
@@ -435,8 +443,7 @@ btnValidate.addEventListener('click', ()=>{
 
     if (victory) {
         // VICTOIRE
-        itemSource.style.display = "none";
-        inventoryTarget.style.display = "none";
+        document.getElementById('main-puzzle-wrapper').style.display = "none";
         btnValidate.style.display = "none";
         winContainer.style.display = "block"; 
         typeWriter(winDialogue, closeDialogue);
