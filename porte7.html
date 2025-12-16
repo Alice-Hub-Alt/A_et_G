@@ -18,7 +18,42 @@ html, body{
     user-select: none;
 }
 
-/* (Styles de l'interface utilisateur, Dialogue, Bouton Valider, etc. : INCHANGÉS) */
+/* --- UI GLOBALE --- */
+
+/* Retour */
+#back-btn{
+    position:fixed; top:14px; left:14px;
+    font-size:32px; color:red;
+    cursor:pointer; z-index:6000;
+    text-shadow: 2px 2px 0px black;
+}
+
+/* Dialogue */
+#dialogue-box{
+    position:fixed;
+    left:50%; bottom:26px;
+    transform:translateX(-50%);
+    width:84%;
+    min-height:14vh; max-height:28vh;
+    background:rgba(0,0,0,0.55);
+    border:3px solid #ff00ff;
+    padding:18px;
+    color:#ff66ff;
+    display:none;
+    z-index:9000;
+    text-shadow:0 0 6px rgba(255,0,255,0.2);
+    overflow:auto;
+}
+#dialogue-text{ font-size:0.86em; line-height:1.45; }
+.cursor-active{
+    border-right:0.15em solid #ff66ff;
+    animation:blink 0.5s steps(1) infinite;
+    padding-right:6px;
+}
+@keyframes blink{
+    0%,100%{border-color:transparent;}
+    50%{border-color:#ff66ff;}
+}
 
 /* --- LOGIQUE DU PUZZLE (Rune GA) --- */
 
@@ -146,7 +181,7 @@ html, body{
 <div id="dialogue-box"><div id="dialogue-text"></div></div>
 
 <script>
-// --- CONFIGURATION DU TYPEWRITER (INCHANGÉE) ---
+// --- CONFIGURATION DU TYPEWRITER (CORRIGÉE) ---
 
 const dialogueBox = document.getElementById("dialogue-box");
 const dialogueText = document.getElementById("dialogue-text");
@@ -155,9 +190,11 @@ let typingInterval;
 let isTyping = false;
 let skipRequested = false;
 
-const introDialogues = ["intro 1", "intro 2"];
-const winDialogue = "Gagné";
-const failDialogue = "Perdu";
+// Dialogues par défaut de l'inventaire
+const introDialogues = ["C'est quoi, une sorte de puzzle par trie sélectif de traits de caractères ?", "C'est au masculin, j'imagine que c'est pour Guilian. Toujours à mettre le bazard celui la !"];
+const winDialogue = "Youhou je le connais trop bien je suis juste trop forte en fait !";
+const failDialogue = "Mais non mais pas du tout je dit nimp c'est pas du tout lui ça...";
+
 
 function stopSound(){
   try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){}
@@ -165,19 +202,36 @@ function stopSound(){
 
 function closeDialogue(){
     dialogueBox.style.display = "none";
-    dialogueBox.removeEventListener('click', closeDialogue); 
+    // Évite les écouteurs multiples, doit être géré dans typeWriter
 }
 
 function typeWriter(text, callback){
     if(typingInterval) clearInterval(typingInterval);
     skipRequested = false;
+    
+    // S'assurer que les anciens écouteurs sont retirés avant d'en ajouter de nouveaux
+    dialogueBox.removeEventListener('click', skipOrNext); 
 
     const finalizeTyping = () => {
         clearInterval(typingInterval);
         stopSound();
         dialogueText.classList.remove("cursor-active");
         isTyping = false;
-        if(callback) dialogueBox.addEventListener('click', callback, { once:true });
+        
+        // Ajoute l'écouteur pour passer au callback (ou fermer)
+        if(callback) {
+            dialogueBox.addEventListener('click', callback, { once:true });
+        } else {
+            dialogueBox.addEventListener('click', closeDialogue, { once:true });
+        }
+    };
+
+    const skipOrNext = (event) => {
+        if(isTyping){
+            skipRequested = true;
+            event.stopPropagation();
+            return;
+        }
     };
 
     isTyping = true;
@@ -200,32 +254,30 @@ function typeWriter(text, callback){
             finalizeTyping();
         }
     }, 28);
+    
+    // L'écouteur principal est toujours actif pour skip
+    dialogueBox.addEventListener("click", skipOrNext, { once:true });
 }
 
-dialogueBox.addEventListener("click", (event)=>{
-    if(isTyping){
-        skipRequested = true;
-        event.stopPropagation();
-        return;
-    }
-});
-
 function introSequenceStep2(){
+    // IMPORTANT: On retire l'écouteur du dialogue précédent avant de lancer le nouveau
+    dialogueBox.removeEventListener('click', introSequenceStep2); 
     typeWriter(introDialogues[1], endIntroSequence);
 }
 
 function endIntroSequence(){
+    dialogueBox.removeEventListener('click', endIntroSequence);
     dialogueBox.style.display = "none";
-    dialogueBox.removeEventListener('click', endIntroSequence); 
 }
 
 window.onload = ()=>{
     setupRunePuzzle();
+    // Lance la première étape de l'introduction
     typeWriter(introDialogues[0], introSequenceStep2);
 }
 
 
-// --- LOGIQUE DU PUZZLE RUNE GA (Tracé de Forme Libre - Validation Tolérante) ---
+// --- LOGIQUE DU PUZZLE RUNE GA (Grille 10x9) ---
 
 const canvas = document.getElementById('rune-canvas');
 const ctx = canvas.getContext('2d');
@@ -253,63 +305,40 @@ for (let y = 0; y < GRID_ROWS; y++) {
     }
 }
 
-// DEFINITION DU CHEMIN DE SOLUTION ATOMIQUE (Tous les petits segments unitaires)
-// Chaque entrée est un segment de point à point (ex: P1_P2)
-// Cette liste est la référence que le tracé de l'utilisateur doit couvrir intégralement.
-
-// Pour chaque ligne de référence, nous listons tous les segments atomiques (adjacents) qui la composent.
-// Exemple : Ligne P23-P43 via P33 -> Segments atomiques : [P23_P33, P33_P43]
+// DEFINITION DU CHEMIN DE SOLUTION ATOMIQUE (18 segments basés sur la correction d'Alice)
 const ATOMIC_SOLUTION_SEGMENTS = [
-    // 1. P23 - P43 (via P33)
-    'P23_P33', 'P33_P43',
-    // 2. P5 - P23 (via P14)
-    'P5_P14', 'P14_P23',
-    // 3. P5 - P27 (via P16)
+    // P43 et P23: P33
+    'P43_P33', 'P33_P23',
+    // P23 et P5: P14
+    'P23_P14', 'P14_P5',
+    // P5 et P27: P16 
     'P5_P16', 'P16_P27',
-    // 4. P27 - P35 (via P36, P46)
-    'P27_P36', 'P36_P46', 'P46_P55', // Correction: 27->35 n'a pas de 46, c'est P36_P45? Ah non c'est 27->36 et 36->45 si on est en diagonale
-    // Vrai chemin pour P27-P35 (ligne droite diagonale) : P27_P36, P36_P45, P45_P54, P54_P63, P63_P72, P72_P81, P81_P90
-    // Ligne droite 45° : P27 (x7, y3) à P35 (x5, y4). Pente -1. P27_P36, P36_P45
-    // Je corrige la logique de cette ligne, elle est complexe sur une grille.
-    
-    // Simplification (basée sur une interprétation 45° qui croise P36)
-    // P27-P35 est censé être une ligne diagonale de P27 à P35, ce qui est P27_P36 si on prend P36
-    // MAIS P35 est dans la même rangée que P36, cela n'a pas de sens pour le tracé.
-    // Ligne P27 (col 7, rang 3) à P35 (col 5, rang 4) ? C'est P27_P36, P36_P45
-    // En se basant sur la photo, P27 (Haut Droit) et P35 (Haut Gauche) sont les deux sommets droits/gauche de la forme du bas.
-    // Sur l'image de Tunic, ce sont P27 et P35. On va prendre la ligne directe P27_P35.
-    
-    // Simplification par segments atomiques directs qui peuvent être couverts par une seule ligne plus longue
-    
-    // Ligne 4: P27-P35. C'est P27_P36 et P36_P45 (P36 et P46 sont les points intermédiaires)
-    'P27_P36', 'P36_P45', // J'utilise P45 ici car P35 est en haut à gauche de P45
-    
-    // Ligne 5: P35 - P45 (via P44)
-    'P35_P44', 'P44_P45',
-    
-    // Ligne 6: P43 - P48 (via P44, P45, P46, P47)
+    // P27 et P35: RIEN (Direct)
+    'P27_P35',
+    // P35 et P45: RIEN (Direct)
+    'P35_P45',
+    // P43 et P48: P44, P45, P46, P47
     'P43_P44', 'P44_P45', 'P45_P46', 'P46_P47', 'P47_P48',
-    
-    // Ligne 7: P53 - P73 (via P63)
+    // P53 et P73: P63 
     'P53_P63', 'P63_P73',
-    
-    // Ligne 8: P55 - P78 (via P66, P77)
-    'P55_P66', 'P66_P77', 'P77_P78', // P77_P78 est un segment plus court
-    
-    // Ligne 9: P55 - P85 (via P65, P75)
+    // P55 et P67: RIEN (Direct)
+    'P55_P67',
+    // P55 et P85: P65, P75
     'P55_P65', 'P65_P75', 'P75_P85',
-    
-    // Ligne 10: P48 - P53 (Ligne courte centrale)
-    'P48_P53', // Pas d'intermédiaire
+    // P48 et P53: RIEN (Ligne centrale Directe)
+    'P48_P53',
 ];
-// Enlève les doublons et trie
+
+// Nettoyage et tri des segments de solution
 const SOLUTION_SEGMENTS = Array.from(new Set(ATOMIC_SOLUTION_SEGMENTS)).sort();
+const SOLUTION_POINTS = new Set();
+SOLUTION_SEGMENTS.forEach(key => key.split('_').forEach(id => SOLUTION_POINTS.add(id)));
 
 
 let currentLines = new Map(); 
 let selectedPoint = null; 
 
-// Utilitaires de position et de clé
+// Utilitaires
 function getLineKey(idA, idB) {
     return [idA, idB].sort().join('_');
 }
@@ -318,27 +347,30 @@ function getPointById(id) {
     return POINTS_CONFIG.find(p => p.id === id);
 }
 
-// Fonction pour vérifier si deux points sont adjacents (segment atomique)
-function isAdjacent(idA, idB) {
-    const pointA = getPointById(idA);
-    const pointB = getPointById(idB);
-    const dist = Math.hypot(pointA.x - pointB.x, pointA.y - pointB.y);
-    
-    // 40px est la distance minimale (verticale/horizontale)
-    // 56.57px est la distance diagonale (sqrt(40^2 + 40^2))
-    return dist <= SPACING * 1.5; 
-}
+// Fonction pour vérifier si un point (px, py) est sur un segment (p1, p2)
+// Utilisation d'une tolérance pour les flottants
+const isPointOnSegment = (px, py, p1, p2) => {
+    // Vérification de la colinéarité (produit croisé proche de zéro)
+    const crossProduct = (py - p1.y) * (p2.x - p1.x) - (px - p1.x) * (p2.y - p1.y);
+    if (Math.abs(crossProduct) > 1) return false; 
+
+    // Vérification de la projection (doit être entre les extrémités)
+    const dotProduct = (px - p1.x) * (p2.x - p1.x) + (py - p1.y) * (p2.y - p1.y);
+    if (dotProduct < 0) return false; 
+
+    const squaredLength = (p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y);
+    if (dotProduct > squaredLength) return false; 
+
+    return true;
+};
 
 
-// --- Fonctions de rendu (INCHANGÉES) ---
-
+// Fonctions de rendu et d'interaction (INCHANGÉES)
 function drawCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
     ctx.strokeStyle = 'white';
     ctx.lineWidth = 4;
     ctx.lineCap = 'round';
-    
     currentLines.forEach(line => {
         ctx.beginPath();
         ctx.moveTo(line.x1, line.y1);
@@ -355,24 +387,17 @@ function handlePointClick() {
     if (!selectedPoint) {
         selectedPoint = pointId;
         pointElement.classList.add('selected');
-    } 
-    
-    else if (selectedPoint === pointId) {
+    } else if (selectedPoint === pointId) {
         selectedPoint = null;
         pointElement.classList.remove('selected');
-    }
-    
-    else {
+    } else {
         const lineKey = getLineKey(selectedPoint, pointId);
         const prevSelectedElement = document.getElementById(selectedPoint);
         const prevPointData = getPointById(selectedPoint);
 
         if (currentLines.has(lineKey)) {
-            // EFFACEMENT DE LIGNE
             currentLines.delete(lineKey);
-        } 
-        else {
-            // TRACÉ DE LIGNE
+        } else {
             currentLines.set(lineKey, {
                 x1: prevPointData.x, 
                 y1: prevPointData.y, 
@@ -401,12 +426,11 @@ function setupRunePuzzle() {
         pointDiv.addEventListener('click', handlePointClick);
         wrapper.appendChild(pointDiv);
     });
-
     drawCanvas(); 
 }
 
 
-// --- VALIDATION DU PUZZLE RUNE GA (NOUVELLE LOGIQUE TOLÉRANTE) ---
+// --- VALIDATION DU PUZZLE RUNE GA (LOGIQUE TOLÉRANTE CORRIGÉE) ---
 
 btnValidate.addEventListener('click', ()=>{
     
@@ -418,31 +442,14 @@ btnValidate.addEventListener('click', ()=>{
         const [idA_sol, idB_sol] = solutionSegmentKey.split('_');
         let segmentIsCovered = false;
 
+        const A_sol = getPointById(idA_sol);
+        const B_sol = getPointById(idB_sol);
+
         // Parcourir toutes les lignes tracées par l'utilisateur (currentLines)
         for (const userLineKey of currentLines.keys()) {
             const [idA_user, idB_user] = userLineKey.split('_');
-
-            // Simplification : On vérifie si la ligne de l'utilisateur contient le segment solution
-            // C'est la partie la plus difficile sans librairie graphique, on utilise la position des points
-            const A_sol = getPointById(idA_sol);
-            const B_sol = getPointById(idB_sol);
             const A_user = getPointById(idA_user);
             const B_user = getPointById(idB_user);
-
-            // Fonction pour vérifier si un point (px, py) est sur un segment (p1, p2)
-            // Utilisation d'une tolérance pour les flottants
-            const isPointOnSegment = (px, py, p1, p2) => {
-                const crossProduct = (py - p1.y) * (p2.x - p1.x) - (px - p1.x) * (p2.y - p1.y);
-                if (Math.abs(crossProduct) > 1) return false; // Pas sur la ligne
-
-                const dotProduct = (px - p1.x) * (p2.x - p1.x) + (py - p1.y) * (p2.y - p1.y);
-                if (dotProduct < 0) return false; // Avant p1
-
-                const squaredLength = (p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y);
-                if (dotProduct > squaredLength) return false; // Après p2
-
-                return true;
-            };
 
             // Vérifier si A_sol et B_sol sont sur la ligne tracée par l'utilisateur
             if (isPointOnSegment(A_sol.x, A_sol.y, A_user, B_user) && isPointOnSegment(B_sol.x, B_sol.y, A_user, B_user)) {
@@ -457,37 +464,22 @@ btnValidate.addEventListener('click', ()=>{
         }
     }
 
-    // Étape 2 : Vérifier que l'utilisateur n'a pas tracé de segments INVALIDE (qui ne fait pas partie de la solution)
+    // Étape 2 : Vérifier que l'utilisateur n'a pas utilisé des points qui ne font pas partie de la solution
+    // On vérifie que les extrémités de chaque ligne tracée sont bien des points faisant partie de l'ensemble de la rune (SOLUTION_POINTS)
     if (allSegmentsCovered) {
         for (const userLineKey of currentLines.keys()) {
             const [idA_user, idB_user] = userLineKey.split('_');
-
-            // Pour chaque ligne tracée par l'utilisateur, si elle n'est pas un segment atomique de la solution,
-            // il faut vérifier si elle est couverte par une combinaison de segments atomiques de la solution.
-            // La solution la plus simple est de ne pas permettre à l'utilisateur de relier deux points qui ne font pas partie de la solution du tout.
-            // Ici, pour simplifier le prototype, on va vérifier que chaque segment tracé est adjacent ou fait partie de la solution.
             
-            // Si la ligne de l'utilisateur est trop longue et ne peut pas être décomposée en segments atomiques de la solution, elle est invalide.
-            // C'est trop complexe à vérifier ici. On va s'assurer que si l'utilisateur trace une ligne directe, elle fait partie de la "solution des lignes directes"
-
-            // Puisque la vérification des segments couverts (Étape 1) est très forte, nous allons nous concentrer sur le fait
-            // que si l'utilisateur trace une ligne *très* longue et non nécessaire, ce n'est pas permis.
-
-            // Solution de prototype : On vérifie juste qu'il n'y a pas de points en dehors de la solution qui sont utilisés comme extrémités.
-            // Tous les points utilisés comme extrémités par l'utilisateur doivent être des Points Clés ou Intermédiaires de la solution.
-            const allValidPointsIds = new Set();
-            SOLUTION_SEGMENTS.forEach(key => {
-                key.split('_').forEach(id => allValidPointsIds.add(id));
-            });
-
-            if (!allValidPointsIds.has(idA_user) || !allValidPointsIds.has(idB_user)) {
+            // Si l'une des extrémités n'est pas un point valide de la solution
+            if (!SOLUTION_POINTS.has(idA_user) || !SOLUTION_POINTS.has(idB_user)) {
+                 // On peut affiner en vérifiant que les points ne sont pas juste "proches" mais bien les points précis Px
+                 // Mais pour cette version, si les extrémités sont en dehors des points de la solution, c'est faux.
                 hasInvalidSegments = true;
                 break;
             }
         }
     }
     
-    // La victoire exige la couverture de tous les segments atomiques, et pas de segments parasites évidents
     const victory = allSegmentsCovered && !hasInvalidSegments;
 
 
@@ -496,12 +488,13 @@ btnValidate.addEventListener('click', ()=>{
         document.getElementById('puzzle-container').style.display = "none";
         btnValidate.style.display = "none";
         winContainer.style.display = "block"; 
-        typeWriter(winDialogue, closeDialogue);
+        typeWriter(winDialogue);
     } else {
         // ECHEC
-        typeWriter(failDialogue, closeDialogue); 
+        typeWriter(failDialogue); 
     }
 });
+
 </script>
 
 </body>
