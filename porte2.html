@@ -1,25 +1,274 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Porte 2</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Porte 2 - La Rencontre</title>
+
 <style>
-  body{
-    margin:0;
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background-color:#111;
-    color:#ff66ff;
-    font-family:'Press Start 2P', monospace;
-    font-size:3em;
-    text-align:center;
-  }
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* --- RESET & BASE --- */
+html, body {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    font-family: 'Press Start 2P', monospace;
+    overflow: hidden;
+    background: url('https://i.redd.it/5oqqs8imr6s41.gif') center/cover no-repeat;
+    user-select: none;
+}
+
+/* --- UI ELEMENTS --- */
+#back-btn {
+    position: fixed; top: 14px; left: 14px;
+    font-size: 32px; color: red;
+    cursor: pointer; z-index: 6000;
+    text-shadow: 2px 2px 0px black;
+}
+
+#validate-btn {
+    position: fixed; bottom: 15%; left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 30px;
+    font-family: 'Press Start 2P', monospace;
+    background: black; color: white;
+    border: 3px solid white;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-size: 1em;
+    z-index: 50;
+}
+#validate-btn:active { transform: translateX(-50%) scale(0.95); }
+
+/* --- DIALOGUE --- */
+#dialogue-box {
+    position: fixed; left: 50%; bottom: 26px;
+    transform: translateX(-50%);
+    width: 84%;
+    min-height: 100px;
+    background: rgba(0,0,0,0.8);
+    border: 3px solid #ff00ff;
+    padding: 18px;
+    color: #ff66ff;
+    display: none;
+    z-index: 9000;
+    text-shadow: 0 0 6px rgba(255,0,255,0.4);
+    font-size: 0.8em;
+    line-height: 1.5;
+}
+
+/* --- PUZZLE CONTAINER --- */
+#puzzle-container {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+    text-align: center;
+}
+
+.box-title-text {
+    color: white; font-size: 1em;
+    text-shadow: 2px 2px 0px black;
+    margin-bottom: 20px;
+}
+
+/* --- CLOCK INTERFACE --- */
+#clock-wrapper {
+    width: 400px;
+    padding: 40px 20px;
+    border: 4px solid white;
+    background: rgba(0, 0, 0, 0.8);
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.2);
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    align-items: center;
+}
+
+.unit-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.arrow {
+    color: #ff00ff;
+    cursor: pointer;
+    font-size: 1.5em;
+    transition: 0.1s;
+}
+.arrow:hover { transform: scale(1.2); }
+
+.value {
+    color: white;
+    font-size: 1.5em;
+    min-width: 60px;
+    text-align: center;
+}
+
+.separator {
+    color: #ff00ff;
+    font-size: 1.5em;
+    padding-top: 5px;
+}
+
+/* --- VICTOIRE --- */
+#win-image-container {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5000;
+    display: none;
+}
+#win-img { 
+    max-width: 90vw; max-height: 80vh; 
+    background: transparent;
+}
+
 </style>
 </head>
 <body>
-  Porte 2
+
+<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=0"></audio>
+
+<div id="back-btn" onclick="history.back()">⬅</div>
+
+<div id="puzzle-container">
+    <div class="box-title-text" style="color:#ff00ff;">Quand tout a commencé ?</div>
+    <div id="clock-wrapper">
+        <div class="unit-group">
+            <div class="arrow" onclick="changeValue('day', 1)">▲</div>
+            <div id="day-val" class="value">01</div>
+            <div class="arrow" onclick="changeValue('day', -1)">▼</div>
+        </div>
+        <div class="separator">/</div>
+        <div class="unit-group">
+            <div class="arrow" onclick="changeValue('month', 1)">▲</div>
+            <div id="month-val" class="value">01</div>
+            <div class="arrow" onclick="changeValue('month', -1)">▼</div>
+        </div>
+        <div class="separator">/</div>
+        <div class="unit-group">
+            <div class="arrow" onclick="changeValue('year', 1)">▲</div>
+            <div id="year-val" class="value">2024</div>
+            <div class="arrow" onclick="changeValue('year', -1)">▼</div>
+        </div>
+    </div>
+</div>
+
+<button id="validate-btn">VALIDER</button>
+
+<div id="win-image-container">
+    <img id="win-img" src="https://i.imgur.com/xnhXVcZ.png" alt="Victoire">
+</div>
+
+<div id="dialogue-box"></div>
+
+<script>
+/* =========================================
+   1. GESTION DES DIALOGUES
+   ========================================= */
+const dialogueBox = document.getElementById("dialogue-box");
+const typeSound = document.getElementById("type-sound");
+let typeInterval;
+
+const dialogs = {
+    intro: ["Une horloge ? On dirait qu'il faut marquer un moment précis...", "J'espère qu'il a bonne mémoire, sinon on va rester coincés ici un moment !"],
+    win: "24 Mars... le jour où tout a changé. Il n'a pas oublié.",
+    fail: "C'est pas ça du tout. C'est gênant s'il s'en rappelle même pas..."
+};
+
+function playSound() {
+    try { typeSound.currentTime = 0; typeSound.play().catch(()=>{}); } catch(e){}
+}
+
+function showDialogue(text, callback = null) {
+    clearInterval(typeInterval);
+    dialogueBox.style.display = 'block';
+    dialogueBox.innerHTML = '';
+    playSound();
+
+    let i = 0;
+    let currentText = "";
+    
+    const skipHandler = (e) => {
+        e.stopPropagation();
+        clearInterval(typeInterval);
+        dialogueBox.innerHTML = text; 
+        finish();
+    };
+    dialogueBox.onclick = skipHandler;
+
+    function finish() {
+        try { typeSound.pause(); } catch(e){}
+        dialogueBox.onclick = () => {
+            dialogueBox.style.display = 'none';
+            dialogueBox.onclick = null;
+            if (callback) callback();
+        };
+    }
+
+    typeInterval = setInterval(() => {
+        currentText += text.charAt(i);
+        dialogueBox.innerHTML = currentText;
+        i++;
+        if (i >= text.length) {
+            clearInterval(typeInterval);
+            finish();
+        }
+    }, 30);
+}
+
+window.onload = () => {
+    showDialogue(dialogs.intro[0], () => {
+        setTimeout(() => {
+            showDialogue(dialogs.intro[1]);
+        }, 200);
+    });
+};
+
+/* =========================================
+   2. LOGIQUE DE L'HORLOGE
+   ========================================= */
+let currentDate = { day: 1, month: 1, year: 2024 };
+
+function changeValue(unit, delta) {
+    if(unit === 'day') {
+        currentDate.day += delta;
+        if(currentDate.day > 31) currentDate.day = 1;
+        if(currentDate.day < 1) currentDate.day = 31;
+    } else if(unit === 'month') {
+        currentDate.month += delta;
+        if(currentDate.month > 12) currentDate.month = 1;
+        if(currentDate.month < 1) currentDate.month = 12;
+    } else if(unit === 'year') {
+        currentDate.year += delta;
+        if(currentDate.year > 2030) currentDate.year = 2020;
+        if(currentDate.year < 2020) currentDate.year = 2030;
+    }
+    updateDisplay();
+}
+
+function updateDisplay() {
+    document.getElementById('day-val').innerText = currentDate.day.toString().padStart(2, '0');
+    document.getElementById('month-val').innerText = currentDate.month.toString().padStart(2, '0');
+    document.getElementById('year-val').innerText = currentDate.year;
+}
+
+/* =========================================
+   3. VALIDATION
+   ========================================= */
+document.getElementById('validate-btn').onclick = () => {
+    // La date cible : 24/03/2025
+    if (currentDate.day === 24 && currentDate.month === 3 && currentDate.year === 2025) {
+        document.getElementById('puzzle-container').style.display = 'none';
+        document.getElementById('validate-btn').style.display = 'none';
+        document.getElementById('win-image-container').style.display = 'block';
+        showDialogue(dialogs.win);
+    } else {
+        showDialogue(dialogs.fail);
+    }
+};
+
+</script>
 </body>
 </html>
