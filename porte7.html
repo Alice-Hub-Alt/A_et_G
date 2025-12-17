@@ -1,9 +1,6 @@
 <!DOCTYPE html>
-
 <html lang="fr">
-
 <head>
-
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
@@ -13,26 +10,34 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 html, body{
-    margin:0; padding:0; height:100%;
+    margin:0;
+    padding:0;
+    height:100%;
     font-family:'Press Start 2P', monospace;
     overflow:hidden;
     background:url('https://i.redd.it/5oqqs8imr6s41.gif') center/cover no-repeat;
-    user-select: none;
+    user-select:none;
 }
 
 #back-btn{
-    position:fixed; top:14px; left:14px;
-    font-size:32px; color:red;
-    cursor:pointer; z-index:6000;
-    text-shadow: 2px 2px 0px black;
+    position:fixed;
+    top:14px;
+    left:14px;
+    font-size:32px;
+    color:red;
+    cursor:pointer;
+    z-index:6000;
+    text-shadow:2px 2px 0 black;
 }
 
 #dialogue-box{
     position:fixed;
-    left:50%; bottom:26px;
+    left:50%;
+    bottom:26px;
     transform:translateX(-50%);
     width:84%;
-    min-height:14vh; max-height:28vh;
+    min-height:14vh;
+    max-height:28vh;
     background:rgba(0,0,0,0.55);
     border:3px solid #ff00ff;
     padding:18px;
@@ -42,73 +47,89 @@ html, body{
     overflow:auto;
 }
 
-#dialogue-text{ font-size:0.86em; line-height:1.45; }
-
-#puzzle-container {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 100;
-    text-align: center;
+#dialogue-text{
+    font-size:0.86em;
+    line-height:1.45;
 }
 
-#canvas-wrapper {
-    position: relative;
-    border: 4px solid white;
-    display: inline-block;
-    width: 400px;
-    height: 360px;
+.cursor-active{
+    border-right:0.15em solid #ff66ff;
+    animation:blink 0.5s steps(1) infinite;
 }
 
-#rune-canvas {
-    background-color: rgba(0, 0, 0, 0.8);
-    display: block;
+@keyframes blink{
+    0%,100%{border-color:transparent;}
+    50%{border-color:#ff66ff;}
 }
 
-.connection-point {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.5);
-    cursor: pointer;
-    transform: translate(-50%, -50%);
+#puzzle-container{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    z-index:100;
+    text-align:center;
 }
 
-.connection-point.selected {
-    background-color: #ff00ff;
-    border: 2px solid white;
+#canvas-wrapper{
+    position:relative;
+    width:400px;
+    height:360px;
+    border:4px solid white;
 }
 
-#validate-btn {
-    position: fixed;
-    bottom: 20%;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 15px;
-    font-family: 'Press Start 2P', monospace;
-    background: black;
-    color: white;
-    border: 3px solid white;
-    cursor: pointer;
+#rune-canvas{
+    background:rgba(0,0,0,0.8);
 }
 
-#win-image-container {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    display: none;
+.connection-point{
+    position:absolute;
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.5);
+    cursor:pointer;
+    transform:translate(-50%,-50%);
+}
+
+.connection-point.selected{
+    background:#ff00ff;
+    border:2px solid white;
+    box-shadow:0 0 8px #ff00ff;
+}
+
+#validate-btn{
+    position:fixed;
+    bottom:20%;
+    left:50%;
+    transform:translateX(-50%);
+    padding:15px;
+    font-family:'Press Start 2P', monospace;
+    background:black;
+    color:white;
+    border:3px solid white;
+    cursor:pointer;
+}
+
+#win-image-container{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    display:none;
+    z-index:5000;
 }
 </style>
-
 </head>
 
 <body>
 
-<div id="back-btn">⬅</div>
+<div id="back-btn" onclick="location.href='zone2_1.html'">⬅</div>
+
+<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3"></audio>
 
 <div id="puzzle-container">
-    <div style="color:#ff00ff;">Tracez notre Symbole : La Rune GA</div>
+    <div style="color:#ff00ff;margin-bottom:20px;">Tracez notre Symbole : La Rune GA</div>
     <div id="canvas-wrapper">
         <canvas id="rune-canvas" width="400" height="360"></canvas>
     </div>
@@ -120,55 +141,95 @@ html, body{
     <img src="https://i.imgur.com/xnhXVcZ.png">
 </div>
 
+<div id="dialogue-box"><div id="dialogue-text"></div></div>
+
 <script>
-const canvas = document.getElementById('rune-canvas');
-const ctx = canvas.getContext('2d');
-const wrapper = document.getElementById('canvas-wrapper');
-const btnValidate = document.getElementById('validate-btn');
-const winContainer = document.getElementById('win-image-container');
+// ---------------- DIALOGUES ----------------
+const dialogueBox = document.getElementById("dialogue-box");
+const dialogueText = document.getElementById("dialogue-text");
+const typeSound = document.getElementById("type-sound");
+
+const introDialogues = ["intro 1", "intro 2"];
+const winDialogue = "Gagné";
+const failDialogue = "Perdu";
+
+let typingInterval;
+let isTyping = false;
+let skipRequested = false;
+
+function typeWriter(text, callback){
+    if(typingInterval) clearInterval(typingInterval);
+    skipRequested = false;
+    isTyping = true;
+    dialogueText.innerHTML = "";
+    dialogueBox.style.display = "block";
+    dialogueText.classList.add("cursor-active");
+
+    let i = 0;
+    typingInterval = setInterval(()=>{
+        if(skipRequested || i >= text.length){
+            clearInterval(typingInterval);
+            dialogueText.innerHTML = text;
+            dialogueText.classList.remove("cursor-active");
+            isTyping = false;
+            if(callback) dialogueBox.onclick = callback;
+            return;
+        }
+        dialogueText.innerHTML += text[i++];
+    },28);
+}
+
+dialogueBox.onclick = ()=>{
+    if(isTyping) skipRequested = true;
+};
+
+// ---------------- PUZZLE ----------------
+const canvas = document.getElementById("rune-canvas");
+const ctx = canvas.getContext("2d");
+const wrapper = document.getElementById("canvas-wrapper");
+const validateBtn = document.getElementById("validate-btn");
+const winContainer = document.getElementById("win-image-container");
 
 const GRID_COLS = 10;
 const GRID_ROWS = 9;
 const SPACING = 40;
-const START_OFFSET = SPACING / 2;
+const OFFSET = SPACING/2;
 
-let POINTS_CONFIG = [];
-let pointCounter = 1;
+let points = [];
+let id = 1;
 
-for (let y = 0; y < GRID_ROWS; y++) {
-    for (let x = 0; x < GRID_COLS; x++) {
-        POINTS_CONFIG.push({
-            id: `P${pointCounter}`,
-            x: START_OFFSET + x * SPACING,
-            y: START_OFFSET + y * SPACING
+for(let y=0;y<GRID_ROWS;y++){
+    for(let x=0;x<GRID_COLS;x++){
+        points.push({
+            id:"P"+id++,
+            x:OFFSET + x*SPACING,
+            y:OFFSET + y*SPACING
         });
-        pointCounter++;
     }
 }
 
-/* ✅ SEULE PARTIE MODIFIÉE */
+/* 🔥 LA SEULE SOURCE DE VÉRITÉ */
 const SOLUTION_LINES = [
-    'P23_P43',
-    'P5_P23',
-    'P5_P27',
-    'P27_P35',
-    'P35_P45',
-    'P43_P48',
-    'P53_P73',
-    'P55_P67',
-    'P55_P85'
+    "P23_P43",
+    "P5_P23",
+    "P5_P27",
+    "P27_P35",
+    "P35_P45",
+    "P43_P48",
+    "P53_P73",
+    "P55_P67",
+    "P55_P85"
 ];
 
 let currentLines = new Map();
-let selectedPoint = null;
+let selected = null;
 
-function getLineKey(a, b){ return [a, b].sort().join('_'); }
-function getPointById(id){ return POINTS_CONFIG.find(p => p.id === id); }
+function key(a,b){ return [a,b].sort().join("_"); }
 
-function drawCanvas(){
+function draw(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 4;
+    ctx.strokeStyle="white";
+    ctx.lineWidth=4;
     currentLines.forEach(l=>{
         ctx.beginPath();
         ctx.moveTo(l.x1,l.y1);
@@ -177,44 +238,44 @@ function drawCanvas(){
     });
 }
 
-function handlePointClick(){
-    const id = this.id;
-    if(!selectedPoint){
-        selectedPoint = id;
-        this.classList.add('selected');
-    } else {
-        const key = getLineKey(selectedPoint,id);
-        if(currentLines.has(key)){
-            currentLines.delete(key);
-        } else {
-            const a = getPointById(selectedPoint);
-            const b = getPointById(id);
-            currentLines.set(key,{x1:a.x,y1:a.y,x2:b.x,y2:b.y});
-        }
-        document.getElementById(selectedPoint).classList.remove('selected');
-        selectedPoint = null;
-        drawCanvas();
-    }
-}
-
-POINTS_CONFIG.forEach(p=>{
-    const d=document.createElement('div');
-    d.className='connection-point';
+points.forEach(p=>{
+    const d=document.createElement("div");
+    d.className="connection-point";
     d.id=p.id;
-    d.style.left=p.x+'px';
-    d.style.top=p.y+'px';
-    d.onclick=handlePointClick;
+    d.style.left=p.x+"px";
+    d.style.top=p.y+"px";
+    d.onclick=()=>{
+        if(!selected){
+            selected=p.id;
+            d.classList.add("selected");
+        }else{
+            const k=key(selected,p.id);
+            const a=points.find(pt=>pt.id===selected);
+            if(currentLines.has(k)) currentLines.delete(k);
+            else currentLines.set(k,{x1:a.x,y1:a.y,x2:p.x,y2:p.y});
+            document.getElementById(selected).classList.remove("selected");
+            selected=null;
+            draw();
+        }
+    };
     wrapper.appendChild(d);
 });
 
-btnValidate.onclick=()=>{
-    const u=[...currentLines.keys()].sort();
-    const s=[...SOLUTION_LINES].sort();
-    if(u.length===s.length && u.every((v,i)=>v===s[i])){
-        winContainer.style.display='block';
-    } else {
-        alert("Raté.");
+validateBtn.onclick=()=>{
+    const user=[...currentLines.keys()].sort();
+    const sol=[...SOLUTION_LINES].sort();
+    if(user.length===sol.length && user.every((v,i)=>v===sol[i])){
+        document.getElementById("puzzle-container").style.display="none";
+        validateBtn.style.display="none";
+        winContainer.style.display="block";
+        typeWriter(winDialogue);
+    }else{
+        typeWriter(failDialogue);
     }
+};
+
+window.onload=()=>{
+    typeWriter(introDialogues[0],()=>typeWriter(introDialogues[1]));
 };
 </script>
 
