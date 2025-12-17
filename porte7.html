@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>Porte 7</title>
+<title>Porte 7 - Rune GA</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -82,7 +82,7 @@ html, body{
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(255, 255, 255, 0.5);
     cursor: pointer;
     z-index: 10; 
     transform: translate(-50%, -50%); 
@@ -91,7 +91,7 @@ html, body{
 .connection-point.selected {
     background-color: #ff00ff; 
     border: 2px solid white;
-    box-shadow: 0 0 10px #ff00ff;
+    box-shadow: 0 0 8px #ff00ff;
 }
 
 .box-title-text {
@@ -141,7 +141,6 @@ html, body{
 
 <div id="puzzle-container">
     <div class="box-title-text" style="color:#ff00ff;">Tracez la Rune GA</div>
-    
     <div id="canvas-wrapper">
         <canvas id="rune-canvas" width="400" height="360"></canvas>
     </div>
@@ -197,7 +196,7 @@ function introSequenceStep2(){ typeWriter(introDialogues[1], () => dialogueBox.s
 
 window.onload = ()=>{ setupRunePuzzle(); typeWriter(introDialogues[0], introSequenceStep2); }
 
-// --- LOGIQUE DU PUZZLE ---
+// --- LOGIQUE DU PUZZLE RUNE GA ---
 const canvas = document.getElementById('rune-canvas');
 const ctx = canvas.getContext('2d');
 const wrapper = document.getElementById('canvas-wrapper');
@@ -206,67 +205,68 @@ const btnValidate = document.getElementById('validate-btn');
 const SPACING = 40;
 const START_OFFSET = SPACING / 2;
 
-// Liste des points uniques pour l'affichage
-const UNIQUE_POINTS = [5, 23, 27, 35, 43, 45, 48, 53, 55, 67, 73, 85];
-// Solution exacte par paires (ordonnées alphabétiquement pour la comparaison)
-const EXACT_SOLUTION = [
+// Liste des points à garder (P1 à P90)
+const POINTS_TO_KEEP = [5, 23, 27, 35, 43, 45, 48, 53, 55, 67, 73, 85];
+let pointsConfig = [];
+
+// Génération des coordonnées uniquement pour les points gardés
+POINTS_TO_KEEP.forEach(id => {
+    let index = id - 1;
+    let x = (index % 10) * SPACING + START_OFFSET;
+    let y = Math.floor(index / 10) * SPACING + START_OFFSET;
+    pointsConfig.push({ id: `P${id}`, x: x, y: y });
+});
+
+// Ta solution par paires
+const SOLUTION_LINES = [
     'P23_P43', 'P5_P23', 'P5_P27', 'P27_P35', 'P35_P45', 
     'P43_P48', 'P53_P73', 'P55_P67', 'P55_P85'
 ].sort();
 
-let pointsData = [];
-
-// Création des points à leurs positions d'origine
-UNIQUE_POINTS.forEach(id => {
-    let index = id - 1;
-    let x = index % 10;
-    let y = Math.floor(index / 10);
-    pointsData.push({
-        id: `P${id}`,
-        x: START_OFFSET + x * SPACING,
-        y: START_OFFSET + y * SPACING
-    });
-});
-
-let userLines = new Map();
+let currentLines = new Set(); 
 let selectedPoint = null;
+
+function getLineKey(idA, idB) {
+    return [idA, idB].sort().join('_');
+}
 
 function drawCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = 'white';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 5;
     ctx.lineCap = 'round';
-    userLines.forEach(l => {
-        ctx.beginPath();
-        ctx.moveTo(l.x1, l.y1);
-        ctx.lineTo(l.x2, l.y2);
-        ctx.stroke();
+    
+    currentLines.forEach(key => {
+        const [idA, idB] = key.split('_');
+        const pA = pointsConfig.find(p => p.id === idA);
+        const pB = pointsConfig.find(p => p.id === idB);
+        
+        if (pA && pB) {
+            ctx.beginPath();
+            ctx.moveTo(pA.x, pA.y);
+            ctx.lineTo(pB.x, pB.y);
+            ctx.stroke();
+        }
     });
 }
 
 function handlePointClick() {
     const pointId = this.id;
-    const pData = pointsData.find(p => p.id === pointId);
-
     if (!selectedPoint) {
         selectedPoint = pointId;
         this.classList.add('selected');
-    } else if (selectedPoint === pointId) {
+    } 
+    else if (selectedPoint === pointId) {
         selectedPoint = null;
         this.classList.remove('selected');
-    } else {
-        const prevPData = pointsData.find(p => p.id === selectedPoint);
-        const lineKey = [selectedPoint, pointId].sort().join('_');
-
-        if (userLines.has(lineKey)) {
-            userLines.delete(lineKey);
+    }
+    else {
+        const lineKey = getLineKey(selectedPoint, pointId);
+        if (currentLines.has(lineKey)) {
+            currentLines.delete(lineKey);
         } else {
-            userLines.set(lineKey, {
-                x1: prevPData.x, y1: prevPData.y,
-                x2: pData.x, y2: pData.y
-            });
+            currentLines.add(lineKey);
         }
-
         document.getElementById(selectedPoint).classList.remove('selected');
         selectedPoint = null;
         drawCanvas();
@@ -274,28 +274,38 @@ function handlePointClick() {
 }
 
 function setupRunePuzzle() {
-    pointsData.forEach(p => {
+    pointsConfig.forEach(point => {
         const div = document.createElement('div');
         div.className = 'connection-point';
-        div.id = p.id;
-        div.style.left = p.x + 'px';
-        div.style.top = p.y + 'px';
+        div.id = point.id;
+        div.style.left = point.x + 'px';
+        div.style.top = point.y + 'px';
         div.addEventListener('click', handlePointClick);
         wrapper.appendChild(div);
     });
+    drawCanvas();
 }
 
 btnValidate.addEventListener('click', () => {
-    const userKeys = Array.from(userLines.keys()).sort();
-    
-    // Vérification : même nombre de lignes ET chaque ligne correspond à la solution
-    const isWin = userKeys.length === EXACT_SOLUTION.length && 
-                  userKeys.every((key, index) => key === EXACT_SOLUTION[index]);
+    const userLines = Array.from(currentLines).sort();
+    const isCorrectSize = userLines.length === SOLUTION_LINES.length;
+    let isSameContent = true;
 
-    if (isWin) {
+    if (isCorrectSize) {
+        for (let i = 0; i < userLines.length; i++) {
+            if (userLines[i] !== SOLUTION_LINES[i]) {
+                isSameContent = false;
+                break;
+            }
+        }
+    } else {
+        isSameContent = false;
+    }
+
+    if (isCorrectSize && isSameContent) {
         document.getElementById('puzzle-container').style.display = "none";
         btnValidate.style.display = "none";
-        document.getElementById('win-image-container').style.display = "block";
+        document.getElementById('win-image-container').style.display = "block"; 
         typeWriter(winDialogue);
     } else {
         typeWriter(failDialogue);
