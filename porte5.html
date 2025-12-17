@@ -1,25 +1,251 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Porte 5</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Porte 5 - La Vérité</title>
+
 <style>
-  body{
-    margin:0;
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background-color:#111;
-    color:#ff66ff;
-    font-family:'Press Start 2P', monospace;
-    font-size:3em;
-    text-align:center;
-  }
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+html, body {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    font-family: 'Press Start 2P', monospace;
+    overflow: hidden;
+    background: url('https://i.redd.it/5oqqs8imr6s41.gif') center/cover no-repeat;
+    user-select: none;
+}
+
+#back-btn {
+    position: fixed; top: 14px; left: 14px;
+    font-size: 32px; color: red;
+    cursor: pointer; z-index: 6000;
+    text-shadow: 2px 2px 0px black;
+}
+
+#validate-btn {
+    position: fixed; bottom: 15%; left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 30px;
+    font-family: 'Press Start 2P', monospace;
+    background: black; color: white;
+    border: 3px solid white;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-size: 1em;
+    z-index: 50;
+}
+
+#dialogue-box {
+    position: fixed; left: 50%; bottom: 26px;
+    transform: translateX(-50%);
+    width: 84%;
+    min-height: 100px;
+    background: rgba(0,0,0,0.8);
+    border: 3px solid #ff00ff;
+    padding: 18px;
+    color: #ff66ff;
+    display: none;
+    z-index: 9000;
+    font-size: 0.8em;
+    line-height: 1.5;
+}
+
+#puzzle-container {
+    position: fixed; top: 45%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+
+/* --- TEXTE À TROUS --- */
+#text-zone {
+    background: rgba(0, 0, 0, 0.85);
+    border: 4px solid white;
+    padding: 30px;
+    color: white;
+    line-height: 2.5;
+    font-size: 0.9em;
+    text-align: left;
+    max-width: 800px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.drop-zone {
+    display: inline-block;
+    min-width: 80px;
+    height: 30px;
+    border-bottom: 3px solid #ff00ff;
+    margin: 0 5px;
+    vertical-align: middle;
+    text-align: center;
+    color: #ff00ff;
+    transition: all 0.2s;
+}
+
+/* --- MOTS À DRAGGER --- */
+#word-bank {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    max-width: 800px;
+}
+
+.word-item {
+    background: black;
+    border: 2px solid white;
+    padding: 10px 15px;
+    color: white;
+    cursor: grab;
+    font-size: 0.7em;
+}
+.word-item.dragging { opacity: 0.5; }
+
+#win-image-container {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5000;
+    display: none;
+}
+#win-img { max-width: 90vw; max-height: 80vh; }
+
 </style>
 </head>
 <body>
-  Porte 5
+
+<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=0"></audio>
+
+<div id="back-btn" onclick="history.back()">⬅</div>
+
+<div id="puzzle-container">
+    <div id="text-zone">
+        Je méprise la <div class="drop-zone" data-answer="naïveté"></div> des gens. 
+        Pour moi, la plupart ne sont que des <div class="drop-zone" data-answer="rouages"></div> 
+        inutiles dans une machine sans <div class="drop-zone" data-answer="but"></div>. 
+        Seule la <div class="drop-zone" data-answer="logique"></div> froide mérite mon respect.
+    </div>
+
+    <div id="word-bank">
+        <div class="word-item" draggable="true">naïveté</div>
+        <div class="word-item" draggable="true">logique</div>
+        <div class="word-item" draggable="true">sentiments</div>
+        <div class="word-item" draggable="true">rouages</div>
+        <div class="word-item" draggable="true">but</div>
+        <div class="word-item" draggable="true">cadeau</div>
+        <div class="word-item" draggable="true">amis</div>
+    </div>
+</div>
+
+<button id="validate-btn">VALIDER</button>
+
+<div id="win-image-container">
+    <img id="win-img" src="https://i.imgur.com/xnhXVcZ.png" alt="Victoire">
+</div>
+
+<div id="dialogue-box"></div>
+
+<script>
+const dialogueBox = document.getElementById("dialogue-box");
+const typeSound = document.getElementById("type-sound");
+let typeInterval;
+
+const dialogs = {
+    intro: ["On dirait que je dois compléter mes propres pensées...", "S'il me connaît vraiment, il saura quoi mettre."],
+    win: "Exactement. Le monde est une machine cassée et il est le seul à l'avoir compris avec moi.",
+    fail: "C'est beaucoup trop niais. Recommence, tu m'insultes là."
+};
+
+function playSound() {
+    try { typeSound.currentTime = 0; typeSound.play().catch(()=>{}); } catch(e){}
+}
+
+function showDialogue(text, callback = null) {
+    clearInterval(typeInterval);
+    dialogueBox.style.display = 'block';
+    dialogueBox.innerHTML = '';
+    playSound();
+    let i = 0;
+    let currentText = "";
+    dialogueBox.onclick = () => {
+        clearInterval(typeInterval);
+        dialogueBox.innerHTML = text;
+        finish();
+    };
+    function finish() {
+        try { typeSound.pause(); } catch(e){}
+        dialogueBox.onclick = () => {
+            dialogueBox.style.display = 'none';
+            if (callback) callback();
+        };
+    }
+    typeInterval = setInterval(() => {
+        currentText += text.charAt(i);
+        dialogueBox.innerHTML = currentText;
+        i++;
+        if (i >= text.length) { clearInterval(typeInterval); finish(); }
+    }, 30);
+}
+
+// --- LOGIQUE DRAG AND DROP ---
+const words = document.querySelectorAll('.word-item');
+const zones = document.querySelectorAll('.drop-zone');
+let draggedWord = null;
+
+words.forEach(word => {
+    word.addEventListener('dragstart', () => {
+        draggedWord = word;
+        word.classList.add('dragging');
+    });
+    word.addEventListener('dragend', () => {
+        word.classList.remove('dragging');
+    });
+});
+
+zones.forEach(zone => {
+    zone.addEventListener('dragover', e => e.preventDefault());
+    zone.addEventListener('drop', () => {
+        if (draggedWord) {
+            // Si la zone contient déjà un mot, on peut le remettre dans la banque si on veut
+            // Ici on remplace juste le texte
+            zone.innerText = draggedWord.innerText;
+            zone.style.minWidth = "auto"; // Le trou s'adapte au mot
+        }
+    });
+    // Optionnel : cliquer sur la zone pour l'effacer
+    zone.onclick = () => { 
+        zone.innerText = ""; 
+        zone.style.minWidth = "80px";
+    };
+});
+
+window.onload = () => {
+    showDialogue(dialogs.intro[0], () => {
+        setTimeout(() => showDialogue(dialogs.intro[1]), 200);
+    });
+};
+
+document.getElementById('validate-btn').onclick = () => {
+    let allCorrect = true;
+    zones.forEach(zone => {
+        if (zone.innerText.trim() !== zone.dataset.answer) {
+            allCorrect = false;
+        }
+    });
+
+    if (allCorrect) {
+        document.getElementById('puzzle-container').style.display = 'none';
+        document.getElementById('validate-btn').style.display = 'none';
+        document.getElementById('win-image-container').style.display = 'block';
+        showDialogue(dialogs.win);
+    } else {
+        showDialogue(dialogs.fail);
+    }
+};
+</script>
 </body>
 </html>
