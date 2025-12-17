@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Porte 7</title>
+<title>Porte 7 - Rune GA</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -47,7 +47,7 @@ html, body {
     width: 84%;
     min-height: 100px;
     background: rgba(0,0,0,0.8);
-    border: 3px solid #ff00ff;
+    border: 3px solid #ff00ff; /* Bordure FIXE (pas de clignotement) */
     padding: 18px;
     color: #ff66ff;
     display: none;
@@ -56,11 +56,6 @@ html, body {
     font-size: 0.8em;
     line-height: 1.5;
 }
-.cursor-active {
-    border-right: 10px solid #ff66ff;
-    animation: blink 0.5s step-end infinite;
-}
-@keyframes blink { 50% { border-color: transparent; } }
 
 /* --- PUZZLE CONTAINER --- */
 #puzzle-container {
@@ -79,7 +74,7 @@ html, body {
 /* --- CANVAS & POINTS --- */
 #canvas-wrapper {
     position: relative;
-    width: 400px; height: 360px; /* Taille Fixe de la zone de jeu */
+    width: 400px; height: 360px;
     border: 4px solid white;
     background: rgba(0, 0, 0, 0.6);
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
@@ -108,6 +103,12 @@ canvas {
     border: 2px solid white;
 }
 
+/* Style spécifique pour les leurres (visuellement identiques mais curseur différent si tu veux, ici je laisse pointer) */
+.point.decoy {
+    cursor: default; /* Montre que ce n'est pas cliquable */
+    opacity: 0.5; /* Optionnel : un tout petit peu plus transparent ? Sinon remettre à 1 */
+}
+
 /* --- VICTOIRE --- */
 #win-image-container {
     position: fixed; top: 50%; left: 50%;
@@ -115,7 +116,11 @@ canvas {
     z-index: 5000;
     display: none;
 }
-#win-img { max-width: 90vw; max-height: 80vh; border: 5px solid white; }
+#win-img { 
+    max-width: 90vw; max-height: 80vh; 
+    border: none; /* Plus de bordure blanche */
+    background: transparent;
+}
 
 </style>
 </head>
@@ -142,7 +147,7 @@ canvas {
 
 <script>
 /* =========================================
-   1. GESTION DES DIALOGUES (Typewriter)
+   1. GESTION DES DIALOGUES
    ========================================= */
 const dialogueBox = document.getElementById("dialogue-box");
 const typeSound = document.getElementById("type-sound");
@@ -162,23 +167,21 @@ function showDialogue(text, callback = null) {
     clearInterval(typeInterval);
     dialogueBox.style.display = 'block';
     dialogueBox.innerHTML = '';
-    dialogueBox.classList.add('cursor-active');
+    // J'ai retiré 'cursor-active' de la classe pour éviter le clignotement de la boite
     playSound();
 
     let i = 0;
     let currentText = "";
     
-    // Fonction de clic pour passer instantanément
     const skipHandler = (e) => {
         e.stopPropagation();
         clearInterval(typeInterval);
-        dialogueBox.innerHTML = text; // Afficher tout
+        dialogueBox.innerHTML = text; 
         finish();
     };
     dialogueBox.onclick = skipHandler;
 
     function finish() {
-        dialogueBox.classList.remove('cursor-active');
         try { typeSound.pause(); } catch(e){}
         dialogueBox.onclick = () => {
             dialogueBox.style.display = 'none';
@@ -198,7 +201,6 @@ function showDialogue(text, callback = null) {
     }, 30);
 }
 
-// Séquence d'intro
 window.onload = () => {
     initPuzzle();
     showDialogue(dialogs.intro[0], () => {
@@ -213,52 +215,61 @@ window.onload = () => {
    2. LOGIQUE DU PUZZLE (RUNE GA)
    ========================================= */
 
-// Configuration de la grille 10x9
 const COLS = 10;
-const SPACING = 40; // 40px entre chaque point
-const OFFSET = 20;  // Marge pour centrer le point dans sa case
+const SPACING = 40; 
+const OFFSET = 20;  
 
-// Liste des points à afficher (IDs basés sur une grille de 1 à 90)
+// Les VRAIS points (utiles)
 const POINTS_IDS = [5, 23, 27, 35, 43, 45, 48, 53, 55, 67, 73, 85];
 
-// Solution attendue (Paires de points)
+// Les points PARASITES (décoration uniquement, IDs au hasard sur la grille vide)
+const DECOY_IDS = [12, 18, 32, 62, 78, 82, 88, 15, 65]; 
+
 const SOLUTION = [
     '5_23', '5_27', '23_43', '27_35', '35_45', 
     '43_48', '53_73', '55_67', '55_85'
 ];
 
-let pointsMap = {}; // Stocke les coordonnées {id: {x, y}}
-let lines = new Set(); // Stocke les lignes tracées "ID_ID"
+let pointsMap = {}; 
+let lines = new Set(); 
 let selectedPoint = null;
 
 const canvas = document.getElementById('rune-canvas');
 const ctx = canvas.getContext('2d');
 const wrapper = document.getElementById('canvas-wrapper');
 
-// Initialisation
-function initPuzzle() {
-    POINTS_IDS.forEach(id => {
-        // Calcul mathématique précis de la position sur la grille
-        // id 1 = index 0. row = 0, col = 0.
-        let idx = id - 1;
-        let col = idx % COLS;
-        let row = Math.floor(idx / COLS);
-        
-        let x = OFFSET + (col * SPACING);
-        let y = OFFSET + (row * SPACING);
+function createPointElement(id, isDecoy) {
+    let idx = id - 1;
+    let col = idx % COLS;
+    let row = Math.floor(idx / COLS);
+    
+    let x = OFFSET + (col * SPACING);
+    let y = OFFSET + (row * SPACING);
 
+    // On stocke la position seulement si c'est un vrai point (pour tracer)
+    if (!isDecoy) {
         pointsMap[id] = {x, y};
+    }
 
-        // Création de l'élément DOM
-        let p = document.createElement('div');
-        p.className = 'point';
-        p.id = 'p-' + id; // id DOM
-        p.dataset.id = id; // id logique
-        p.style.left = x + 'px';
-        p.style.top = y + 'px';
-        p.onclick = onPointClick;
-        wrapper.appendChild(p);
-    });
+    let p = document.createElement('div');
+    p.className = isDecoy ? 'point decoy' : 'point';
+    p.style.left = x + 'px';
+    p.style.top = y + 'px';
+    
+    if (!isDecoy) {
+        p.id = 'p-' + id;
+        p.dataset.id = id;
+        p.onclick = onPointClick; // Seuls les vrais points sont cliquables
+    }
+    
+    wrapper.appendChild(p);
+}
+
+function initPuzzle() {
+    // Créer les vrais points
+    POINTS_IDS.forEach(id => createPointElement(id, false));
+    // Créer les leurres
+    DECOY_IDS.forEach(id => createPointElement(id, true));
 }
 
 function onPointClick(e) {
@@ -266,27 +277,20 @@ function onPointClick(e) {
     let el = this;
 
     if (selectedPoint === null) {
-        // Premier clic
         selectedPoint = id;
         el.classList.add('selected');
     } else if (selectedPoint === id) {
-        // Annuler la sélection
         selectedPoint = null;
         el.classList.remove('selected');
     } else {
-        // Second clic : Tracer ou Effacer
         toggleLine(selectedPoint, id);
-        
-        // Nettoyage visuel
         document.getElementById('p-' + selectedPoint).classList.remove('selected');
         selectedPoint = null;
     }
 }
 
 function toggleLine(idA, idB) {
-    // Créer une clé unique triée (ex: toujours "5_23", jamais "23_5")
     let key = (idA < idB) ? `${idA}_${idB}` : `${idB}_${idA}`;
-
     if (lines.has(key)) {
         lines.delete(key);
     } else {
@@ -297,7 +301,6 @@ function toggleLine(idA, idB) {
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
     ctx.strokeStyle = 'white';
     ctx.lineWidth = 4;
     ctx.lineCap = 'round';
@@ -314,29 +317,24 @@ function draw() {
     });
 }
 
-
 /* =========================================
    3. VALIDATION
    ========================================= */
 
 document.getElementById('validate-btn').onclick = () => {
-    // Conversion en tableaux triés pour comparaison stricte
     let userLines = Array.from(lines).sort();
-    let solutionLines = SOLUTION.sort(); // Normalement déjà trié mais sécurité
+    let solutionLines = SOLUTION.sort();
 
-    // Vérification 1: Nombre de lignes
+    // Comparaison stricte
     if (userLines.length !== solutionLines.length) {
         showDialogue(dialogs.fail);
         return;
     }
 
-    // Vérification 2: Contenu exact
     let isCorrect = true;
     for (let i = 0; i < userLines.length; i++) {
-        // On doit normaliser les clés solution aussi au cas où
         let sKeyParts = solutionLines[i].split('_').map(Number);
         let sKey = (sKeyParts[0] < sKeyParts[1]) ? `${sKeyParts[0]}_${sKeyParts[1]}` : `${sKeyParts[1]}_${sKeyParts[0]}`;
-        
         if (userLines[i] !== sKey) {
             isCorrect = false;
             break;
@@ -344,7 +342,6 @@ document.getElementById('validate-btn').onclick = () => {
     }
 
     if (isCorrect) {
-        // Victoire
         document.getElementById('puzzle-container').style.display = 'none';
         document.getElementById('validate-btn').style.display = 'none';
         document.getElementById('win-image-container').style.display = 'block';
