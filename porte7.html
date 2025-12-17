@@ -1,855 +1,316 @@
 <!DOCTYPE html>
-
 <html lang="fr">
-
 <head>
-
-<meta charset="utf-8">
-
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
-<title>Porte  nb,; n</title>
-
 <meta charset="utf-8"/>
-
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-
-
-<title>Porte 7 - Rune GA (Tunic)</title>
-
-
+<title>Porte 7 - Rune GA</title>
 
 <style>
-
-  body{
-
-    margin:0;
-
-    height:100vh;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    background-color:#111;
-
-    color:#ff66ff;
-
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-
-
 html, body{
-
     margin:0; padding:0; height:100%;
-
     font-family:'Press Start 2P', monospace;
-
-    font-size:3em;
-
-    text-align:center;
-
-  }
-
     overflow:hidden;
-
-    /* Ambiance sombre et neutre pour le canvas */
-
-    background-color: #111; 
-
+    background:url('https://i.redd.it/5oqqs8imr6s41.gif') center/cover no-repeat;
+    background-size: cover; 
     user-select: none;
-
 }
-
-
 
 /* --- UI GLOBALE --- */
 
-
-
-/* Retour */
-
 #back-btn{
-
     position:fixed; top:14px; left:14px;
-
     font-size:32px; color:red;
-
     cursor:pointer; z-index:6000;
-
     text-shadow: 2px 2px 0px black;
-
 }
-
-
-
-/* Dialogue */
 
 #dialogue-box{
-
     position:fixed;
-
     left:50%; bottom:26px;
-
     transform:translateX(-50%);
-
     width:84%;
-
     min-height:14vh; max-height:28vh;
-
     background:rgba(0,0,0,0.55);
-
     border:3px solid #ff00ff;
-
     padding:18px;
-
     color:#ff66ff;
-
     display:none;
-
     z-index:9000;
-
     text-shadow:0 0 6px rgba(255,0,255,0.2);
-
     overflow:auto;
-
 }
-
 #dialogue-text{ font-size:0.86em; line-height:1.45; }
-
 .cursor-active{
-
     border-right:0.15em solid #ff66ff;
-
     animation:blink 0.5s steps(1) infinite;
-
     padding-right:6px;
-
 }
-
 @keyframes blink{
-
     0%,100%{border-color:transparent;}
-
     50%{border-color:#ff66ff;}
-
 }
 
-
-
-/* --- LOGIQUE DU PUZZLE (Rune GA) --- */
-
-
+/* --- LOGIQUE DU PUZZLE --- */
 
 #puzzle-container {
-
     position: fixed;
-
     top: 50%; left: 50%;
-
     transform: translate(-50%, -50%);
-
     z-index: 100;
-
     text-align: center;
-
 }
-
-
 
 #canvas-wrapper {
-
     position: relative;
-
     border: 4px solid white;
-
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-
     display: inline-block;
-
+    width: 400px;
+    height: 360px;
 }
-
-
 
 #rune-canvas {
-
-    background-color: black;
-
+    background-color: rgba(0, 0, 0, 0.8);
     display: block;
-
 }
-
-
-
-/* Style des points cliquables (points de connexion) */
 
 .connection-point {
-
     position: absolute;
-
     width: 14px;
-
     height: 14px;
-
     border-radius: 50%;
-
-    background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent */
-
+    background-color: rgba(255, 255, 255, 0.5);
     cursor: pointer;
-
     z-index: 10; 
-
-    transition: background-color 0.1s;
-
-    /* Centrage du point sur la coordonnée */
-
     transform: translate(-50%, -50%); 
-
 }
-
-
-
-/* Point sélectionné */
 
 .connection-point.selected {
-
     background-color: #ff00ff; 
-
     border: 2px solid white;
-
     box-shadow: 0 0 8px #ff00ff;
-
 }
-
-
-
-/* Bouton Valider */
 
 #validate-btn {
-
     position: fixed;
-
     bottom: 20%; 
-
     left: 50%;
-
     transform: translateX(-50%);
-
     padding: 15px;
-
     font-family: 'Press Start 2P', monospace;
-
     background: black;
-
     color: white;
-
     border: 3px solid white;
-
     cursor: pointer;
-
     text-transform: uppercase;
-
     font-size: 0.9em;
-
-    transition: transform 0.1s;
-
     z-index: 50;
-
 }
-
-#validate-btn:active {
-
-    transform: translateX(-50%) scale(0.95);
-
-}
-
-
-
-/* Image de victoire */
 
 #win-image-container {
-
     position: fixed;
-
     top: 50%; left: 50%;
-
     transform: translate(-50%, -50%);
-
     z-index: 5000;
-
     display: none;
-
-    border: none; 
-
-    box-shadow: none;
-
 }
-
 #win-img {
-
     display: block;
-
     max-width: 90vw;
-
     max-height: 80vh;
-
 }
-
-
 
 </style>
-
 </head>
-
-
 
 <body>
 
-  Porte 7
-
-
-
 <div id="back-btn" onclick="location.href='zone2_1.html'">⬅</div>
-
 <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=0"></audio>
 
-
-
 <div id="puzzle-container">
-
-    <div class="box-title-text" style="color:#ff00ff; margin-bottom: 20px;">Le Tracé de l'Alliance</div>
-
-    
-
+    <div class="box-title-text" style="color:#ff00ff; margin-bottom: 20px;">Tracez la Rune GA</div>
     <div id="canvas-wrapper">
-
-        <canvas id="rune-canvas" width="400" height="400"></canvas>
-
+        <canvas id="rune-canvas" width="400" height="360"></canvas>
     </div>
-
 </div>
-
-
 
 <button id="validate-btn">VALIDER</button>
 
-
-
 <div id="win-image-container">
-
     <img id="win-img" src="https://i.imgur.com/xnhXVcZ.png" alt="Victoire">
-
 </div>
-
-
 
 <div id="dialogue-box"><div id="dialogue-text"></div></div>
 
-
-
 <script>
-
-// --- CONFIGURATION DU TYPEWRITER (Inchangée) ---
-
-
-
+// --- TYPEWRITER ---
 const dialogueBox = document.getElementById("dialogue-box");
-
 const dialogueText = document.getElementById("dialogue-text");
-
 const typeSound = document.getElementById("type-sound");
+let typingInterval, isTyping = false, skipRequested = false;
 
-let typingInterval;
+const introDialogues = ["C'est quoi, une sorte de puzzle par trie sélectif de traits de caractères ?", "C'est au masculin, j'imagine que c'est pour Guilian. Toujours à mettre le bazard celui la !"];
+const winDialogue = "Youhou je le connais trop bien je suis juste trop forte en fait !";
+const failDialogue = "Mais non mais pas du tout je dit nimp c'est pas du tout lui ça...";
 
-let isTyping = false;
-
-let skipRequested = false;
-
-
-
-const introDialogues = ["intro 1", "intro 2"];
-
-const winDialogue = "Gagné";
-
-const failDialogue = "Perdu";
-
-
-
-function stopSound(){
-
-  try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){}
-
-}
-
-
-
-function closeDialogue(){
-
-    dialogueBox.style.display = "none";
-
-    dialogueBox.removeEventListener('click', closeDialogue); 
-
-}
-
-
+function stopSound(){ try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){} }
+function closeDialogue(){ dialogueBox.style.display = "none"; }
 
 function typeWriter(text, callback){
-
     if(typingInterval) clearInterval(typingInterval);
-
     skipRequested = false;
-
-
-
     const finalizeTyping = () => {
-
         clearInterval(typingInterval);
-
         stopSound();
-
         dialogueText.classList.remove("cursor-active");
-
         isTyping = false;
-
         if(callback) dialogueBox.addEventListener('click', callback, { once:true });
-
+        else dialogueBox.addEventListener('click', closeDialogue, { once:true });
     };
-
-
-
     isTyping = true;
-
     dialogueText.innerHTML = "";
-
     dialogueBox.style.display = "block";
-
     dialogueText.classList.add("cursor-active");
-
-    
-
     try{ typeSound.play().catch(()=>{});}catch(e){}
-
-    
-
     let i=0;
-
     typingInterval = setInterval(()=>{
-
-        if(skipRequested){
-
-            dialogueText.innerHTML = text;
-
-            finalizeTyping();
-
-            return;
-
-        }
-
-        if(i < text.length){
-
-            dialogueText.innerHTML += text.charAt(i++);
-
-        } else {
-
-            finalizeTyping();
-
-        }
-
+        if(skipRequested){ dialogueText.innerHTML = text; finalizeTyping(); return; }
+        if(i < text.length){ dialogueText.innerHTML += text.charAt(i++); } else { finalizeTyping(); }
     }, 28);
-
 }
-
-
 
 dialogueBox.addEventListener("click", (event)=>{
-
     if(isTyping){
-
         skipRequested = true;
-
         event.stopPropagation();
-
-        return;
-
     }
-
 });
 
+function introSequenceStep2(){ typeWriter(introDialogues[1], () => dialogueBox.style.display = "none"); }
 
+window.onload = ()=>{ setupRunePuzzle(); typeWriter(introDialogues[0], introSequenceStep2); }
 
-function introSequenceStep2(){
-
-    typeWriter(introDialogues[1], endIntroSequence);
-
-}
-
-
-
-function endIntroSequence(){
-
-    dialogueBox.style.display = "none";
-
-    dialogueBox.removeEventListener('click', endIntroSequence); 
-
-}
-
-
-
-// Lancement de l'intro au chargement
-
-window.onload = ()=>{
-
-    setupRunePuzzle();
-
-    typeWriter(introDialogues[0], introSequenceStep2);
-
-}
-
-
-
-
-
-// --- LOGIQUE DU PUZZLE RUNE GA ---
-
-
-
+// --- LOGIQUE DU PUZZLE (APPLICATION BÊTE DE TON EXEMPLE) ---
 const canvas = document.getElementById('rune-canvas');
-
 const ctx = canvas.getContext('2d');
+const btnValidate = document.getElementById('validate-btn');
 
-const pointSize = 7; // Rayon pour le tracé de la ligne
-
-
-
-// Définition des coordonnées (x, y) des points sur un canvas de 400x400
-
-// Les IDs doivent être des strings uniques
-
+// Points configurés selon tes IDs et la grille 10x9 d'origine
 const POINTS_CONFIG = [
-
-    // La rune a 10 points visibles dans le dessin blanc (sans compter le cercle en bas)
-
-    // Coordonnées ajustées pour le centre (200, 200)
-
-    { id: 'p1', x: 200, y: 30, isCore: true },   // Sommet central
-
-    { id: 'p2', x: 120, y: 100, isCore: true },  // Sommet gauche de la maison
-
-    { id: 'p3', x: 280, y: 100, isCore: true },  // Sommet droit de la maison
-
-    { id: 'p4', x: 120, y: 200, isCore: true },  // Coin inférieur gauche (haut)
-
-    { id: 'p5', x: 280, y: 200, isCore: true },  // Coin inférieur droit (haut)
-
-    { id: 'p6', x: 200, y: 200, isCore: true },  // Centre du milieu (intersection)
-
-    { id: 'p7', x: 280, y: 280, isCore: true },  // Bas à droite
-
-    { id: 'p8', x: 120, y: 280, isCore: true },  // Bas à gauche
-
-    { id: 'p9', x: 200, y: 370, isCore: true },  // Bas du losange
-
-    
-
-    // Points Parasites pour le brouillage (ajustez ces positions si nécessaire)
-
-    { id: 'px1', x: 50, y: 150, isCore: false }, 
-
-    { id: 'px2', x: 350, y: 250, isCore: false },
-
-    { id: 'px3', x: 100, y: 300, isCore: false },
-
-    { id: 'px4', x: 300, y: 50, isCore: false },
-
+    { id: 'P5', x: 180, y: 20 },
+    { id: 'P23', x: 100, y: 100 },
+    { id: 'P27', x: 260, y: 100 },
+    { id: 'P35', x: 180, y: 140 },
+    { id: 'P43', x: 100, y: 180 },
+    { id: 'P45', x: 180, y: 180 },
+    { id: 'P48', x: 300, y: 180 },
+    { id: 'P53', x: 100, y: 220 },
+    { id: 'P55', x: 180, y: 220 },
+    { id: 'P67', x: 260, y: 260 },
+    { id: 'P73', x: 100, y: 300 },
+    { id: 'P85', x: 180, y: 340 }
 ];
-
-
-
-// Les arêtes qui forment la RUNE GA (10 arêtes)
-
-// [ID du point A, ID du point B] - La paire doit toujours être triée alphabétiquement (p1_p2)
 
 const SOLUTION_LINES = [
-
-    // Partie supérieure (Le G)
-
-    'p1_p2', 'p1_p3', 'p2_p4', 'p3_p5', 'p4_p6', 'p5_p6',
-
-    // Partie inférieure (Le A)
-
-    'p4_p8', 'p5_p7', 'p8_p9', 'p7_p9'
-
+    'P23_P43', 'P5_P23', 'P5_P27', 'P27_P35', 'P35_P45', 
+    'P43_P48', 'P53_P73', 'P55_P67', 'P55_P85'
 ];
 
-
-
-let currentLines = new Set(); // Stocke les lignes tracées : Set<string> ex: {'p1_p2', 'p2_p3'}
-
-let selectedPoint = null; // Stocke l'ID du point qui vient d'être cliqué (Point A)
-
-
-
-// Fonction pour trier les IDs de points et former une clé unique pour la ligne
+let currentLines = new Set(); 
+let selectedPoint = null;
 
 function getLineKey(idA, idB) {
-
     return [idA, idB].sort().join('_');
-
 }
-
-
-
-// Dessine le contenu du canvas (lignes et points)
 
 function drawCanvas() {
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-
-
-    // 1. Dessiner les lignes actuelles
-
     ctx.strokeStyle = 'white';
-
     ctx.lineWidth = 5;
-
     ctx.lineCap = 'round';
-
     
-
     currentLines.forEach(key => {
-
         const [idA, idB] = key.split('_');
-
         const pointA = POINTS_CONFIG.find(p => p.id === idA);
-
         const pointB = POINTS_CONFIG.find(p => p.id === idB);
-
         
-
         if (pointA && pointB) {
-
             ctx.beginPath();
-
             ctx.moveTo(pointA.x, pointA.y);
-
             ctx.lineTo(pointB.x, pointB.y);
-
             ctx.stroke();
-
         }
-
     });
-
-
-
-    // 2. Dessiner les points (ils sont gérés par le DOM/CSS)
-
 }
-
-
 
 function handlePointClick() {
-
     const pointId = this.id;
-
-    const pointElement = this;
-
-
-
-    // Si aucun point n'est sélectionné (Point A)
-
     if (!selectedPoint) {
-
         selectedPoint = pointId;
-
-        pointElement.classList.add('selected');
-
+        this.classList.add('selected');
     } 
-
-    
-
-    // Si on reclique sur le même point, on le désélectionne (Annuler)
-
     else if (selectedPoint === pointId) {
-
         selectedPoint = null;
-
-        pointElement.classList.remove('selected');
-
+        this.classList.remove('selected');
     }
-
-    
-
-    // Si un point est déjà sélectionné (Point B)
-
     else {
-
         const lineKey = getLineKey(selectedPoint, pointId);
-
-        const prevSelectedElement = document.getElementById(selectedPoint);
-
-
-
-        // A. La ligne existe déjà -> EFFACEMENT DE LIGNE
-
         if (currentLines.has(lineKey)) {
-
             currentLines.delete(lineKey);
-
-        } 
-
-        // B. La ligne n'existe pas -> TRACÉ DE LIGNE
-
-        else {
-
+        } else {
             currentLines.add(lineKey);
-
         }
-
-
-
-        // Réinitialisation après le tracé/effacement
-
-        if (prevSelectedElement) {
-
-            prevSelectedElement.classList.remove('selected');
-
-        }
-
+        document.getElementById(selectedPoint).classList.remove('selected');
         selectedPoint = null;
-
         drawCanvas();
-
     }
-
 }
-
-
 
 function setupRunePuzzle() {
-
     const wrapper = document.getElementById('canvas-wrapper');
-
-    
-
     POINTS_CONFIG.forEach(point => {
-
         const pointDiv = document.createElement('div');
-
         pointDiv.className = 'connection-point';
-
         pointDiv.id = point.id;
-
         pointDiv.style.left = point.x + 'px';
-
         pointDiv.style.top = point.y + 'px';
-
-        pointDiv.title = point.id; // Aide au debug/test
-
-        
-
         pointDiv.addEventListener('click', handlePointClick);
-
         wrapper.appendChild(pointDiv);
-
     });
-
-
-
-    drawCanvas(); // Initialisation du dessin (vide)
-
+    drawCanvas();
 }
 
-
-
-
-
-// --- VALIDATION DU PUZZLE RUNE GA ---
-
-
-
 btnValidate.addEventListener('click', ()=>{
-
-    
-
-    // 1. Convertir le Set de l'utilisateur en Array trié
-
     const userLines = Array.from(currentLines).sort();
-
-    
-
-    // 2. Préparer les lignes de la solution (elles sont déjà triées)
-
     const solutionLines = SOLUTION_LINES.sort();
-
     
-
-    // 3. Comparer
-
     const isCorrectSize = userLines.length === solutionLines.length;
-
     let isSameContent = true;
 
-
-
     if (isCorrectSize) {
-
         for (let i = 0; i < userLines.length; i++) {
-
             if (userLines[i] !== solutionLines[i]) {
-
                 isSameContent = false;
-
                 break;
-
             }
-
         }
-
     } else {
-
         isSameContent = false;
-
     }
 
-
-
-    const victory = isCorrectSize && isSameContent;
-
-
-
-    if (victory) {
-
-        // VICTOIRE
-
+    if (isCorrectSize && isSameContent) {
         document.getElementById('puzzle-container').style.display = "none";
-
         btnValidate.style.display = "none";
-
-        winContainer.style.display = "block"; 
-
-        typeWriter(winDialogue, closeDialogue);
-
+        document.getElementById('win-image-container').style.display = "block"; 
+        typeWriter(winDialogue);
     } else {
-
-        // ECHEC
-
-        typeWriter(failDialogue, closeDialogue); 
-
+        typeWriter(failDialogue);
     }
-
 });
-
-
-
 </script>
-
-
-
 </body>
-
 </html>
