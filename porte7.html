@@ -15,13 +15,12 @@ html, body{
     overflow:hidden;
     /* Nouveau fond GIF */
     background:url('https://i.redd.it/5oqqs8imr6s41.gif') center/cover no-repeat;
-    background-size: cover; /* Ajuster la taille du fond */
+    background-size: cover; 
     user-select: none;
 }
 
 /* --- UI GLOBALE --- */
 
-/* Retour */
 #back-btn{
     position:fixed; top:14px; left:14px;
     font-size:32px; color:red;
@@ -29,7 +28,6 @@ html, body{
     text-shadow: 2px 2px 0px black;
 }
 
-/* Dialogue */
 #dialogue-box{
     position:fixed;
     left:50%; bottom:26px;
@@ -72,7 +70,7 @@ html, body{
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
     display: inline-block;
     width: 400px;
-    height: 360px; /* Réduit à 9 rangées */
+    height: 360px;
 }
 
 #rune-canvas {
@@ -80,7 +78,6 @@ html, body{
     display: block;
 }
 
-/* Style des points de la grille */
 .connection-point {
     position: absolute;
     width: 10px;
@@ -93,7 +90,6 @@ html, body{
     transform: translate(-50%, -50%); 
 }
 
-/* Afficher le numéro au survol (utilise l'attribut title) */
 .connection-point:hover::after {
     content: attr(title);
     position: absolute;
@@ -110,14 +106,12 @@ html, body{
     border: 1px solid white;
 }
 
-/* Point sélectionné */
 .connection-point.selected {
     background-color: #ff00ff; 
     border: 2px solid white;
     box-shadow: 0 0 8px #ff00ff;
 }
 
-/* Titre des portes */
 .box-title-text {
     color: white;
     font-size: 0.9em;
@@ -126,7 +120,6 @@ html, body{
     margin-bottom: 20px;
 }
 
-/* Bouton Valider */
 #validate-btn {
     position: fixed;
     bottom: 20%; 
@@ -147,15 +140,12 @@ html, body{
     transform: translateX(-50%) scale(0.95);
 }
 
-/* Image de victoire */
 #win-image-container {
     position: fixed;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     z-index: 5000;
     display: none;
-    border: none; 
-    box-shadow: none;
 }
 #win-img {
     display: block;
@@ -188,7 +178,7 @@ html, body{
 <div id="dialogue-box"><div id="dialogue-text"></div></div>
 
 <script>
-// --- CONFIGURATION DU TYPEWRITER (CORRIGÉE) ---
+// --- CONFIGURATION DU TYPEWRITER ---
 
 const dialogueBox = document.getElementById("dialogue-box");
 const dialogueText = document.getElementById("dialogue-text");
@@ -197,7 +187,6 @@ let typingInterval;
 let isTyping = false;
 let skipRequested = false;
 
-// Dialogues mis à jour
 const introDialogues = ["C'est quoi, une sorte de puzzle par trie sélectif de traits de caractères ?", "C'est au masculin, j'imagine que c'est pour Guilian. Toujours à mettre le bazard celui la !"];
 const winDialogue = "Youhou je le connais trop bien je suis juste trop forte en fait !";
 const failDialogue = "Mais non mais pas du tout je dit nimp c'est pas du tout lui ça...";
@@ -213,8 +202,6 @@ function closeDialogue(){
 function typeWriter(text, callback){
     if(typingInterval) clearInterval(typingInterval);
     skipRequested = false;
-
-    // Suppression des anciens écouteurs pour éviter les doubles exécutions
     dialogueBox.onclick = null; 
     
     const finalizeTyping = () => {
@@ -222,8 +209,6 @@ function typeWriter(text, callback){
         stopSound();
         dialogueText.classList.remove("cursor-active");
         isTyping = false;
-        
-        // Exécute le callback (ou ferme le dialogue) au clic après la fin de la frappe
         dialogueBox.onclick = callback || closeDialogue;
     };
 
@@ -232,7 +217,6 @@ function typeWriter(text, callback){
             skipRequested = true;
             event.stopPropagation();
         } else {
-            // Si la frappe est terminée, le clic exécute la fonction de l'étape suivante
             if (dialogueBox.onclick) dialogueBox.onclick();
         }
     };
@@ -258,13 +242,10 @@ function typeWriter(text, callback){
         }
     }, 28);
 
-    // Attache l'écouteur unique pour gérer le skip ou l'étape suivante
     dialogueBox.onclick = handleInteraction;
 }
 
-
 function introSequenceStep2(){
-    // IMPORTANT : On passe la fonction de l'étape suivante (endIntroSequence) comme callback
     typeWriter(introDialogues[1], endIntroSequence);
 }
 
@@ -272,14 +253,13 @@ function endIntroSequence(){
     dialogueBox.style.display = "none";
 }
 
-// Lancement de l'intro au chargement
 window.onload = ()=>{
     setupRunePuzzle();
     typeWriter(introDialogues[0], introSequenceStep2);
 }
 
 
-// --- LOGIQUE DU PUZZLE RUNE GA (Tracé de Forme Stricte) ---
+// --- LOGIQUE DU PUZZLE RUNE GA (AVEC PATCH GÉOMÉTRIQUE) ---
 
 const canvas = document.getElementById('rune-canvas');
 const ctx = canvas.getContext('2d');
@@ -287,7 +267,6 @@ const wrapper = document.getElementById('canvas-wrapper');
 const btnValidate = document.getElementById('validate-btn');
 const winContainer = document.getElementById('win-image-container');
 
-// Définition de la grille 10x9 (10 colonnes, 9 rangées)
 const GRID_COLS = 10;
 const GRID_ROWS = 9;
 const SPACING = 40;
@@ -296,7 +275,6 @@ const START_OFFSET = SPACING / 2;
 let POINTS_CONFIG = [];
 let pointCounter = 1;
 
-// Génération de la grille 10x9 (90 points)
 for (let y = 0; y < GRID_ROWS; y++) {
     for (let x = 0; x < GRID_COLS; x++) {
         POINTS_CONFIG.push({
@@ -308,40 +286,49 @@ for (let y = 0; y < GRID_ROWS; y++) {
     }
 }
 
-// L'ENSEMBLE DES LIGNES EXACTES À TRACER (CORRIGÉ selon ta dernière liste)
-// Nous ajoutons P48_P53 qui est la ligne centrale et fait partie de la rune.
-const SOLUTION_LINES = [
-    'P23_P43',
-    'P5_P23',
-    'P5_P27',
-    'P27_P35',
-    'P35_P45',
-    'P43_P48',
-    'P53_P73',
-    'P55_P67',
-    'P55_P85'
+const SOLUTION_LINES_IDS = [
+    'P23_P43', 'P5_P23', 'P5_P27', 'P27_P35', 
+    'P35_P45', 'P43_P48', 'P53_P73', 'P55_P67', 'P55_P85'
 ]; 
 
-let currentLines = new Map(); 
+let userLines = []; 
 let selectedPoint = null; 
-
-function getLineKey(idA, idB) {
-    // Assure un ordre alphabétique pour la clé pour que P23_P43 soit le même que P43_P23
-    return [idA, idB].sort().join('_');
-}
 
 function getPointById(id) {
     return POINTS_CONFIG.find(p => p.id === id);
 }
 
+// FONCTION DU PATCH : Normalisation
+function normalize(a, b){
+    if(a.x < b.x || (a.x === b.x && a.y <= b.y)){
+        return {x1:a.x, y1:a.y, x2:b.x, y2:b.y};
+    }
+    return {x1:b.x, y1:b.y, x2:a.x, y2:a.y};
+}
+
+// FONCTION DU PATCH : Comparaison
+function sameLine(a, b){
+    return Math.abs(a.x1 - b.x1) < 1 &&
+           Math.abs(a.y1 - b.y1) < 1 &&
+           Math.abs(a.x2 - b.x2) < 1 &&
+           Math.abs(a.y2 - b.y2) < 1;
+}
+
+// Pré-calcul de la solution géométrique
+const SOLUTION_GEOMETRY = SOLUTION_LINES_IDS.map(idPair => {
+    const ids = idPair.split('_');
+    const pA = getPointById(ids[0]);
+    const pB = getPointById(ids[1]);
+    return normalize(pA, pB);
+});
+
 function drawCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
     ctx.strokeStyle = 'white';
     ctx.lineWidth = 4;
     ctx.lineCap = 'round';
     
-    currentLines.forEach(line => {
+    userLines.forEach(line => {
         ctx.beginPath();
         ctx.moveTo(line.x1, line.y1);
         ctx.lineTo(line.x2, line.y2);
@@ -351,99 +338,67 @@ function drawCanvas() {
 
 function handlePointClick() {
     const pointId = this.id;
-    const pointElement = this;
     const currentPointData = getPointById(pointId);
 
     if (!selectedPoint) {
         selectedPoint = pointId;
-        pointElement.classList.add('selected');
+        this.classList.add('selected');
     } 
-    
     else if (selectedPoint === pointId) {
         selectedPoint = null;
-        pointElement.classList.remove('selected');
+        this.classList.remove('selected');
     }
-    
     else {
-        const lineKey = getLineKey(selectedPoint, pointId);
-        const prevSelectedElement = document.getElementById(selectedPoint);
         const prevPointData = getPointById(selectedPoint);
-
-        if (currentLines.has(lineKey)) {
-            // EFFACEMENT DE LIGNE
-            currentLines.delete(lineKey);
-        } 
-        else {
-            // TRACÉ DE LIGNE
-            currentLines.set(lineKey, {
-                x1: prevPointData.x, 
-                y1: prevPointData.y, 
-                x2: currentPointData.x, 
-                y2: currentPointData.y
-            });
+        const newLine = normalize(prevPointData, currentPointData);
+        
+        // Toggle de la ligne
+        const existingIndex = userLines.findIndex(l => sameLine(l, newLine));
+        if (existingIndex !== -1) {
+            userLines.splice(existingIndex, 1);
+        } else {
+            userLines.push(newLine);
         }
 
-        if (prevSelectedElement) {
-            prevSelectedElement.classList.remove('selected');
-        }
+        document.getElementById(selectedPoint).classList.remove('selected');
         selectedPoint = null;
         drawCanvas();
     }
 }
 
 function setupRunePuzzle() {
-    // 1. Création des 90 points de la grille 
     POINTS_CONFIG.forEach(point => {
         const pointDiv = document.createElement('div');
         pointDiv.className = 'connection-point';
         pointDiv.id = point.id;
         pointDiv.style.left = point.x + 'px';
         pointDiv.style.top = point.y + 'px';
-        pointDiv.title = point.id.substring(1); // Retire le 'P' pour l'affichage au survol
-        
+        pointDiv.title = point.id.substring(1);
         pointDiv.addEventListener('click', handlePointClick);
         wrapper.appendChild(pointDiv);
     });
-
     drawCanvas(); 
 }
 
-
-// --- VALIDATION DU PUZZLE RUNE GA ---
+// --- VALIDATION DU PUZZLE ---
 
 btnValidate.addEventListener('click', ()=>{
+    // Vérification géométrique complète
+    const isCorrectSize = userLines.length === SOLUTION_GEOMETRY.length;
     
-    // Récupération et tri des lignes de l'utilisateur et des lignes solution
-    const userLines = Array.from(currentLines.keys()).sort();
-    const solutionLines = [...SOLUTION_LINES].sort();
-    
-    const isCorrectSize = userLines.length === solutionLines.length;
-    let isSameContent = true;
+    const allFound = SOLUTION_GEOMETRY.every(sLine => 
+        userLines.some(uLine => sameLine(uLine, sLine))
+    );
 
-    if (isCorrectSize) {
-        for (let i = 0; i < userLines.length; i++) {
-            // Vérification stricte: la ligne tracée par l'utilisateur doit correspondre exactement
-            // à l'une des lignes de la solution (grâce au tri et à getLineKey)
-            if (userLines[i] !== solutionLines[i]) {
-                isSameContent = false;
-                break;
-            }
-        }
-    } else {
-        isSameContent = false;
-    }
-
-    const victory = isCorrectSize && isSameContent;
+    const victory = isCorrectSize && allFound;
 
     if (victory) {
-        // VICTOIRE
         document.getElementById('puzzle-container').style.display = "none";
         btnValidate.style.display = "none";
         winContainer.style.display = "block"; 
-        typeWriter(winDialogue); // Utilisation de typeWriter corrigé
+        typeWriter(winDialogue);
     } else {
-        // ECHEC
-        typeWriter(failDialogue); // Utilisation de typeWriter corrigé
+        typeWriter(failDialogue);
     }
 });
 
