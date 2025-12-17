@@ -415,7 +415,7 @@ btnValidate.addEventListener('click', ()=>{
     
     // Récupération et tri des lignes de l'utilisateur et des lignes solution
     const userLines = Array.from(currentLines.keys()).sort();
-    const solutionLines = SOLUTION_LINES.sort();
+    const solutionLines = [...SOLUTION_LINES].sort();
     
     const isCorrectSize = userLines.length === solutionLines.length;
     let isSameContent = true;
