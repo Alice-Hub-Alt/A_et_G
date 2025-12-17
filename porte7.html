@@ -79,8 +79,8 @@ html, body{
 
 .connection-point {
     position: absolute;
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
     background-color: rgba(255, 255, 255, 0.5);
     cursor: pointer;
@@ -92,14 +92,6 @@ html, body{
     background-color: #ff00ff; 
     border: 2px solid white;
     box-shadow: 0 0 8px #ff00ff;
-}
-
-.box-title-text {
-    color: white;
-    font-size: 0.9em;
-    text-shadow: 2px 2px 0px black;
-    text-align: center;
-    margin-bottom: 20px;
 }
 
 #validate-btn {
@@ -140,7 +132,7 @@ html, body{
 <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=0"></audio>
 
 <div id="puzzle-container">
-    <div class="box-title-text" style="color:#ff00ff;">Tracez la Rune GA</div>
+    <div class="box-title-text" style="color:#ff00ff; margin-bottom: 20px;">Tracez la Rune GA</div>
     <div id="canvas-wrapper">
         <canvas id="rune-canvas" width="400" height="360"></canvas>
     </div>
@@ -171,13 +163,13 @@ function closeDialogue(){ dialogueBox.style.display = "none"; }
 function typeWriter(text, callback){
     if(typingInterval) clearInterval(typingInterval);
     skipRequested = false;
-    dialogueBox.onclick = null;
     const finalizeTyping = () => {
         clearInterval(typingInterval);
         stopSound();
         dialogueText.classList.remove("cursor-active");
         isTyping = false;
-        dialogueBox.onclick = callback || closeDialogue;
+        if(callback) dialogueBox.addEventListener('click', callback, { once:true });
+        else dialogueBox.addEventListener('click', closeDialogue, { once:true });
     };
     isTyping = true;
     dialogueText.innerHTML = "";
@@ -189,39 +181,44 @@ function typeWriter(text, callback){
         if(skipRequested){ dialogueText.innerHTML = text; finalizeTyping(); return; }
         if(i < text.length){ dialogueText.innerHTML += text.charAt(i++); } else { finalizeTyping(); }
     }, 28);
-    dialogueBox.onclick = (e) => { if(isTyping){ skipRequested = true; e.stopPropagation(); } else if(dialogueBox.onclick) dialogueBox.onclick(); };
 }
+
+dialogueBox.addEventListener("click", (event)=>{
+    if(isTyping){
+        skipRequested = true;
+        event.stopPropagation();
+    }
+});
 
 function introSequenceStep2(){ typeWriter(introDialogues[1], () => dialogueBox.style.display = "none"); }
 
 window.onload = ()=>{ setupRunePuzzle(); typeWriter(introDialogues[0], introSequenceStep2); }
 
-// --- LOGIQUE DU PUZZLE RUNE GA ---
+// --- LOGIQUE DU PUZZLE (APPLICATION BÊTE DE TON EXEMPLE) ---
 const canvas = document.getElementById('rune-canvas');
 const ctx = canvas.getContext('2d');
-const wrapper = document.getElementById('canvas-wrapper');
 const btnValidate = document.getElementById('validate-btn');
 
-const SPACING = 40;
-const START_OFFSET = SPACING / 2;
+// Points configurés selon tes IDs et la grille 10x9 d'origine
+const POINTS_CONFIG = [
+    { id: 'P5', x: 180, y: 20 },
+    { id: 'P23', x: 100, y: 100 },
+    { id: 'P27', x: 260, y: 100 },
+    { id: 'P35', x: 180, y: 140 },
+    { id: 'P43', x: 100, y: 180 },
+    { id: 'P45', x: 180, y: 180 },
+    { id: 'P48', x: 300, y: 180 },
+    { id: 'P53', x: 100, y: 220 },
+    { id: 'P55', x: 180, y: 220 },
+    { id: 'P67', x: 260, y: 260 },
+    { id: 'P73', x: 100, y: 300 },
+    { id: 'P85', x: 180, y: 340 }
+];
 
-// Liste des points à garder (P1 à P90)
-const POINTS_TO_KEEP = [5, 23, 27, 35, 43, 45, 48, 53, 55, 67, 73, 85];
-let pointsConfig = [];
-
-// Génération des coordonnées uniquement pour les points gardés
-POINTS_TO_KEEP.forEach(id => {
-    let index = id - 1;
-    let x = (index % 10) * SPACING + START_OFFSET;
-    let y = Math.floor(index / 10) * SPACING + START_OFFSET;
-    pointsConfig.push({ id: `P${id}`, x: x, y: y });
-});
-
-// Ta solution par paires
 const SOLUTION_LINES = [
     'P23_P43', 'P5_P23', 'P5_P27', 'P27_P35', 'P35_P45', 
     'P43_P48', 'P53_P73', 'P55_P67', 'P55_P85'
-].sort();
+];
 
 let currentLines = new Set(); 
 let selectedPoint = null;
@@ -238,13 +235,13 @@ function drawCanvas() {
     
     currentLines.forEach(key => {
         const [idA, idB] = key.split('_');
-        const pA = pointsConfig.find(p => p.id === idA);
-        const pB = pointsConfig.find(p => p.id === idB);
+        const pointA = POINTS_CONFIG.find(p => p.id === idA);
+        const pointB = POINTS_CONFIG.find(p => p.id === idB);
         
-        if (pA && pB) {
+        if (pointA && pointB) {
             ctx.beginPath();
-            ctx.moveTo(pA.x, pA.y);
-            ctx.lineTo(pB.x, pB.y);
+            ctx.moveTo(pointA.x, pointA.y);
+            ctx.lineTo(pointB.x, pointB.y);
             ctx.stroke();
         }
     });
@@ -274,26 +271,29 @@ function handlePointClick() {
 }
 
 function setupRunePuzzle() {
-    pointsConfig.forEach(point => {
-        const div = document.createElement('div');
-        div.className = 'connection-point';
-        div.id = point.id;
-        div.style.left = point.x + 'px';
-        div.style.top = point.y + 'px';
-        div.addEventListener('click', handlePointClick);
-        wrapper.appendChild(div);
+    const wrapper = document.getElementById('canvas-wrapper');
+    POINTS_CONFIG.forEach(point => {
+        const pointDiv = document.createElement('div');
+        pointDiv.className = 'connection-point';
+        pointDiv.id = point.id;
+        pointDiv.style.left = point.x + 'px';
+        pointDiv.style.top = point.y + 'px';
+        pointDiv.addEventListener('click', handlePointClick);
+        wrapper.appendChild(pointDiv);
     });
     drawCanvas();
 }
 
-btnValidate.addEventListener('click', () => {
+btnValidate.addEventListener('click', ()=>{
     const userLines = Array.from(currentLines).sort();
-    const isCorrectSize = userLines.length === SOLUTION_LINES.length;
+    const solutionLines = SOLUTION_LINES.sort();
+    
+    const isCorrectSize = userLines.length === solutionLines.length;
     let isSameContent = true;
 
     if (isCorrectSize) {
         for (let i = 0; i < userLines.length; i++) {
-            if (userLines[i] !== SOLUTION_LINES[i]) {
+            if (userLines[i] !== solutionLines[i]) {
                 isSameContent = false;
                 break;
             }
