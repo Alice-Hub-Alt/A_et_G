@@ -140,7 +140,7 @@ html, body{
 <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=0"></audio>
 
 <div id="puzzle-container">
-    <div class="box-title-text" style="color:#ff00ff;">Reliez les points pour tracer la Rune</div>
+    <div class="box-title-text" style="color:#ff00ff;">Tracez la Rune GA</div>
     
     <div id="canvas-wrapper">
         <canvas id="rune-canvas" width="400" height="360"></canvas>
@@ -197,7 +197,7 @@ function introSequenceStep2(){ typeWriter(introDialogues[1], () => dialogueBox.s
 
 window.onload = ()=>{ setupRunePuzzle(); typeWriter(introDialogues[0], introSequenceStep2); }
 
-// --- LOGIQUE DU PUZZLE SIMPLIFIÉE ---
+// --- LOGIQUE DU PUZZLE ---
 const canvas = document.getElementById('rune-canvas');
 const ctx = canvas.getContext('2d');
 const wrapper = document.getElementById('canvas-wrapper');
@@ -206,12 +206,18 @@ const btnValidate = document.getElementById('validate-btn');
 const SPACING = 40;
 const START_OFFSET = SPACING / 2;
 
-// Liste des IDs nécessaires uniquement
-const REQUIRED_POINTS = [5, 23, 27, 35, 43, 45, 48, 53, 55, 67, 73, 85];
+// Liste des points uniques pour l'affichage
+const UNIQUE_POINTS = [5, 23, 27, 35, 43, 45, 48, 53, 55, 67, 73, 85];
+// Solution exacte par paires (ordonnées alphabétiquement pour la comparaison)
+const EXACT_SOLUTION = [
+    'P23_P43', 'P5_P23', 'P5_P27', 'P27_P35', 'P35_P45', 
+    'P43_P48', 'P53_P73', 'P55_P67', 'P55_P85'
+].sort();
+
 let pointsData = [];
 
-// On génère la position exacte de ces points selon la grille 10x9 d'origine
-REQUIRED_POINTS.forEach(id => {
+// Création des points à leurs positions d'origine
+UNIQUE_POINTS.forEach(id => {
     let index = id - 1;
     let x = index % 10;
     let y = Math.floor(index / 10);
@@ -222,7 +228,7 @@ REQUIRED_POINTS.forEach(id => {
     });
 });
 
-let userLines = [];
+let userLines = new Map();
 let selectedPoint = null;
 
 function drawCanvas() {
@@ -250,16 +256,12 @@ function handlePointClick() {
         this.classList.remove('selected');
     } else {
         const prevPData = pointsData.find(p => p.id === selectedPoint);
-        
-        // On crée une clé unique pour le toggle (triée pour éviter les inversions)
         const lineKey = [selectedPoint, pointId].sort().join('_');
-        const exists = userLines.findIndex(l => l.key === lineKey);
 
-        if (exists !== -1) {
-            userLines.splice(exists, 1);
+        if (userLines.has(lineKey)) {
+            userLines.delete(lineKey);
         } else {
-            userLines.push({
-                key: lineKey,
+            userLines.set(lineKey, {
                 x1: prevPData.x, y1: prevPData.y,
                 x2: pData.x, y2: pData.y
             });
@@ -284,9 +286,13 @@ function setupRunePuzzle() {
 }
 
 btnValidate.addEventListener('click', () => {
-    // La condition de victoire est simplement d'avoir tracé les 9 traits de la rune
-    // On pourrait aussi vérifier que tous les points ont au moins une connexion
-    if (userLines.length === 9) {
+    const userKeys = Array.from(userLines.keys()).sort();
+    
+    // Vérification : même nombre de lignes ET chaque ligne correspond à la solution
+    const isWin = userKeys.length === EXACT_SOLUTION.length && 
+                  userKeys.every((key, index) => key === EXACT_SOLUTION[index]);
+
+    if (isWin) {
         document.getElementById('puzzle-container').style.display = "none";
         btnValidate.style.display = "none";
         document.getElementById('win-image-container').style.display = "block";
