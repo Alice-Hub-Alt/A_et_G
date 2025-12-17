@@ -3,139 +3,133 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-
-<title>Porte 7 - Rune GA</title>
+<title>Porte 7</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-html, body{
-    margin:0; padding:0; height:100%;
-    font-family:'Press Start 2P', monospace;
-    overflow:hidden;
-    background:url('https://i.redd.it/5oqqs8imr6s41.gif') center/cover no-repeat;
-    background-size: cover; 
+/* --- RESET & BASE --- */
+html, body {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    font-family: 'Press Start 2P', monospace;
+    overflow: hidden;
+    background: url('https://i.redd.it/5oqqs8imr6s41.gif') center/cover no-repeat;
     user-select: none;
 }
 
-/* --- UI GLOBALE --- */
-
-#back-btn{
-    position:fixed; top:14px; left:14px;
-    font-size:32px; color:red;
-    cursor:pointer; z-index:6000;
+/* --- UI ELEMENTS --- */
+#back-btn {
+    position: fixed; top: 14px; left: 14px;
+    font-size: 32px; color: red;
+    cursor: pointer; z-index: 6000;
     text-shadow: 2px 2px 0px black;
 }
 
-#dialogue-box{
-    position:fixed;
-    left:50%; bottom:26px;
-    transform:translateX(-50%);
-    width:84%;
-    min-height:14vh; max-height:28vh;
-    background:rgba(0,0,0,0.55);
-    border:3px solid #ff00ff;
-    padding:18px;
-    color:#ff66ff;
-    display:none;
-    z-index:9000;
-    text-shadow:0 0 6px rgba(255,0,255,0.2);
-    overflow:auto;
+#validate-btn {
+    position: fixed; bottom: 15%; left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 30px;
+    font-family: 'Press Start 2P', monospace;
+    background: black; color: white;
+    border: 3px solid white;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-size: 1em;
+    z-index: 50;
 }
-#dialogue-text{ font-size:0.86em; line-height:1.45; }
-.cursor-active{
-    border-right:0.15em solid #ff66ff;
-    animation:blink 0.5s steps(1) infinite;
-    padding-right:6px;
-}
-@keyframes blink{
-    0%,100%{border-color:transparent;}
-    50%{border-color:#ff66ff;}
-}
+#validate-btn:active { transform: translateX(-50%) scale(0.95); }
 
-/* --- LOGIQUE DU PUZZLE --- */
+/* --- DIALOGUE --- */
+#dialogue-box {
+    position: fixed; left: 50%; bottom: 26px;
+    transform: translateX(-50%);
+    width: 84%;
+    min-height: 100px;
+    background: rgba(0,0,0,0.8);
+    border: 3px solid #ff00ff;
+    padding: 18px;
+    color: #ff66ff;
+    display: none;
+    z-index: 9000;
+    text-shadow: 0 0 6px rgba(255,0,255,0.4);
+    font-size: 0.8em;
+    line-height: 1.5;
+}
+.cursor-active {
+    border-right: 10px solid #ff66ff;
+    animation: blink 0.5s step-end infinite;
+}
+@keyframes blink { 50% { border-color: transparent; } }
 
+/* --- PUZZLE CONTAINER --- */
 #puzzle-container {
-    position: fixed;
-    top: 50%; left: 50%;
+    position: fixed; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     z-index: 100;
     text-align: center;
 }
 
+.box-title-text {
+    color: white; font-size: 1em;
+    text-shadow: 2px 2px 0px black;
+    margin-bottom: 20px;
+}
+
+/* --- CANVAS & POINTS --- */
 #canvas-wrapper {
     position: relative;
+    width: 400px; height: 360px; /* Taille Fixe de la zone de jeu */
     border: 4px solid white;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-    display: inline-block;
-    width: 400px;
-    height: 360px;
+    background: rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    margin: 0 auto;
 }
 
-#rune-canvas {
-    background-color: rgba(0, 0, 0, 0.8);
+canvas {
     display: block;
+    width: 100%; height: 100%;
 }
 
-.connection-point {
+.point {
     position: absolute;
-    width: 14px;
-    height: 14px;
+    width: 16px; height: 16px;
+    background: rgba(255, 255, 255, 0.5);
     border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
     cursor: pointer;
-    z-index: 10; 
-    transform: translate(-50%, -50%); 
+    z-index: 10;
+    transition: transform 0.1s;
 }
-
-.connection-point.selected {
-    background-color: #ff00ff; 
+.point:hover { transform: translate(-50%, -50%) scale(1.2); background: white; }
+.point.selected {
+    background: #ff00ff;
+    box-shadow: 0 0 10px #ff00ff;
     border: 2px solid white;
-    box-shadow: 0 0 8px #ff00ff;
 }
 
-#validate-btn {
-    position: fixed;
-    bottom: 20%; 
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 15px;
-    font-family: 'Press Start 2P', monospace;
-    background: black;
-    color: white;
-    border: 3px solid white;
-    cursor: pointer;
-    text-transform: uppercase;
-    font-size: 0.9em;
-    z-index: 50;
-}
-
+/* --- VICTOIRE --- */
 #win-image-container {
-    position: fixed;
-    top: 50%; left: 50%;
+    position: fixed; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     z-index: 5000;
     display: none;
 }
-#win-img {
-    display: block;
-    max-width: 90vw;
-    max-height: 80vh;
-}
+#win-img { max-width: 90vw; max-height: 80vh; border: 5px solid white; }
 
 </style>
 </head>
-
 <body>
 
-<div id="back-btn" onclick="location.href='zone2_1.html'">⬅</div>
 <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=0"></audio>
 
+<div id="back-btn" onclick="location.href='zone2_1.html'">⬅</div>
+
 <div id="puzzle-container">
-    <div class="box-title-text" style="color:#ff00ff; margin-bottom: 20px;">Tracez la Rune GA</div>
+    <div class="box-title-text" style="color:#ff00ff;">Tracez la Rune GA</div>
     <div id="canvas-wrapper">
         <canvas id="rune-canvas" width="400" height="360"></canvas>
-    </div>
+        </div>
 </div>
 
 <button id="validate-btn">VALIDER</button>
@@ -144,173 +138,222 @@ html, body{
     <img id="win-img" src="https://i.imgur.com/xnhXVcZ.png" alt="Victoire">
 </div>
 
-<div id="dialogue-box"><div id="dialogue-text"></div></div>
+<div id="dialogue-box"></div>
 
 <script>
-// --- TYPEWRITER ---
+/* =========================================
+   1. GESTION DES DIALOGUES (Typewriter)
+   ========================================= */
 const dialogueBox = document.getElementById("dialogue-box");
-const dialogueText = document.getElementById("dialogue-text");
 const typeSound = document.getElementById("type-sound");
-let typingInterval, isTyping = false, skipRequested = false;
+let typeInterval;
 
-const introDialogues = ["C'est quoi, une sorte de puzzle par trie sélectif de traits de caractères ?", "C'est au masculin, j'imagine que c'est pour Guilian. Toujours à mettre le bazard celui la !"];
-const winDialogue = "Youhou je le connais trop bien je suis juste trop forte en fait !";
-const failDialogue = "Mais non mais pas du tout je dit nimp c'est pas du tout lui ça...";
+const dialogs = {
+    intro: ["C'est quoi, une sorte de puzzle par trie sélectif de traits de caractères ?", "C'est au masculin, j'imagine que c'est pour Guilian. Toujours à mettre le bazard celui la !"],
+    win: "Youhou je le connais trop bien je suis juste trop forte en fait !",
+    fail: "Mais non mais pas du tout je dit nimp c'est pas du tout lui ça..."
+};
 
-function stopSound(){ try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){} }
-function closeDialogue(){ dialogueBox.style.display = "none"; }
-
-function typeWriter(text, callback){
-    if(typingInterval) clearInterval(typingInterval);
-    skipRequested = false;
-    const finalizeTyping = () => {
-        clearInterval(typingInterval);
-        stopSound();
-        dialogueText.classList.remove("cursor-active");
-        isTyping = false;
-        if(callback) dialogueBox.addEventListener('click', callback, { once:true });
-        else dialogueBox.addEventListener('click', closeDialogue, { once:true });
-    };
-    isTyping = true;
-    dialogueText.innerHTML = "";
-    dialogueBox.style.display = "block";
-    dialogueText.classList.add("cursor-active");
-    try{ typeSound.play().catch(()=>{});}catch(e){}
-    let i=0;
-    typingInterval = setInterval(()=>{
-        if(skipRequested){ dialogueText.innerHTML = text; finalizeTyping(); return; }
-        if(i < text.length){ dialogueText.innerHTML += text.charAt(i++); } else { finalizeTyping(); }
-    }, 28);
+function playSound() {
+    try { typeSound.currentTime = 0; typeSound.play().catch(()=>{}); } catch(e){}
 }
 
-dialogueBox.addEventListener("click", (event)=>{
-    if(isTyping){
-        skipRequested = true;
-        event.stopPropagation();
+function showDialogue(text, callback = null) {
+    clearInterval(typeInterval);
+    dialogueBox.style.display = 'block';
+    dialogueBox.innerHTML = '';
+    dialogueBox.classList.add('cursor-active');
+    playSound();
+
+    let i = 0;
+    let currentText = "";
+    
+    // Fonction de clic pour passer instantanément
+    const skipHandler = (e) => {
+        e.stopPropagation();
+        clearInterval(typeInterval);
+        dialogueBox.innerHTML = text; // Afficher tout
+        finish();
+    };
+    dialogueBox.onclick = skipHandler;
+
+    function finish() {
+        dialogueBox.classList.remove('cursor-active');
+        try { typeSound.pause(); } catch(e){}
+        dialogueBox.onclick = () => {
+            dialogueBox.style.display = 'none';
+            dialogueBox.onclick = null;
+            if (callback) callback();
+        };
     }
-});
 
-function introSequenceStep2(){ typeWriter(introDialogues[1], () => dialogueBox.style.display = "none"); }
+    typeInterval = setInterval(() => {
+        currentText += text.charAt(i);
+        dialogueBox.innerHTML = currentText;
+        i++;
+        if (i >= text.length) {
+            clearInterval(typeInterval);
+            finish();
+        }
+    }, 30);
+}
 
-window.onload = ()=>{ setupRunePuzzle(); typeWriter(introDialogues[0], introSequenceStep2); }
+// Séquence d'intro
+window.onload = () => {
+    initPuzzle();
+    showDialogue(dialogs.intro[0], () => {
+        setTimeout(() => {
+            showDialogue(dialogs.intro[1]);
+        }, 200);
+    });
+};
 
-// --- LOGIQUE DU PUZZLE (APPLICATION BÊTE DE TON EXEMPLE) ---
-const canvas = document.getElementById('rune-canvas');
-const ctx = canvas.getContext('2d');
-const btnValidate = document.getElementById('validate-btn');
 
-// Points configurés selon tes IDs et la grille 10x9 d'origine
-const POINTS_CONFIG = [
-    { id: 'P5', x: 180, y: 20 },
-    { id: 'P23', x: 100, y: 100 },
-    { id: 'P27', x: 260, y: 100 },
-    { id: 'P35', x: 180, y: 140 },
-    { id: 'P43', x: 100, y: 180 },
-    { id: 'P45', x: 180, y: 180 },
-    { id: 'P48', x: 300, y: 180 },
-    { id: 'P53', x: 100, y: 220 },
-    { id: 'P55', x: 180, y: 220 },
-    { id: 'P67', x: 260, y: 260 },
-    { id: 'P73', x: 100, y: 300 },
-    { id: 'P85', x: 180, y: 340 }
+/* =========================================
+   2. LOGIQUE DU PUZZLE (RUNE GA)
+   ========================================= */
+
+// Configuration de la grille 10x9
+const COLS = 10;
+const SPACING = 40; // 40px entre chaque point
+const OFFSET = 20;  // Marge pour centrer le point dans sa case
+
+// Liste des points à afficher (IDs basés sur une grille de 1 à 90)
+const POINTS_IDS = [5, 23, 27, 35, 43, 45, 48, 53, 55, 67, 73, 85];
+
+// Solution attendue (Paires de points)
+const SOLUTION = [
+    '5_23', '5_27', '23_43', '27_35', '35_45', 
+    '43_48', '53_73', '55_67', '55_85'
 ];
 
-const SOLUTION_LINES = [
-    'P23_P43', 'P5_P23', 'P5_P27', 'P27_P35', 'P35_P45', 
-    'P43_P48', 'P53_P73', 'P55_P67', 'P55_P85'
-];
-
-let currentLines = new Set(); 
+let pointsMap = {}; // Stocke les coordonnées {id: {x, y}}
+let lines = new Set(); // Stocke les lignes tracées "ID_ID"
 let selectedPoint = null;
 
-function getLineKey(idA, idB) {
-    return [idA, idB].sort().join('_');
-}
+const canvas = document.getElementById('rune-canvas');
+const ctx = canvas.getContext('2d');
+const wrapper = document.getElementById('canvas-wrapper');
 
-function drawCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 5;
-    ctx.lineCap = 'round';
-    
-    currentLines.forEach(key => {
-        const [idA, idB] = key.split('_');
-        const pointA = POINTS_CONFIG.find(p => p.id === idA);
-        const pointB = POINTS_CONFIG.find(p => p.id === idB);
+// Initialisation
+function initPuzzle() {
+    POINTS_IDS.forEach(id => {
+        // Calcul mathématique précis de la position sur la grille
+        // id 1 = index 0. row = 0, col = 0.
+        let idx = id - 1;
+        let col = idx % COLS;
+        let row = Math.floor(idx / COLS);
         
-        if (pointA && pointB) {
-            ctx.beginPath();
-            ctx.moveTo(pointA.x, pointA.y);
-            ctx.lineTo(pointB.x, pointB.y);
-            ctx.stroke();
-        }
+        let x = OFFSET + (col * SPACING);
+        let y = OFFSET + (row * SPACING);
+
+        pointsMap[id] = {x, y};
+
+        // Création de l'élément DOM
+        let p = document.createElement('div');
+        p.className = 'point';
+        p.id = 'p-' + id; // id DOM
+        p.dataset.id = id; // id logique
+        p.style.left = x + 'px';
+        p.style.top = y + 'px';
+        p.onclick = onPointClick;
+        wrapper.appendChild(p);
     });
 }
 
-function handlePointClick() {
-    const pointId = this.id;
-    if (!selectedPoint) {
-        selectedPoint = pointId;
-        this.classList.add('selected');
-    } 
-    else if (selectedPoint === pointId) {
+function onPointClick(e) {
+    let id = parseInt(this.dataset.id);
+    let el = this;
+
+    if (selectedPoint === null) {
+        // Premier clic
+        selectedPoint = id;
+        el.classList.add('selected');
+    } else if (selectedPoint === id) {
+        // Annuler la sélection
         selectedPoint = null;
-        this.classList.remove('selected');
-    }
-    else {
-        const lineKey = getLineKey(selectedPoint, pointId);
-        if (currentLines.has(lineKey)) {
-            currentLines.delete(lineKey);
-        } else {
-            currentLines.add(lineKey);
-        }
-        document.getElementById(selectedPoint).classList.remove('selected');
+        el.classList.remove('selected');
+    } else {
+        // Second clic : Tracer ou Effacer
+        toggleLine(selectedPoint, id);
+        
+        // Nettoyage visuel
+        document.getElementById('p-' + selectedPoint).classList.remove('selected');
         selectedPoint = null;
-        drawCanvas();
     }
 }
 
-function setupRunePuzzle() {
-    const wrapper = document.getElementById('canvas-wrapper');
-    POINTS_CONFIG.forEach(point => {
-        const pointDiv = document.createElement('div');
-        pointDiv.className = 'connection-point';
-        pointDiv.id = point.id;
-        pointDiv.style.left = point.x + 'px';
-        pointDiv.style.top = point.y + 'px';
-        pointDiv.addEventListener('click', handlePointClick);
-        wrapper.appendChild(pointDiv);
-    });
-    drawCanvas();
+function toggleLine(idA, idB) {
+    // Créer une clé unique triée (ex: toujours "5_23", jamais "23_5")
+    let key = (idA < idB) ? `${idA}_${idB}` : `${idB}_${idA}`;
+
+    if (lines.has(key)) {
+        lines.delete(key);
+    } else {
+        lines.add(key);
+    }
+    draw();
 }
 
-btnValidate.addEventListener('click', ()=>{
-    const userLines = Array.from(currentLines).sort();
-    const solutionLines = SOLUTION_LINES.sort();
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    const isCorrectSize = userLines.length === solutionLines.length;
-    let isSameContent = true;
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
 
-    if (isCorrectSize) {
-        for (let i = 0; i < userLines.length; i++) {
-            if (userLines[i] !== solutionLines[i]) {
-                isSameContent = false;
-                break;
-            }
+    lines.forEach(key => {
+        let [a, b] = key.split('_').map(Number);
+        let p1 = pointsMap[a];
+        let p2 = pointsMap[b];
+
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+    });
+}
+
+
+/* =========================================
+   3. VALIDATION
+   ========================================= */
+
+document.getElementById('validate-btn').onclick = () => {
+    // Conversion en tableaux triés pour comparaison stricte
+    let userLines = Array.from(lines).sort();
+    let solutionLines = SOLUTION.sort(); // Normalement déjà trié mais sécurité
+
+    // Vérification 1: Nombre de lignes
+    if (userLines.length !== solutionLines.length) {
+        showDialogue(dialogs.fail);
+        return;
+    }
+
+    // Vérification 2: Contenu exact
+    let isCorrect = true;
+    for (let i = 0; i < userLines.length; i++) {
+        // On doit normaliser les clés solution aussi au cas où
+        let sKeyParts = solutionLines[i].split('_').map(Number);
+        let sKey = (sKeyParts[0] < sKeyParts[1]) ? `${sKeyParts[0]}_${sKeyParts[1]}` : `${sKeyParts[1]}_${sKeyParts[0]}`;
+        
+        if (userLines[i] !== sKey) {
+            isCorrect = false;
+            break;
         }
-    } else {
-        isSameContent = false;
     }
 
-    if (isCorrectSize && isSameContent) {
-        document.getElementById('puzzle-container').style.display = "none";
-        btnValidate.style.display = "none";
-        document.getElementById('win-image-container').style.display = "block"; 
-        typeWriter(winDialogue);
+    if (isCorrect) {
+        // Victoire
+        document.getElementById('puzzle-container').style.display = 'none';
+        document.getElementById('validate-btn').style.display = 'none';
+        document.getElementById('win-image-container').style.display = 'block';
+        showDialogue(dialogs.win);
     } else {
-        typeWriter(failDialogue);
+        showDialogue(dialogs.fail);
     }
-});
+};
+
 </script>
 </body>
 </html>
