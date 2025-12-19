@@ -1,25 +1,321 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Porte 4</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Porte 4 - Le Combat</title>
+
 <style>
-  body{
-    margin:0;
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background-color:#111;
-    color:#ff66ff;
-    font-family:'Press Start 2P', monospace;
-    font-size:3em;
-    text-align:center;
-  }
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+html, body {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    font-family: 'Press Start 2P', monospace;
+    overflow: hidden;
+    background: black; /* Fond noir pour l'ambiance combat */
+    color: white;
+    user-select: none;
+}
+
+#back-btn {
+    position: fixed; top: 14px; left: 14px;
+    font-size: 32px; color: red;
+    cursor: pointer; z-index: 6000;
+    text-shadow: 2px 2px 0px black;
+}
+
+/* --- SCÈNE DE COMBAT --- */
+#battle-scene {
+    position: fixed; top: 10%; left: 50%;
+    transform: translateX(-50%);
+    width: 90%; max-width: 600px;
+    height: 40%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* L'ENNEMI (LE MONDE RÉEL) - Forme abstraite menaçante */
+#enemy {
+    width: 150px; height: 150px;
+    background: linear-gradient(45deg, #444, #000);
+    border: 4px solid red;
+    box-shadow: 0 0 30px red;
+    position: relative;
+    animation: float 3s ease-in-out infinite;
+}
+#enemy::after {
+    content: "REALITE";
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: red;
+    font-size: 0.8em;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-20px) scale(1.05); }
+}
+
+/* Animation d'attaque subie */
+@keyframes shakeEnemy {
+    0% { transform: translate(10px, 0); }
+    20% { transform: translate(-10px, 0); }
+    40% { transform: translate(10px, 0); }
+    60% { transform: translate(-10px, 0); }
+    100% { transform: translate(0, 0); }
+}
+.shake { animation: shakeEnemy 0.4s linear; }
+
+/* --- HUD (PV, Noms) --- */
+#hud {
+    position: fixed; top: 55%; left: 50%;
+    transform: translateX(-50%);
+    width: 90%; max-width: 600px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8em;
+}
+
+.status-box {
+    background: rgba(0,0,255,0.3);
+    border: 2px solid white;
+    padding: 10px;
+    width: 45%;
+}
+.enemy-status {
+    background: rgba(255,0,0,0.3);
+    text-align: right;
+}
+
+/* --- MENU D'ACTION --- */
+#action-menu {
+    position: fixed; bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    width: 90%; max-width: 600px;
+    height: 150px;
+    background: #222;
+    border: 4px solid white;
+    border-radius: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 10px;
+    gap: 10px;
+}
+
+.btn-action {
+    background: none;
+    border: 2px solid #555;
+    color: white;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.9em;
+    cursor: pointer;
+    text-align: left;
+    padding-left: 20px;
+    transition: 0.2s;
+}
+.btn-action:hover {
+    background: white;
+    color: black;
+    border-color: white;
+}
+.btn-action:active { transform: scale(0.98); }
+
+/* --- BOITE DE LOG (Texte narratif) --- */
+#log-box {
+    position: fixed; bottom: 180px; left: 50%;
+    transform: translateX(-50%);
+    width: 90%; max-width: 600px;
+    background: rgba(0,0,0,0.8);
+    border: 2px solid #777;
+    padding: 10px;
+    color: #aaa;
+    font-size: 0.7em;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+}
+
+/* --- SOUS MENU INVOCATION --- */
+#summon-menu {
+    display: none; /* Caché par défaut */
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #222;
+    z-index: 10;
+    flex-direction: column;
+}
+
+/* VICTOIRE */
+#win-screen {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: black;
+    display: none;
+    z-index: 9999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+#win-img { max-width: 90vw; max-height: 70vh; margin-bottom: 20px;}
+
+/* DIALOGUE DU BAS (GLOBAL) */
+#dialogue-box {
+    position: fixed; left: 50%; bottom: 26px;
+    transform: translateX(-50%);
+    width: 84%;
+    min-height: 100px;
+    background: rgba(0,0,0,0.9);
+    border: 3px solid #ff00ff;
+    padding: 18px;
+    color: #ff66ff;
+    display: none;
+    z-index: 10000;
+    font-size: 0.8em;
+    line-height: 1.5;
+}
+
 </style>
 </head>
 <body>
-  Porte 4
+
+<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=0"></audio>
+<audio id="hit-sound" src="https://dl.dropboxusercontent.com/scl/fi/34j8p9y4j3y9j4y4j4y4j/hit.mp3?rlkey=placeholder&dl=0"></audio> <div id="back-btn" onclick="history.back()">⬅</div>
+
+<div id="battle-scene">
+    <div id="enemy"></div>
+</div>
+
+<div id="hud">
+    <div class="status-box enemy-status">
+        LE MONDE<br>
+        HP: ∞ / ∞
+    </div>
+    <div class="status-box">
+        GUILIAN<br>
+        HP: 1 / 100
+    </div>
+</div>
+
+<div id="log-box">Le Monde Réel vous fixe avec mépris.</div>
+
+<div id="action-menu">
+    <button class="btn-action" onclick="playerAction('attack')">ATTAQUER</button>
+    <button class="btn-action" onclick="playerAction('defend')">DÉFENDRE</button>
+    <button class="btn-action" onclick="openSummon()">APPELER</button>
+    <button class="btn-action" onclick="playerAction('flee')">FUIR</button>
+
+    <div id="summon-menu">
+        <button class="btn-action" style="height:100%; text-align:center;" onclick="summonAlice()">> ALICE</button>
+        <button class="btn-action" style="height:100%; text-align:center; font-size:0.6em; color:#555;" onclick="closeSummon()">RETOUR</button>
+    </div>
+</div>
+
+<div id="win-screen">
+    <img id="win-img" src="https://i.imgur.com/xnhXVcZ.png" alt="Victoire">
+</div>
+
+<div id="dialogue-box"></div>
+
+<script>
+/* GESTION DIALOGUE */
+const dialogueBox = document.getElementById("dialogue-box");
+const typeSound = document.getElementById("type-sound");
+let typeInterval;
+
+const dialogs = {
+    intro: ["Un combat RPG ? Classique.", "Face à 'La Réalité'... Bonne chance pour battre ça tout seul."],
+    attack: "C'est inutile. Tu n'as pas la force pour ça.",
+    defend: "Tu retardes l'inévitable.",
+    flee: "Impossible de fuir. Elle est partout.",
+    win: "Échec et mat. Tu n'es plus jamais seul face au monde."
+};
+
+function playSound() { try { typeSound.currentTime = 0; typeSound.play().catch(()=>{}); } catch(e){} }
+
+function showDialogue(text, callback = null) {
+    clearInterval(typeInterval);
+    dialogueBox.style.display = 'block';
+    dialogueBox.innerHTML = '';
+    playSound();
+    let i = 0; let currentText = "";
+    dialogueBox.onclick = () => {
+        clearInterval(typeInterval);
+        dialogueBox.innerHTML = text;
+        finish();
+    };
+    function finish() {
+        try { typeSound.pause(); } catch(e){}
+        dialogueBox.onclick = () => {
+            dialogueBox.style.display = 'none';
+            if (callback) callback();
+        };
+    }
+    typeInterval = setInterval(() => {
+        currentText += text.charAt(i);
+        dialogueBox.innerHTML = currentText;
+        i++;
+        if (i >= text.length) { clearInterval(typeInterval); finish(); }
+    }, 30);
+}
+
+/* LOGIQUE DE COMBAT */
+const logBox = document.getElementById('log-box');
+const enemy = document.getElementById('enemy');
+const summonMenu = document.getElementById('summon-menu');
+
+window.onload = () => {
+    showDialogue(dialogs.intro[0], () => {
+        setTimeout(() => showDialogue(dialogs.intro[1]), 200);
+    });
+};
+
+function playerAction(action) {
+    if (action === 'attack') {
+        logBox.innerText = "Vous frappez... 0 Dégâts.";
+        enemy.classList.remove('shake');
+        void enemy.offsetWidth; // Trigger reflow
+        enemy.classList.add('shake'); // Petit effet visuel
+        showDialogue(dialogs.attack);
+    } else if (action === 'defend') {
+        logBox.innerText = "Vous vous protégez du regard des autres.";
+        showDialogue(dialogs.defend);
+    } else if (action === 'flee') {
+        logBox.innerText = "Vous courez en rond.";
+        showDialogue(dialogs.flee);
+    }
+}
+
+function openSummon() {
+    summonMenu.style.display = 'flex';
+}
+
+function closeSummon() {
+    summonMenu.style.display = 'none';
+}
+
+function summonAlice() {
+    summonMenu.style.display = 'none';
+    document.getElementById('action-menu').style.display = 'none';
+    
+    // Animation de victoire
+    logBox.innerText = "ALICE rejoint le combat !";
+    logBox.style.color = "#ff00ff";
+    logBox.style.borderColor = "#ff00ff";
+    
+    enemy.style.transition = "all 1s";
+    enemy.style.transform = "scale(0.1) rotate(720deg)";
+    enemy.style.opacity = "0";
+    
+    setTimeout(() => {
+        document.getElementById('win-screen').style.display = 'flex';
+        showDialogue(dialogs.win);
+    }, 1500);
+}
+
+</script>
 </body>
 </html>
