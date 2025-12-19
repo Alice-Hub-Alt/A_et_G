@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Porte 5 - La Vérité</title>
+<title>Porte 5</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -25,7 +25,7 @@ html, body {
 }
 
 #validate-btn {
-    position: fixed; bottom: 15%; left: 50%;
+    position: fixed; bottom: 10%; left: 50%;
     transform: translateX(-50%);
     padding: 15px 30px;
     font-family: 'Press Start 2P', monospace;
@@ -38,73 +38,81 @@ html, body {
 }
 
 #dialogue-box {
-    position: fixed; left: 50%; bottom: 26px;
+    position: fixed; left: 50%; bottom: 20px;
     transform: translateX(-50%);
     width: 84%;
     min-height: 100px;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.9);
     border: 3px solid #ff00ff;
     padding: 18px;
     color: #ff66ff;
     display: none;
     z-index: 9000;
     font-size: 0.8em;
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
 #puzzle-container {
-    position: fixed; top: 45%; left: 50%;
+    position: fixed; top: 40%; left: 50%;
     transform: translate(-50%, -50%);
     width: 90%;
+    max-width: 900px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 30px;
+    gap: 40px;
 }
 
-/* --- TEXTE À TROUS --- */
+/* --- ZONE DE TEXTE --- */
 #text-zone {
     background: rgba(0, 0, 0, 0.85);
     border: 4px solid white;
-    padding: 30px;
+    padding: 35px;
     color: white;
-    line-height: 2.5;
-    font-size: 0.9em;
+    line-height: 2.8;
+    font-size: 0.85em;
     text-align: left;
-    max-width: 800px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    box-shadow: 0 0 30px rgba(255, 0, 255, 0.1);
 }
 
 .drop-zone {
-    display: inline-block;
-    min-width: 80px;
-    height: 30px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 100px;
+    height: 32px;
     border-bottom: 3px solid #ff00ff;
-    margin: 0 5px;
-    vertical-align: middle;
-    text-align: center;
-    color: #ff00ff;
+    margin: 0 8px;
+    color: #00ffff; /* Couleur différente pour les mots placés */
+    cursor: pointer;
     transition: all 0.2s;
+    vertical-align: middle;
+}
+.drop-zone:empty::before {
+    content: "...";
+    color: #555;
 }
 
-/* --- MOTS À DRAGGER --- */
+/* --- BANQUE DE MOTS --- */
 #word-bank {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 15px;
-    max-width: 800px;
+    gap: 12px;
 }
 
 .word-item {
     background: black;
     border: 2px solid white;
-    padding: 10px 15px;
+    padding: 8px 12px;
     color: white;
     cursor: grab;
-    font-size: 0.7em;
+    font-size: 0.65em;
+    transition: transform 0.1s;
 }
-.word-item.dragging { opacity: 0.5; }
+.word-item:hover { border-color: #ff00ff; color: #ff00ff; }
+.word-item.dragging { opacity: 0.3; }
+.word-item.used { display: none; } /* On cache le mot quand il est placé */
 
 #win-image-container {
     position: fixed; top: 50%; left: 50%;
@@ -113,6 +121,14 @@ html, body {
     display: none;
 }
 #win-img { max-width: 90vw; max-height: 80vh; }
+
+/* Animation d'erreur */
+@keyframes shake {
+    0%, 100% { transform: translate(-50%, -50%); }
+    25% { transform: translate(-52%, -50%); }
+    75% { transform: translate(-48%, -50%); }
+}
+.shake { animation: shake 0.2s ease-in-out 0s 2; }
 
 </style>
 </head>
@@ -124,20 +140,39 @@ html, body {
 
 <div id="puzzle-container">
     <div id="text-zone">
-        Je méprise la <div class="drop-zone" data-answer="naïveté"></div> des gens. 
-        Pour moi, la plupart ne sont que des <div class="drop-zone" data-answer="rouages"></div> 
-        inutiles dans une machine sans <div class="drop-zone" data-answer="but"></div>. 
-        Seule la <div class="drop-zone" data-answer="logique"></div> froide mérite mon respect.
+        Je me demande qui je suis. D'un coté j'ai l'impression d'être très 
+        <div class="drop-zone" data-answer="intelligente"></div>, mais quand je réfléchis deux minutes je me dit que je suis surtout très 
+        <div class="drop-zone" data-answer="bizarre"></div>. Oui je sais que c'est très 
+        <div class="drop-zone" data-answer="orgueilleux"></div> de me croire 
+        <div class="drop-zone" data-answer="différente"></div>. Mais bon au final, il suffit d'
+        <div class="drop-zone" data-answer="ignorer"></div> tout cela. Je n'ai jamais cru en la valeur de 
+        <div class="drop-zone" data-answer="la vérité"></div> de toute façon. Autant juste 
+        <div class="drop-zone" data-answer="vivre"></div> une 
+        <div class="drop-zone" data-answer="illusion"></div> qui nous rend heureux plutôt que de  
+        <div class="drop-zone" data-answer="rechercher"></div> quelque chose qui n'existe pas, ou nous rendra malheureux. Non ?
     </div>
 
     <div id="word-bank">
-        <div class="word-item" draggable="true">naïveté</div>
-        <div class="word-item" draggable="true">logique</div>
-        <div class="word-item" draggable="true">sentiments</div>
-        <div class="word-item" draggable="true">rouages</div>
-        <div class="word-item" draggable="true">but</div>
-        <div class="word-item" draggable="true">cadeau</div>
-        <div class="word-item" draggable="true">amis</div>
+        <div class="word-item" draggable="true">intelligente</div>
+        <div class="word-item" draggable="true">bizarre</div>
+        <div class="word-item" draggable="true">orgueilleux</div>
+        <div class="word-item" draggable="true">différente</div>
+        <div class="word-item" draggable="true">ignorer</div>
+        <div class="word-item" draggable="true">la vérité</div>
+        <div class="word-item" draggable="true">vivre</div>
+        <div class="word-item" draggable="true">illusion</div>
+        <div class="word-item" draggable="true">rechercher</div>
+        <div class="word-item" draggable="true">supérieure</div>
+        <div class="word-item" draggable="true">bête</div>
+        <div class="word-item" draggable="true">abandonner</div>
+        <div class="word-item" draggable="true">valeur absolue</div>
+        <div class="word-item" draggable="true">accepter</div>
+        <div class="word-item" draggable="true">réalité</div>
+        <div class="word-item" draggable="true">poursuivre</div>
+        <div class="word-item" draggable="true">lucide</div>
+        <div class="word-item" draggable="true">banale</div>
+        <div class="word-item" draggable="true">existence</div>
+        <div class="word-item" draggable="true">simuler</div>
     </div>
 </div>
 
@@ -155,9 +190,9 @@ const typeSound = document.getElementById("type-sound");
 let typeInterval;
 
 const dialogs = {
-    intro: ["On dirait que je dois compléter mes propres pensées...", "S'il me connaît vraiment, il saura quoi mettre."],
-    win: "Exactement. Le monde est une machine cassée et il est le seul à l'avoir compris avec moi.",
-    fail: "C'est beaucoup trop niais. Recommence, tu m'insultes là."
+    intro: ["C'est un peu gênant de se lire comme ça...", "Il ferait bien de choisir les bons mots, j'ai pas envie d'avoir l'air d'une idiote niaisée."],
+    win: "On dirait qu'il a compris ma philosophie. La vérité est surestimée de toute façon.",
+    fail: "Pas du tout. Il m'écoute quand je parle ou il fait semblant ?"
 };
 
 function playSound() {
@@ -191,39 +226,51 @@ function showDialogue(text, callback = null) {
     }, 30);
 }
 
-// --- LOGIQUE DRAG AND DROP ---
+// --- LOGIQUE DRAG & DROP ---
+let draggedWord = null;
 const words = document.querySelectorAll('.word-item');
 const zones = document.querySelectorAll('.drop-zone');
-let draggedWord = null;
 
 words.forEach(word => {
     word.addEventListener('dragstart', () => {
         draggedWord = word;
         word.classList.add('dragging');
     });
-    word.addEventListener('dragend', () => {
-        word.classList.remove('dragging');
-    });
+    word.addEventListener('dragend', () => word.classList.remove('dragging'));
 });
 
 zones.forEach(zone => {
     zone.addEventListener('dragover', e => e.preventDefault());
     zone.addEventListener('drop', () => {
         if (draggedWord) {
-            // Si la zone contient déjà un mot, on peut le remettre dans la banque si on veut
-            // Ici on remplace juste le texte
+            // Si la zone est déjà pleine, on libère l'ancien mot
+            if (zone.innerText !== "") {
+                const oldWordText = zone.innerText;
+                words.forEach(w => { if(w.innerText === oldWordText) w.classList.remove('used'); });
+            }
             zone.innerText = draggedWord.innerText;
-            zone.style.minWidth = "auto"; // Le trou s'adapte au mot
+            draggedWord.classList.add('used');
+            draggedWord = null;
         }
     });
-    // Optionnel : cliquer sur la zone pour l'effacer
-    zone.onclick = () => { 
-        zone.innerText = ""; 
-        zone.style.minWidth = "80px";
+
+    // RETIRER UN MOT EN CLIQUANT DESSUS
+    zone.onclick = () => {
+        if (zone.innerText !== "") {
+            const wordToReturn = zone.innerText;
+            words.forEach(w => { if(w.innerText === wordToReturn) w.classList.remove('used'); });
+            zone.innerText = "";
+        }
     };
 });
 
 window.onload = () => {
+    // Mélange aléatoire des mots dans la banque
+    const bank = document.getElementById('word-bank');
+    for (let i = bank.children.length; i >= 0; i--) {
+        bank.appendChild(bank.children[Math.random() * i | 0]);
+    }
+    
     showDialogue(dialogs.intro[0], () => {
         setTimeout(() => showDialogue(dialogs.intro[1]), 200);
     });
@@ -243,7 +290,16 @@ document.getElementById('validate-btn').onclick = () => {
         document.getElementById('win-image-container').style.display = 'block';
         showDialogue(dialogs.win);
     } else {
+        const container = document.getElementById('puzzle-container');
+        container.classList.add('shake');
+        setTimeout(() => container.classList.remove('shake'), 400);
         showDialogue(dialogs.fail);
+        
+        // Optionnel : Réinitialiser tout si tu veux être dure avec lui
+        /*
+        zones.forEach(zone => zone.innerText = "");
+        words.forEach(w => w.classList.remove('used'));
+        */
     }
 };
 </script>
