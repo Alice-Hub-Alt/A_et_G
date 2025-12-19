@@ -21,7 +21,7 @@ html, body {
 #back-btn {
     position: fixed; top: 14px; left: 14px;
     font-size: 32px; color: red;
-    cursor: pointer; z-index: 6000;
+    cursor: pointer; z-index: 20000; /* Priorité absolue pour rester cliquable */
     text-shadow: 2px 2px 0px black;
 }
 
@@ -38,7 +38,6 @@ html, body {
     z-index: 5;
 }
 
-/* L'ENNEMI (LE MONDE RÉEL) */
 #enemy-container {
     position: relative;
     text-align: center;
@@ -46,7 +45,6 @@ html, body {
 }
 #enemy-img {
     width: 250px; height: auto;
-    /* Plus de bordure ni de fond, juste l'image flottante */
     filter: drop-shadow(0 0 10px rgba(255,0,0,0.5));
 }
 #enemy-name {
@@ -55,20 +53,20 @@ html, body {
 
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 
-/* EFFETS VISUELS (GIFs superposés) */
+/* EFFETS VISUELS */
 .fx-overlay {
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none; display: none; z-index: 10;
 }
-#player-attack-fx { width: 200px; } /* Coup d'épée */
-#summon-fx { width: 300px; mix-blend-mode: screen; transform: translate(-50%, -60%); } /* Pilier magique */
-#enemy-attack-fx { /* Explosion géante */
+#player-attack-fx { width: 200px; } 
+#summon-fx { width: 300px; mix-blend-mode: screen; transform: translate(-50%, -60%); } 
+#enemy-attack-fx {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     object-fit: cover; transform: none; z-index: 100; mix-blend-mode: screen;
 }
 
-/* --- HUD (PV, Noms) --- */
+/* --- HUD --- */
 #hud {
     position: fixed; top: 52%; left: 50%;
     transform: translateX(-50%);
@@ -79,7 +77,7 @@ html, body {
 .status-box { background: rgba(0,0,255,0.4); border: 2px solid white; padding: 10px; width: 45%; text-shadow: 1px 1px black; }
 .enemy-status { background: rgba(255,0,0,0.4); text-align: right; }
 
-/* --- MENU D'ACTION --- */
+/* --- MENU --- */
 #action-menu {
     position: fixed; bottom: 20px; left: 50%;
     transform: translateX(-50%);
@@ -94,10 +92,8 @@ html, body {
     cursor: pointer; text-align: left; padding-left: 20px; transition: 0.2s;
 }
 .btn-action:hover:not([disabled]) { background: white; color: black; border-color: white; }
-.btn-action:active:not([disabled]) { transform: scale(0.98); }
 .btn-action[disabled] { opacity: 0.5; cursor: not-allowed; }
 
-/* --- BOITE DE LOG --- */
 #log-box {
     position: fixed; bottom: 180px; left: 50%;
     transform: translateX(-50%);
@@ -107,7 +103,6 @@ html, body {
     display: flex; align-items: center; z-index: 20;
 }
 
-/* --- SOUS MENU INVOCATION --- */
 #summon-menu {
     display: none; position: absolute; top: 0; left: 0;
     width: 100%; height: 100%; background: #222; z-index: 30;
@@ -116,21 +111,20 @@ html, body {
 
 /* VICTOIRE */
 #win-screen {
-    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    position: fixed; top: 0; left: 0;
     width: 100%; height: 100%;
-    /* Pas de fond noir, on laisse voir le GIF du body derrière */
-    background: rgba(0,0,0,0.5); 
-    display: none; z-index: 9999;
+    background: rgba(0,0,0,0.6); 
+    display: none; z-index: 15000; /* En dessous du back-btn */
     flex-direction: column; align-items: center; justify-content: center;
 }
 #win-img { max-width: 90vw; max-height: 70vh; margin-bottom: 20px;}
 
-/* DIALOGUE GLOBAL */
+/* DIALOGUE */
 #dialogue-box {
     position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
     width: 84%; min-height: 100px; background: rgba(0,0,0,0.9);
     border: 3px solid #ff00ff; padding: 18px; color: #ff66ff;
-    display: none; z-index: 10000; font-size: 0.8em; line-height: 1.5;
+    display: none; z-index: 25000; font-size: 0.8em; line-height: 1.5;
 }
 </style>
 </head>
@@ -142,14 +136,14 @@ html, body {
 <audio id="summon-sound" src="https://dl.dropboxusercontent.com/scl/fi/1zgbvmqx0is149a94vfxl/sfx-cinematic-and-magical-riser-sound-effect-373215.mp3?rlkey=3cuiylc08201ci77ex3djial1&dl=1"></audio>
 <audio id="death-sound" src="https://dl.dropboxusercontent.com/scl/fi/p7ls5b1kq4di28wvt7nar/half-life-gmod-death-sound-high-quality.mp3?rlkey=8igo29z5228x3uxofcxedye6h&dl=1"></audio>
 
-<div id="back-btn" onclick="history.back()">⬅</div>
+<div id="back-btn" onclick="location.href='zone2_1.html'">⬅</div>
 
 <div id="battle-scene">
     <div id="enemy-container">
         <img id="enemy-img" src="https://i.imgur.com/sW9pbd3.png" alt="Réalité">
         <div id="enemy-name">RÉALITÉ</div>
         <img id="player-attack-fx" class="fx-overlay" src="https://cdn.pixabay.com/animation/2025/10/26/17/49/17-49-35-844_512.gif">
-        <img id="summon-fx" class="fx-overlay" src="https://img.itch.zone/aW1hZ2UvMjgxOTU5LzEzNjk3MDkuZ2lm/original/YaPnLG.gif">
+        <img id="summon-fx" class="fx-overlay" src="https://img.itch.zone/aW1hZ2UvMjgxOTU5LzEzNjk3MDYuZ2lm/original/YaPnLG.gif">
     </div>
 </div>
 
@@ -181,7 +175,6 @@ html, body {
 <div id="dialogue-box"></div>
 
 <script>
-/* --- GESTION DIALOGUE --- */
 const dialogueBox = document.getElementById("dialogue-box");
 let typeInterval;
 const dialogs = {
@@ -194,10 +187,7 @@ const dialogs = {
 
 function playSound(id) {
     const sound = document.getElementById(id);
-    if(sound) {
-        sound.currentTime = 0;
-        sound.play().catch(e => console.log("Erreur lecture son :", e));
-    }
+    if(sound) { sound.currentTime = 0; sound.play().catch(()=>{}); }
 }
 
 function showDialogue(text, callback = null) {
@@ -212,7 +202,6 @@ function showDialogue(text, callback = null) {
     typeInterval = setInterval(() => { currentText += text.charAt(i); dialogueBox.innerHTML = currentText; i++; if (i >= text.length) { clearInterval(typeInterval); finish(); } }, 30);
 }
 
-/* --- LOGIQUE DE COMBAT --- */
 let playerHP = 100;
 let isPlayerTurn = true;
 const logBox = document.getElementById('log-box');
@@ -220,10 +209,6 @@ const hpSpan = document.getElementById('player-hp');
 const menuBtns = document.querySelectorAll('#action-menu > .btn-action');
 
 window.onload = () => {
-    // Préchargement des FX
-    ['player-attack-fx', 'enemy-attack-fx', 'summon-fx'].forEach(id => {
-        let img = document.getElementById(id); img.style.display = 'block'; setTimeout(() => img.style.display = 'none', 10);
-    });
     showDialogue(dialogs.intro[0], () => setTimeout(() => showDialogue(dialogs.intro[1]), 200));
 };
 
@@ -234,14 +219,12 @@ function setTurn(player) {
     logBox.innerText = player ? "C'est à vous." : "La Réalité prépare quelque chose...";
 }
 
-// --- TOUR JOUEUR ---
 function playerAction(action) {
     if (!isPlayerTurn) return;
     closeSummon();
-
     if (action === 'attack') {
         logBox.innerText = "Alice attaque ! 1 Dégât...";
-        playFx('player-attack-fx', 'sword-sound', 1000); // 1s pour laisser le gif jouer
+        playFx('player-attack-fx', 'sword-sound', 1000);
         showDialogue(dialogs.attack, () => setTurn(false));
     } else if (action === 'defend') {
         logBox.innerText = "Alice se protège.";
@@ -255,45 +238,32 @@ function playerAction(action) {
 function openSummon() { if(isPlayerTurn) document.getElementById('summon-menu').style.display = 'flex'; }
 function closeSummon() { document.getElementById('summon-menu').style.display = 'none'; }
 
-// --- TOUR ENNEMI (LA RÉALITÉ) ---
 function enemyAttack() {
-    // Masquer l'interface
     document.getElementById('hud').style.display = 'none';
     document.getElementById('action-menu').style.display = 'none';
     logBox.style.display = 'none';
-
-    // Jouer l'attaque massive
     playSound('explosion-sound');
     const explosion = document.getElementById('enemy-attack-fx');
     explosion.style.display = 'block';
 
     setTimeout(() => {
         explosion.style.display = 'none';
-        // Réafficher l'interface
         document.getElementById('hud').style.display = 'flex';
         document.getElementById('action-menu').style.display = 'grid';
         logBox.style.display = 'flex';
-
-        // Dégâts
         playerHP -= 99;
         hpSpan.innerText = playerHP;
         logBox.innerText = "La Réalité vous frappe de plein fouet ! -99 PV !";
         logBox.style.color = "red";
-
         checkDeath();
     }, 1200);
 }
 
-// --- CONDITIONS DE FIN ---
 function checkDeath() {
     if (playerHP <= 0) {
         hpSpan.innerText = "0";
-        logBox.innerText = "Alice a succombé à la réalité...";
         playSound('death-sound');
-        menuBtns.forEach(btn => btn.disabled = true);
-        setTimeout(() => {
-            location.href = 'zone2_1.html'; // REDIRECTION MORT
-        }, 3000);
+        setTimeout(() => { location.href = 'zone2_1.html'; }, 3000);
     } else {
         setTimeout(() => { logBox.style.color = "#aaa"; setTurn(true); }, 2000);
     }
@@ -301,34 +271,25 @@ function checkDeath() {
 
 function summonGuilian() {
     if (!isPlayerTurn) return;
-    
-    // On cache tout sauf le fond
     document.getElementById('summon-menu').style.display = 'none';
     document.getElementById('action-menu').style.display = 'none';
     document.getElementById('hud').style.display = 'none';
     logBox.style.display = 'none';
-    document.getElementById('enemy-container').style.display = 'block'; // On garde l'ennemi pour le frapper
-    
-    // FX de l'invocation sur l'ennemi
     playFx('summon-fx', 'summon-sound', 2000);
 
     setTimeout(() => {
-        // Disparition de l'ennemi
         document.getElementById('enemy-container').style.display = 'none';
-        // Affichage victoire
         document.getElementById('win-screen').style.display = 'flex';
         showDialogue(dialogs.win);
     }, 2000);
 }
 
-// --- UTILITAIRE FX ---
 function playFx(imgId, soundId, duration) {
     const fx = document.getElementById(imgId);
     fx.style.display = 'block';
     playSound(soundId);
     setTimeout(() => fx.style.display = 'none', duration);
 }
-
 </script>
 </body>
 </html>
