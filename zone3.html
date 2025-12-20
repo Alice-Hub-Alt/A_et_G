@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zone 3</title>
+    <title>Zone 3 : C'est la merde</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -43,7 +43,7 @@ body {
     width: 90%;
     position: fixed;
     left: 50%;
-    bottom: 10px;
+    bottom: 20px;
     transform: translateX(-50%);
     padding: 20px;
     display: none;
@@ -77,15 +77,14 @@ body {
 }
 @keyframes blink {50%{border-color:transparent;}}
 
-/* GLITCH GIFS (derrière tout sauf le fond) */
+/* GLITCH GIFS */
 .glitch-gif {
     position: absolute;
-    z-index: 1500;
-    pointer-events: none;
-    opacity: 0.8;
+    pointer-events: none; /* Important pour cliquer au travers */
+    opacity: 0.9;
 }
 
-/* IMAGES SCENE (devant gif, derrière texte) */
+/* IMAGES SCENE */
 .scene-img {
     position: fixed;
     top: 50%;
@@ -96,6 +95,7 @@ body {
     z-index: 2500;
     border: 2px solid white; 
     box-shadow: 0 0 15px rgba(0,0,0,0.8);
+    cursor: pointer;
 }
 
 /* FONDU FINAL */
@@ -109,7 +109,7 @@ body {
     z-index: 5000;
 }
 
-/* BOUTON FIN (Hors Système de jeu, z-index très haut) */
+/* BOUTON FIN */
 #end-button {
     position: fixed;
     top: 50%;
@@ -145,7 +145,6 @@ body {
 <audio id="type-sound-thought" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?dl=1"></audio>
 
 <div id="fade-black"></div>
-
 <div id="intro-overlay-zone2">Cliquer pour entrer dans le cauchemar...</div>
 
 <div id="dialogue-box"><span id="dialogue-text"></span></div>
@@ -161,274 +160,274 @@ body {
 <img id="img6" class="scene-img" class="scene-img" src="https://i.imgur.com/kuEm3Fv.png">
 
 <script>
-/* ---------------------- CONSTANTES & ETAT ---------------------- */
-
-let isTyping = false, skipTyping = false;
-let currentImageShown = null;
-const LAST_IMAGE_ID = "img6"; 
-
-const dBox = document.getElementById("dialogue-box");
-const dText = document.getElementById("dialogue-text");
-const tBox = document.getElementById("thought-box");
-const tText = document.getElementById("thought-text");
-const typeSound = document.getElementById("type-sound");
-const typeSoundThought = document.getElementById("type-sound-thought");
-const audioFear = document.getElementById("audio-fear");
-const audioPeace = document.getElementById("audio-peace");
-const allImages = document.querySelectorAll(".scene-img");
-
-typeSound.volume = 0.5;
-typeSoundThought.volume = 0.5;
-audioPeace.volume = 0.6; // Un peu plus doux pour les oiseaux
-
-/* ---------------------- UTILS ---------------------- */
-
-function stopSound(soundEl) {
-    soundEl.pause();
-    soundEl.currentTime = 0;
-    soundEl.loop = false; 
-}
-
-function showDialogue(t) { typeWriter(t, dBox, dText, typeSound, true); }
-function showThought(t) { typeWriter(t, tBox, tText, typeSoundThought, false); }
-
-
-/* ---------------------- TEXT ENGINE ---------------------- */
-
-function typeWriter(text, box, span, sound, isLongSound = false) {
-    document.body.removeEventListener('click', hideImageAndContinue, true);
-    dBox.onclick = null;
-    tBox.onclick = null;
-
-    span.innerHTML = "";
-    box.style.display = "block";
-    tBox.style.display = (box === dBox ? "none" : tBox.style.display);
-    dBox.style.display = (box === tBox ? "none" : dBox.style.display);
-
-    isTyping = true;
-    skipTyping = false;
-    span.classList.add("cursor-active");
-    
-    if (isLongSound) {
-        sound.currentTime = 0;
-        sound.play().catch(()=>{});
-    } else {
-        if(sound.paused || sound.currentTime > 0) { 
-            sound.currentTime = 0;
-            sound.play().catch(()=>{});
+    // --- Configuration des Glitchs ---
+    function spawnGlitch(count, mode) {
+        for (let i = 0; i < count; i++) {
+            const g = document.createElement("img");
+            g.src = "https://i.imgur.com/UsrQHo8.gif";
+            g.className = "glitch-gif";
+            
+            // Position aléatoire sur tout l'écran
+            g.style.top = Math.random() * 95 + "vh";
+            g.style.left = Math.random() * 95 + "vw";
+            
+            if (mode === 'medium') {
+                // Assez gros dès le début
+                const size = Math.floor(Math.random() * 100) + 100; // 100px à 200px
+                g.style.width = size + "px";
+                g.style.zIndex = 1000;
+            } else if (mode === 'heavy') {
+                // Énormes pour recouvrir
+                const size = Math.floor(Math.random() * 300) + 200; // 200px à 500px
+                g.style.width = size + "px";
+                g.style.zIndex = Math.floor(Math.random() * 50) + 1500;
+            }
+            document.body.appendChild(g);
         }
     }
 
-    let i = 0;
-    const interval = setInterval(() => {
-        if (skipTyping) {
-            span.innerHTML = text;
-            end();
-        } else if (i < text.length) {
-            span.innerHTML += text[i++];
-            if (isLongSound && i >= text.length - 1) {
-                stopSound(sound);
-            }
-        } else end();
-    }, 28);
-
-    box.onclick = (e) => {
-        if (isTyping) {
-            skipTyping = true;
-            e.stopPropagation(); 
+    function removeGlitch(percent) {
+        const gifs = [...document.querySelectorAll(".glitch-gif")];
+        const count = Math.floor(gifs.length * percent);
+        for (let i = 0; i < count; i++) {
+            const indexToRemove = gifs.length - 1 - i;
+            if(indexToRemove >= 0) gifs[indexToRemove].remove();
         }
+    }
+
+    // --- Séquence Narrative (Format Objet comme Zone 1.2) ---
+    const sequenceData = [
+        { text: "Oula, c'est, particulier disons", type: "thought" },
+        { text: "Alice fut abasourdie, elle qui pensais être tiré d'affaire était en fait sur le point de réellement sombrer", type: "narrator" },
+        { text: "Ah bah t'es de retour toi !", type: "thought" },
+        { text: "Et encourageant en plus !", type: "thought" },
+        { text: "Alice avais beau se cacher sous sous sarcasme, elle était terrorisé", type: "narrator" },
+        
+        // Premier Glitch : Plus gros et plus nombreux
+        { action: "glitch", count: 25, mode: "medium" }, 
+        
+        { text: "Et elle avais raison d'avoir aussi peur, car elle savais très bien qu'un jour ça finirais par se produite", type: "narrator" },
+        { text: "Euh, quoi ?", type: "thought" },
+        { text: "Guilian t'abandonne Alice.", type: "narrator" },
+        { text: "Ta vie est fini, abandonne, arrête d'essayer d'être heureuse, c'est vain.", type: "narrator" },
+        { text: "Oui, je sais.", type: "thought" },
+        
+        // Deuxième Glitch : Invasion totale
+        { action: "glitch", count: 80, mode: "heavy" }, 
+        
+        { text: "Je commence à me sentir mal là, arrête.", type: "thought" },
+        { text: "Alice savais que je ne fessai que dire la vérité mais continuais de nier", type: "narrator" },
+        { text: "Non par pitié, je t'en supplie, ARRÊTE.", type: "thought" },
+        
+        { action: "image", id: "img1" },
+        { text: "Quoi ? T'es pas censé m'avoir abandonné toi ?", type: "thought" },
+        { text: "Arrête de faire semblant de m'aimer, je sais que je ne te mérite pas.", type: "thought" },
+        { action: "image", id: "img2" },
+        { action: "image", id: "img3" },
+        { text: "Je me déteste", type: "thought" },
+        { action: "image", id: "img4" },
+        
+        { action: "remove_glitch", percent: 0.4 }, // On calme un peu le jeu
+        { text: "Belle formulation j'avoue, t'es doué.", type: "thought" },
+        { text: "Mais ça ne changera pas le fait que je suis qu'une merde.", type: "thought" },
+        { action: "image", id: "img5" },
+        { text: "Merci beaucoup, je sais pas ce que je ferais sans toi", type: "thought" },
+        
+        // Le grand changement (Musique + Fond + Suppression Glitch)
+        { action: "background_change", url: "https://c.tenor.com/ZL7fgNaWWXMAAAAd/tenor.gif" },
+        
+        { action: "image", id: "img6", isLast: true }
+    ];
+
+    // --- Moteur (Inspiré de Zone 1.2) ---
+    let currentStep = 0;
+    let isTyping = false;
+    let skipRequested = false;
+    let typingInterval;
+    let activeImage = null;
+
+    const dBox = document.getElementById("dialogue-box");
+    const dText = document.getElementById("dialogue-text");
+    const tBox = document.getElementById("thought-box");
+    const tText = document.getElementById("thought-text");
+    
+    const audioFear = document.getElementById("audio-fear");
+    const audioPeace = document.getElementById("audio-peace");
+    const typeSound = document.getElementById("type-sound");
+    const typeSoundThought = document.getElementById("type-sound-thought");
+
+    // Volumes
+    typeSound.volume = 0.5;
+    typeSoundThought.volume = 0.5;
+    audioPeace.volume = 0.6;
+
+    // --- Fonction Typewriter (La version stable) ---
+    function typeWriter(text, targetElement, isThought, callback) {
+        if (typingInterval) clearInterval(typingInterval);
+        skipRequested = false;
+        isTyping = true;
+        targetElement.innerHTML = '';
+        targetElement.classList.add('cursor-active');
+
+        // Gestion du son : On joue au début, on coupe à la fin
+        let soundEl = isThought ? typeSoundThought : typeSound;
+        if (soundEl) { 
+            soundEl.currentTime = 0; 
+            soundEl.play().catch(()=>{}); 
+        }
+
+        let i = 0;
+        typingInterval = setInterval(() => {
+            if (skipRequested) {
+                targetElement.innerHTML = text;
+                finalizeTyping();
+                return;
+            }
+            if (i < text.length) {
+                targetElement.innerHTML += text.charAt(i++);
+            } else {
+                finalizeTyping();
+            }
+        }, 28);
+
+        function finalizeTyping() {
+            clearInterval(typingInterval);
+            targetElement.classList.remove('cursor-active');
+            if (soundEl) { 
+                soundEl.pause(); 
+                soundEl.currentTime = 0; 
+            }
+            isTyping = false;
+            if (callback) callback();
+        }
+    }
+
+    function skipText(e) {
+        if (isTyping) {
+            skipRequested = true;
+            e.stopPropagation();
+        }
+    }
+
+    // --- Gestion des Images ---
+    function hideActiveImage(callback) {
+        if (activeImage) {
+            activeImage.style.display = 'none';
+            activeImage = null;
+        }
+        if (callback) callback();
+    }
+
+    function showImageAndWait(id, isLast) {
+        dBox.style.display = 'none';
+        tBox.style.display = 'none';
+        
+        const img = document.getElementById(id);
+        img.style.display = 'block';
+        activeImage = img;
+
+        setTimeout(() => {
+            if (isLast) {
+                // Logique spéciale dernière image -> Fin
+                img.onclick = () => {
+                    img.style.display = 'none';
+                    initiateFinalSequence();
+                };
+            } else {
+                // Image normale
+                img.onclick = (e) => {
+                    e.stopPropagation();
+                    img.style.display = 'none';
+                    activeImage = null;
+                    nextStep();
+                };
+            }
+        }, 50);
+    }
+
+    // --- Gestionnaire d'étapes ---
+    function nextStep() {
+        if (isTyping) return;
+        
+        // Cache les boites par défaut
+        dBox.style.display = 'none';
+        tBox.style.display = 'none';
+
+        if (currentStep >= sequenceData.length) return;
+
+        const data = sequenceData[currentStep++];
+
+        // 1. DIALOGUE (Narrateur)
+        if (data.type === "narrator") {
+            dBox.style.display = 'block';
+            dBox.onclick = skipText;
+            typeWriter(data.text, dText, false, () => {
+                dBox.onclick = nextStep;
+            });
+        
+        // 2. PENSÉE
+        } else if (data.type === "thought") {
+            tBox.style.display = 'block';
+            tBox.onclick = skipText;
+            typeWriter(data.text, tText, true, () => {
+                tBox.onclick = nextStep;
+            });
+
+        // 3. IMAGE
+        } else if (data.action === "image") {
+            showImageAndWait(data.id, data.isLast);
+
+        // 4. GLITCH
+        } else if (data.action === "glitch") {
+            spawnGlitch(data.count, data.mode);
+            nextStep(); // On enchaine direct
+
+        // 5. RETRAIT GLITCH
+        } else if (data.action === "remove_glitch") {
+            removeGlitch(data.percent);
+            nextStep();
+
+        // 6. CHANGEMENT FOND (ET SON)
+        } else if (data.action === "background_change") {
+            // Visuel
+            document.body.style.backgroundImage = `url('${data.url}')`;
+            removeGlitch(1); // On vire tout le reste des glitchs
+            
+            // Son
+            audioFear.pause();
+            audioPeace.play().catch(()=>{});
+            
+            setTimeout(nextStep, 1200); // Petite pause pour admirer le ciel
+        }
+    }
+
+    // --- Fin de séquence ---
+    function initiateFinalSequence() {
+        const black = document.getElementById("fade-black");
+        black.style.opacity = 1;
+        
+        // Arrêt des sons
+        audioPeace.pause();
+        audioFear.pause();
+        
+        setTimeout(() => {
+            const endBtn = document.getElementById("end-button");
+            document.body.style.backgroundColor = "black";
+            document.body.style.backgroundImage = "none";
+            black.style.display = "none";
+            endBtn.style.display = "block";
+            setTimeout(() => endBtn.style.opacity = 1, 50);
+        }, 1500);
+    }
+
+    // --- Démarrage ---
+    const overlay = document.getElementById("intro-overlay-zone2");
+    overlay.onclick = () => {
+        overlay.style.display = "none";
+        audioFear.play().catch(()=>{});
+        nextStep();
     };
 
-    function end() {
-        clearInterval(interval);
-        span.classList.remove("cursor-active");
-        if (!isLongSound) stopSound(sound);
-        isTyping = false;
-        box.onclick = next; 
-    }
-}
-
-
-/* ---------------------- SCENE IMAGES & GESTION DU FLUX ---------------------- */
-
-function hideAllImages() {
-    allImages.forEach(img => img.style.display = "none");
-    currentImageShown = null;
-}
-
-function hideImageAndContinue(e) {
-    if (currentImageShown) {
-        const isLastImage = currentImageShown.id === LAST_IMAGE_ID; 
-        
-        hideAllImages();
-        document.body.removeEventListener('click', hideImageAndContinue, true);
-        e.stopPropagation(); 
-
-        if (isLastImage) {
-            initiateFinalSequence(); 
-        } else {
-            next(); 
-        }
-    }
-}
-
-function showImage(id) {
-    dBox.style.display = "none";
-    tBox.style.display = "none";
-    hideAllImages();
-    
-    const imgElement = document.getElementById(id);
-    imgElement.style.display = "block";
-    currentImageShown = imgElement;
-
-    document.body.addEventListener('click', hideImageAndContinue, {once: true, capture: true}); 
-}
-
-function changeBackground(url) {
-    // Changement visuel
-    document.body.style.backgroundImage = `url('${url}')`;
-    
-    // Changement Audio (Transition brusque voulue)
-    audioFear.pause();
-    audioPeace.play().catch(e => console.log("Erreur lecture audio:", e));
-
-    setTimeout(next, 1200); 
-}
-
-/* * spawnGlitch amélioré :
- * count : nombre de glitchs
- * mode : 'light' (petits, épars) ou 'heavy' (gros, envahissants)
- */
-function spawnGlitch(count, mode = 'light') {
-    for (let i = 0; i < count; i++) {
-        const g = document.createElement("img");
-        g.src = "https://i.imgur.com/UsrQHo8.gif";
-        g.className = "glitch-gif";
-        
-        // Position aléatoire
-        g.style.top = Math.random() * 90 + "vh";
-        g.style.left = Math.random() * 90 + "vw";
-        
-        // Taille selon le mode
-        if (mode === 'heavy') {
-            // Gros glitchs (entre 150px et 350px)
-            const size = Math.floor(Math.random() * 200) + 150;
-            g.style.width = size + "px";
-            // Z-index variable pour effet de superposition
-            g.style.zIndex = Math.floor(Math.random() * 50) + 1500;
-        } else {
-            // Petits glitchs (entre 50px et 120px)
-            const size = Math.floor(Math.random() * 70) + 50;
-            g.style.width = size + "px";
-        }
-
-        document.body.appendChild(g);
-    }
-    next(); 
-}
-
-function removeGlitch(percent) {
-    const gifs = [...document.querySelectorAll(".glitch-gif")];
-    const count = Math.floor(gifs.length * percent);
-    for (let i = 0; i < count; i++) {
-        const indexToRemove = gifs.length - 1 - i;
-        if(indexToRemove >= 0) gifs[indexToRemove].remove();
-    }
-}
-
-function runActionsAndContinue(actions, delay=10) {
-    actions.forEach(action => action());
-    setTimeout(next, delay);
-}
-
-
-/* ---------------------- SEQUENCE ---------------------- */
-
-const seq = [
-    ()=>showThought("Oula, c'est, particulier disons"),
-    ()=>showDialogue("Alice fut abasourdie, elle qui pensais être tiré d'affaire était en fait sur le point de réellement sombrer"),
-    ()=>showThought("Ah bah t'es de retour toi !"),
-    ()=>showThought("Et encourageant en plus !"),
-    ()=>showDialogue("Alice avais beau se cacher sous sous sarcasme, elle était terrorisé"),
-    ()=>spawnGlitch(12, 'light'), // Glitch légers
-    ()=>showDialogue("Et elle avais raison d'avoir aussi peur, car elle savais très bien qu'un jour ça finirais par se produite"),
-    ()=>showThought("Euh, quoi ?"),
-    ()=>showDialogue("Guilian t'abandonne Alice."),
-    ()=>showDialogue("Ta vie est fini, abandonne, arrête d'essayer d'être heureuse, c'est vain."),
-    ()=>showThought("Oui, je sais."),
-    ()=>spawnGlitch(40, 'heavy'), // Glitch LOURDS qui recouvrent
-    ()=>showThought("Je commence à me sentir mal là, arrête."),
-    ()=>showDialogue("Alice savais que je ne fessai que dire la vérité mais continuais de nier"),
-    ()=>showThought("Non par pitié, je t'en supplie, ARRÊTE."),
-    ()=>showImage("img1"),
-    ()=>showThought("Quoi ? T'es pas censé m'avoir abandonné toi ?"),
-    ()=>showThought("Arrête de faire semblant de m'aimer, je sais que je ne te mérite pas."),
-    ()=>showImage("img2"),
-    ()=>showImage("img3"),
-    ()=>showThought("Je me déteste"),
-    ()=>showImage("img4"),
-    ()=>runActionsAndContinue([()=>removeGlitch(0.4)]), 
-    ()=>showThought("Belle formulation j'avoue, t'es doué."),
-    ()=>showThought("Mais ça ne changera pas le fait que je suis qu'une merde."),
-    ()=>showImage("img5"), 
-    ()=>showThought("Merci beaucoup, je sais pas ce que je ferais sans toi"), 
-    ()=>runActionsAndContinue([()=>removeGlitch(1), ()=>changeBackground('https://c.tenor.com/ZL7fgNaWWXMAAAAd/tenor.gif')]),
-    ()=>showImage("img6"), 
-    // FIN
-];
-
-let index = 0;
-
-function next() {
-    if (index < seq.length && !isTyping && !currentImageShown) {
-        seq[index++]();
-    }
-}
-
-/* ---------------------- FIN D'URGENCE (STATIQUE) ---------------------- */
-
-function initiateFinalSequence() {
-    document.body.removeEventListener('click', next);
-    dBox.onclick = null;
-    tBox.onclick = null;
-    
-    stopSound(typeSound);
-    stopSound(typeSoundThought);
-    
-    dBox.style.display = "none";
-    tBox.style.display = "none";
-    
-    const black = document.getElementById("fade-black");
-    black.style.opacity = 1;
-    
-    setTimeout(showEndButton, 1500); 
-}
-
-function showEndButton() {
-    const black = document.getElementById("fade-black");
-    const endButton = document.getElementById("end-button");
-    
-    black.style.display = "none";
-    document.body.style.backgroundColor = "black";
-    document.body.style.backgroundImage = "none";
-
-    endButton.style.display = "block";
-    
-    setTimeout(() => {
-        endButton.style.opacity = 1; 
-    }, 50); 
-}
-
-// Lancement initial
-document.getElementById("intro-overlay-zone2").onclick = () => {
-    document.getElementById("intro-overlay-zone2").style.display = "none";
-    
-    // Lancement de l'audio peur
-    audioFear.play().catch(e => console.log("Erreur audio fear:", e));
-
-    document.body.addEventListener('click', next); 
-    next(); 
-};
 </script>
 </body>
 </html>
