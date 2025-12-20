@@ -128,7 +128,11 @@ html, body {
 </head>
 <body>
 
-<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=0"></audio>
+<audio id="puzzle-music" loop autoplay>
+    <source src="https://www.dropbox.com/scl/fi/1qpotqkqki841p7k5hftb/Gravity-Falls-Dreamscaperers-Outro-Real-Loop.mp3?dl=1" type="audio/mpeg">
+</audio>
+
+<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=1"></audio>
 
 <div id="back-btn" onclick="history.back()">⬅</div>
 
@@ -219,6 +223,12 @@ function showDialogue(text, callback = null) {
 }
 
 window.onload = () => {
+    // Lancer la musique au chargement
+    const music = document.getElementById('puzzle-music');
+    music.play().catch(() => {
+        console.log("Lecture auto bloquée par le navigateur, le son s'activera au premier clic.");
+    });
+
     showDialogue(dialogs.intro[0], () => {
         setTimeout(() => {
             showDialogue(dialogs.intro[1]);
