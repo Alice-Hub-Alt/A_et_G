@@ -106,6 +106,10 @@ html, body{
 
 <body>
 
+<audio id="room-music" loop autoplay>
+    <source src="https://www.dropbox.com/scl/fi/xg18qn93hdnmlptnamjv1/Professor-Layton-and-the-Eternal-Diva-OST-3-Puzzles-Number-001-Puzzles-3.mp3?dl=1" type="audio/mpeg">
+</audio>
+
 <div id="dialogue-box"><div id="dialogue-text"></div></div>
 <div id="back-btn" onclick="location.href='zone2_1.html'">⬅</div>
 
@@ -118,9 +122,10 @@ html, body{
   <div id="next-arrow">➡</div>
 </div>
 
-<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=0"></audio>
+<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=1"></audio>
 
 <script>
+const roomMusic = document.getElementById("room-music");
 const dialogueBox = document.getElementById("dialogue-box");
 const dialogueText = document.getElementById("dialogue-text");
 const typeSound = document.getElementById("type-sound");
@@ -176,6 +181,10 @@ dialogueBox.addEventListener("click", ()=>{
 });
 
 window.onload = ()=>{
+  // Lancement de la musique
+  roomMusic.play().catch(() => {
+    console.log("Lecture auto bloquée, elle démarrera au premier clic.");
+  });
   typeWriter("Oh, c'est assez appaisant ici !");
 }
 
