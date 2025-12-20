@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zone 1.2</title>
+    <title>Zone 1.22</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
@@ -112,8 +112,8 @@
     <audio id="zone-audio" loop>
         <source src="https://www.dropbox.com/scl/fi/02fiahycufeo1h9xa719l/Code-Lyoko-Romantic-MomentMomento-Romantico.mp3?dl=1" type="audio/mpeg">
     </audio>
-    <audio id="type-sound" preload="auto" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?dl=1"></audio>
-    <audio id="type-sound-thought" preload="auto" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?dl=1"></audio>
+    <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?dl=1"></audio>
+    <audio id="type-sound-thought" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?dl=1"></audio>
 
     <div id="intro-overlay-zone2">
         Quelques mois plus tard... <br><br>
@@ -178,7 +178,7 @@
         const typeSound = document.getElementById('type-sound');
         const typeSoundThought = document.getElementById('type-sound-thought');
 
-        // CORRECTION: Volume augmenté à 1.0 comme dans la Zone 3
+        // REGLAGE VOLUME (Comme en Zone 3)
         typeSound.volume = 1.0;
         typeSoundThought.volume = 1.0;
 
@@ -199,14 +199,26 @@
         endButton.style.display = "none";
         document.body.appendChild(endButton);
 
+        // --- FONCTION UTILITAIRE STOP (Comme en Zone 3) ---
+        function stopSound(soundEl) {
+            if(soundEl) {
+                soundEl.pause();
+                soundEl.currentTime = 0;
+            }
+        }
+
         function skipText(e){
             if(isTyping){
+                // Arrêt immédiat du son au skip (Logique Zone 3)
+                stopSound(typeSound);
+                stopSound(typeSoundThought);
+                
                 skipRequested = true;
                 e.stopPropagation();
             }
         }
 
-        // --- FONCTION TYPEWRITER CORRIGÉE ---
+        // --- TYPEWRITER (LOGIQUE ZONE 3 ADAPTÉE) ---
         function typeWriter(text, targetElement, isThought, callback){
             if(typingInterval) clearInterval(typingInterval);
             skipRequested = false;
@@ -216,11 +228,10 @@
 
             let soundEl = isThought ? typeSoundThought : typeSound;
             
-            // CORRECTION: On force le mode boucle (loop) au début
+            // DEMARRAGE SON (Start once)
             if(soundEl){ 
                 soundEl.currentTime = 0; 
-                soundEl.loop = true; // IMPORTANT : Le son boucle tant qu'on écrit
-                soundEl.play().catch(e => console.log("Erreur audio:", e)); 
+                soundEl.play().catch(()=>{}); 
             }
 
             let i=0;
@@ -241,12 +252,8 @@
                 clearInterval(typingInterval);
                 targetElement.classList.remove('cursor-active');
                 
-                // CORRECTION: On arrête le son proprement et on enlève la boucle
-                if(soundEl){ 
-                    soundEl.pause(); 
-                    soundEl.currentTime = 0; 
-                    soundEl.loop = false;
-                }
+                // ARRET SON (Stop at end)
+                stopSound(soundEl);
                 
                 isTyping=false;
                 if(callback) callback();
