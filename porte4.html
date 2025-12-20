@@ -119,7 +119,11 @@ canvas {
 </head>
 <body>
 
-<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=0"></audio>
+<audio id="puzzle-music" loop autoplay>
+    <source src="https://www.dropbox.com/scl/fi/3gooqam9jp5ro0hyb57dt/Sounds-of-Hyrule-2-Hyrule-Field-night-from-Breath-of-the-Wild.mp3?dl=1" type="audio/mpeg">
+</audio>
+
+<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=1"></audio>
 
 <div id="back-btn" onclick="location.href='zone2_1.html'">⬅</div>
 
@@ -139,6 +143,7 @@ canvas {
 <div id="dialogue-box"></div>
 
 <script>
+const music = document.getElementById("puzzle-music");
 /* =========================================
    1. GESTION DES DIALOGUES
    ========================================= */
@@ -166,7 +171,7 @@ function showDialogue(text, callback = null) {
     let currentText = "";
     
     const skipHandler = (e) => {
-        e.stopPropation();
+        e.stopPropagation();
         clearInterval(typeInterval);
         dialogueBox.innerHTML = text; 
         finish();
@@ -194,6 +199,11 @@ function showDialogue(text, callback = null) {
 }
 
 window.onload = () => {
+    // Lancement de la musique
+    music.play().catch(() => {
+        console.log("Lecture auto bloquée par le navigateur.");
+    });
+
     initPuzzle();
     showDialogue(dialogs.intro[0], () => {
         setTimeout(() => {
@@ -211,7 +221,6 @@ const COLS = 10;
 const SPACING = 40; 
 const OFFSET = 20;  
 
-// Uniquement les points actifs nécessaires pour la rune
 const POINTS_IDS = [5, 23, 27, 35, 43, 45, 48, 53, 55, 67, 73, 85];
 
 const SOLUTION = [
@@ -249,7 +258,6 @@ function createPointElement(id) {
 }
 
 function initPuzzle() {
-    // On ne crée QUE les points actifs
     POINTS_IDS.forEach(id => createPointElement(id));
 }
 
