@@ -60,14 +60,14 @@ html, body{
     position: fixed;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 720px; /* Largeur pour contenir les deux boîtes + l'espacement */
+    width: 720px;
     z-index: 100;
 }
 
 #titles-wrapper {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 5px; /* Espacement entre le titre et la boîte */
+    margin-bottom: 5px;
     width: 100%;
 }
 
@@ -76,7 +76,7 @@ html, body{
     font-size: 0.9em;
     text-shadow: 2px 2px 0px black;
     text-align: center;
-    width: 350px; /* Aligné avec la largeur des boîtes d'inventaire */
+    width: 350px;
 }
 
 #dnd-container {
@@ -119,7 +119,7 @@ html, body{
     border: 1px solid rgba(255, 255, 255, 0.5); 
 }
 
-/* L'image elle-même pour respecter les proportions (correction de la déformation) */
+/* L'image elle-même */
 .draggable-item img {
     max-width: 100%; 
     max-height: 100%; 
@@ -158,7 +158,7 @@ html, body{
     transform: translate(-50%, -50%);
     z-index: 5000;
     display: none;
-    border: none; 
+    border: none; 
     box-shadow: none;
 }
 #win-img {
@@ -172,8 +172,12 @@ html, body{
 
 <body>
 
+<audio id="puzzle-music" loop autoplay>
+    <source src="https://www.dropbox.com/scl/fi/th4orqwip07kmesxls2gf/Lost-Forest-High-Quality-Version-Professor-Layton-and-the-Diabolical-Box.mp3?dl=1" type="audio/mpeg">
+</audio>
+
 <div id="back-btn" onclick="location.href='zone2_1.html'">⬅</div>
-<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=0"></audio>
+<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=1"></audio>
 
 <div id="main-puzzle-wrapper">
     
@@ -203,8 +207,7 @@ html, body{
 <div id="dialogue-box"><div id="dialogue-text"></div></div>
 
 <script>
-// --- CONFIGURATION DU TYPEWRITER (Inchangée) ---
-
+const music = document.getElementById("puzzle-music");
 const dialogueBox = document.getElementById("dialogue-box");
 const dialogueText = document.getElementById("dialogue-text");
 const typeSound = document.getElementById("type-sound");
@@ -276,14 +279,16 @@ function endIntroSequence(){
     dialogueBox.removeEventListener('click', endIntroSequence); 
 }
 
-// Lancement de l'intro au chargement
 window.onload = ()=>{
+    music.play().catch(() => {
+        console.log("Lecture auto bloquée, elle démarrera au premier clic.");
+    });
     setupInventory();
     typeWriter(introDialogues[0], introSequenceStep2);
 }
 
 
-// --- LOGIQUE DU PUZZLE D&D (Inchangée) ---
+// --- LOGIQUE DU PUZZLE D&D ---
 
 const itemSource = document.getElementById('item-source');
 const inventoryTarget = document.getElementById('inventory-target');
@@ -308,13 +313,11 @@ const parasiteItems = [
     { id: 'tyrannie', name: 'Autoritaire', src: 'https://i.imgur.com/fc4QXTq.png', type: 'parasite' }
 ];
 
-// Reconstitution de l'ordre d'affichage désiré
 function getShuffledItems() {
     let allItems = [];
     let coreIndex = 0;
     let parasiteIndex = 0;
 
-    // Schéma : Vrais (x2), Faux, Vrais, Faux, Vrais (x2), Faux, Vrais, Faux, Vrais (x2)
     const orderPattern = [
         { type: 'core', count: 2 },
         { type: 'parasite', count: 1 },
@@ -365,7 +368,6 @@ function setupInventory() {
     addDragListeners();
 }
 
-// Les fonctions de Drag & Drop (inchangées)
 function addDragListeners() {
     document.querySelectorAll('.draggable-item').forEach(item => {
         item.addEventListener('dragstart', handleDragStart);
@@ -419,8 +421,6 @@ function handleDrop(e) {
 }
 
 
-// --- VALIDATION DU PUZZLE SÉLECTIF (Inchangée) ---
-
 btnValidate.addEventListener('click', ()=>{
     
     const itemsInInventory = inventoryTarget.querySelectorAll('.draggable-item');
@@ -436,19 +436,16 @@ btnValidate.addEventListener('click', ()=>{
         }
     });
 
-    const totalCoreItems = coreItems.length; // 8
+    const totalCoreItems = coreItems.length; 
     
-    // Condition de Victoire : 8 "core" et 0 "parasite" dans la cible
     const victory = (coreItemsCount === totalCoreItems) && (parasiteItemsCount === 0);
 
     if (victory) {
-        // VICTOIRE
         document.getElementById('main-puzzle-wrapper').style.display = "none";
         btnValidate.style.display = "none";
         winContainer.style.display = "block"; 
         typeWriter(winDialogue, closeDialogue);
     } else {
-        // ECHEC
         typeWriter(failDialogue, closeDialogue); 
     }
 });
