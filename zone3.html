@@ -9,7 +9,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 body {
-    /* MODIFICATION 1: Correction du fond pour qu'il remplisse bien l'écran */
     background-image: url('https://neocardmaker.com/uploads/monthly_2019_10/1502293590_Spooky2.gif.aa0118140c56d49b8ecc4294d9e4bd34.gif');
     background-size: cover;
     background-repeat: no-repeat;
@@ -35,6 +34,8 @@ body {
     z-index: 9999;
     font-size: 1.5em;
     cursor: pointer;
+    text-align: center;
+    padding: 20px;
 }
 
 /* BOITES DE TEXTE */
@@ -79,10 +80,9 @@ body {
 /* GLITCH GIFS (derrière tout sauf le fond) */
 .glitch-gif {
     position: absolute;
-    width: 180px;
-    height: auto;
     z-index: 1500;
     pointer-events: none;
+    opacity: 0.8;
 }
 
 /* IMAGES SCENE (devant gif, derrière texte) */
@@ -95,6 +95,7 @@ body {
     display: none;
     z-index: 2500;
     border: 2px solid white; 
+    box-shadow: 0 0 15px rgba(0,0,0,0.8);
 }
 
 /* FONDU FINAL */
@@ -132,17 +133,25 @@ body {
 
 <body>
 
-<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?rlkey=q1hljzkfdh6b4qjj89yut92oy&dl=1"></audio>
-<audio id="type-sound-thought" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=183ys2rx&dl=1"></audio>
+<audio id="audio-fear" loop>
+    <source src="https://www.dropbox.com/scl/fi/v745wspc750tckh9kkjux/AMBIANCE-SONORE-QUI-FAIT-PEUR-pluie-orage-vents-grincements-chuchotements-bizarres....mp3?dl=1" type="audio/mpeg">
+</audio>
+
+<audio id="audio-peace" loop>
+    <source src="https://www.dropbox.com/scl/fi/c12x3k9zwrnf1chexzeqq/Nightingale-singing-The-best-bird-song-in-the-world-Luscinia-megarhynchos.mp3?dl=1" type="audio/mpeg">
+</audio>
+
+<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?dl=1"></audio>
+<audio id="type-sound-thought" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?dl=1"></audio>
 
 <div id="fade-black"></div>
 
-<div id="intro-overlay-zone2">...</div>
+<div id="intro-overlay-zone2">Cliquer pour entrer dans le cauchemar...</div>
 
 <div id="dialogue-box"><span id="dialogue-text"></span></div>
 <div id="thought-box"><span id="thought-text"></span></div>
 
-<a id="end-button" href="fin.html">FIN</a> 
+<a id="end-button" href="fin.html">Se réveiller</a> 
 
 <img id="img1" class="scene-img" src="https://i.imgur.com/LHb0oXX.png">
 <img id="img2" class="scene-img" src="https://i.imgur.com/eUtYYag.png">
@@ -156,7 +165,7 @@ body {
 
 let isTyping = false, skipTyping = false;
 let currentImageShown = null;
-const LAST_IMAGE_ID = "img6"; // ID de la dernière image
+const LAST_IMAGE_ID = "img6"; 
 
 const dBox = document.getElementById("dialogue-box");
 const dText = document.getElementById("dialogue-text");
@@ -164,27 +173,29 @@ const tBox = document.getElementById("thought-box");
 const tText = document.getElementById("thought-text");
 const typeSound = document.getElementById("type-sound");
 const typeSoundThought = document.getElementById("type-sound-thought");
+const audioFear = document.getElementById("audio-fear");
+const audioPeace = document.getElementById("audio-peace");
 const allImages = document.querySelectorAll(".scene-img");
 
 typeSound.volume = 0.5;
 typeSoundThought.volume = 0.5;
+audioPeace.volume = 0.6; // Un peu plus doux pour les oiseaux
 
 /* ---------------------- UTILS ---------------------- */
 
 function stopSound(soundEl) {
     soundEl.pause();
     soundEl.currentTime = 0;
-    soundEl.loop = false; // Sécurité anti-boucle
+    soundEl.loop = false; 
 }
 
 function showDialogue(t) { typeWriter(t, dBox, dText, typeSound, true); }
 function showThought(t) { typeWriter(t, tBox, tText, typeSoundThought, false); }
 
 
-/* ---------------------- TEXT ENGINE (CORRIGÉ) ---------------------- */
+/* ---------------------- TEXT ENGINE ---------------------- */
 
 function typeWriter(text, box, span, sound, isLongSound = false) {
-    // Nettoyage des écouteurs précédents (IMPORTANT pour éviter les bugs)
     document.body.removeEventListener('click', hideImageAndContinue, true);
     dBox.onclick = null;
     tBox.onclick = null;
@@ -198,14 +209,11 @@ function typeWriter(text, box, span, sound, isLongSound = false) {
     skipTyping = false;
     span.classList.add("cursor-active");
     
-    // 🔊 GESTION DU SON 🔊
     if (isLongSound) {
-        // Pour le narrateur (son long), on joue une seule fois
         sound.currentTime = 0;
         sound.play().catch(()=>{});
     } else {
-        // Pour la pensée (son court), on le joue une seule fois au début de la frappe
-        if(sound.paused || sound.currentTime > 0) { // Si déjà joué/en pause, on relance
+        if(sound.paused || sound.currentTime > 0) { 
             sound.currentTime = 0;
             sound.play().catch(()=>{});
         }
@@ -218,14 +226,10 @@ function typeWriter(text, box, span, sound, isLongSound = false) {
             end();
         } else if (i < text.length) {
             span.innerHTML += text[i++];
-            
-            // Si c'est le narrateur (son long), on coupe le son quand il ne reste plus qu'une lettre.
             if (isLongSound && i >= text.length - 1) {
                 stopSound(sound);
             }
         } else end();
-        
-        // Arrêt immédiat du son court dès que la frappe est finie (dans end())
     }, 28);
 
     box.onclick = (e) => {
@@ -238,14 +242,9 @@ function typeWriter(text, box, span, sound, isLongSound = false) {
     function end() {
         clearInterval(interval);
         span.classList.remove("cursor-active");
-        
-        // On s'assure que le son est coupé, surtout la pensée pour éviter le décalage
-        if (!isLongSound) {
-            stopSound(sound);
-        }
-        
+        if (!isLongSound) stopSound(sound);
         isTyping = false;
-        box.onclick = next; // Rétablit l'appel à next()
+        box.onclick = next; 
     }
 }
 
@@ -257,20 +256,18 @@ function hideAllImages() {
     currentImageShown = null;
 }
 
-// Fonction appelée au clic pour masquer l'image
 function hideImageAndContinue(e) {
     if (currentImageShown) {
-        const isLastImage = currentImageShown.id === LAST_IMAGE_ID; // Vérifie si c'est la dernière image
+        const isLastImage = currentImageShown.id === LAST_IMAGE_ID; 
         
         hideAllImages();
         document.body.removeEventListener('click', hideImageAndContinue, true);
         e.stopPropagation(); 
 
         if (isLastImage) {
-            // PRINCIPE 1: IDENTIFIER LE DERNIER ÉVÉNEMENT FIABLE
-            initiateFinalSequence(); // Appel de la fonction de fin statique
+            initiateFinalSequence(); 
         } else {
-            next(); // Sinon, continue dans le moteur narratif normal
+            next(); 
         }
     }
 }
@@ -284,23 +281,47 @@ function showImage(id) {
     imgElement.style.display = "block";
     currentImageShown = imgElement;
 
-    // Le clic n'importe où sur l'écran fait disparaître l'image
     document.body.addEventListener('click', hideImageAndContinue, {once: true, capture: true}); 
 }
 
 function changeBackground(url) {
+    // Changement visuel
     document.body.style.backgroundImage = `url('${url}')`;
+    
+    // Changement Audio (Transition brusque voulue)
+    audioFear.pause();
+    audioPeace.play().catch(e => console.log("Erreur lecture audio:", e));
+
     setTimeout(next, 1200); 
 }
 
-function spawnGlitch(amount) {
-    amount *= 5;
-    for (let i = 0; i < amount; i++) {
+/* * spawnGlitch amélioré :
+ * count : nombre de glitchs
+ * mode : 'light' (petits, épars) ou 'heavy' (gros, envahissants)
+ */
+function spawnGlitch(count, mode = 'light') {
+    for (let i = 0; i < count; i++) {
         const g = document.createElement("img");
         g.src = "https://i.imgur.com/UsrQHo8.gif";
         g.className = "glitch-gif";
-        g.style.top = Math.random()*90+"vh";
-        g.style.left = Math.random()*90+"vw";
+        
+        // Position aléatoire
+        g.style.top = Math.random() * 90 + "vh";
+        g.style.left = Math.random() * 90 + "vw";
+        
+        // Taille selon le mode
+        if (mode === 'heavy') {
+            // Gros glitchs (entre 150px et 350px)
+            const size = Math.floor(Math.random() * 200) + 150;
+            g.style.width = size + "px";
+            // Z-index variable pour effet de superposition
+            g.style.zIndex = Math.floor(Math.random() * 50) + 1500;
+        } else {
+            // Petits glitchs (entre 50px et 120px)
+            const size = Math.floor(Math.random() * 70) + 50;
+            g.style.width = size + "px";
+        }
+
         document.body.appendChild(g);
     }
     next(); 
@@ -329,13 +350,13 @@ const seq = [
     ()=>showThought("Ah bah t'es de retour toi !"),
     ()=>showThought("Et encourageant en plus !"),
     ()=>showDialogue("Alice avais beau se cacher sous sous sarcasme, elle était terrorisé"),
-    ()=>spawnGlitch(6),
+    ()=>spawnGlitch(12, 'light'), // Glitch légers
     ()=>showDialogue("Et elle avais raison d'avoir aussi peur, car elle savais très bien qu'un jour ça finirais par se produite"),
     ()=>showThought("Euh, quoi ?"),
     ()=>showDialogue("Guilian t'abandonne Alice."),
     ()=>showDialogue("Ta vie est fini, abandonne, arrête d'essayer d'être heureuse, c'est vain."),
     ()=>showThought("Oui, je sais."),
-    ()=>spawnGlitch(10),
+    ()=>spawnGlitch(40, 'heavy'), // Glitch LOURDS qui recouvrent
     ()=>showThought("Je commence à me sentir mal là, arrête."),
     ()=>showDialogue("Alice savais que je ne fessai que dire la vérité mais continuais de nier"),
     ()=>showThought("Non par pitié, je t'en supplie, ARRÊTE."),
@@ -353,13 +374,12 @@ const seq = [
     ()=>showThought("Merci beaucoup, je sais pas ce que je ferais sans toi"), 
     ()=>runActionsAndContinue([()=>removeGlitch(1), ()=>changeBackground('https://c.tenor.com/ZL7fgNaWWXMAAAAd/tenor.gif')]),
     ()=>showImage("img6"), 
-    // FIN DU SYSTÈME NARRATIF. Après le clic sur img6, on sort du flux 'next()'.
+    // FIN
 ];
 
 let index = 0;
 
 function next() {
-    // Le moteur narratif est mort, on ne le consulte plus (PRINCIPE 2)
     if (index < seq.length && !isTyping && !currentImageShown) {
         seq[index++]();
     }
@@ -368,24 +388,19 @@ function next() {
 /* ---------------------- FIN D'URGENCE (STATIQUE) ---------------------- */
 
 function initiateFinalSequence() {
-    // PRINCIPE 3: NETTOYER TOUS LES ÉCOUTEURS GLOBAUX
     document.body.removeEventListener('click', next);
     dBox.onclick = null;
     tBox.onclick = null;
     
-    // S'assurer qu'aucun son ne traîne
     stopSound(typeSound);
     stopSound(typeSoundThought);
     
-    // Sortie visuelle du moteur
     dBox.style.display = "none";
     tBox.style.display = "none";
     
-    // Démarrage du fondu
     const black = document.getElementById("fade-black");
     black.style.opacity = 1;
     
-    // Après le fondu, on affiche le bouton (état terminal statique)
     setTimeout(showEndButton, 1500); 
 }
 
@@ -393,29 +408,24 @@ function showEndButton() {
     const black = document.getElementById("fade-black");
     const endButton = document.getElementById("end-button");
     
-    // PRINCIPE 4: Affichage du bouton comme un élément hors système
-
-    // Assurer que le fond est noir uni (nettoyage visuel total)
     black.style.display = "none";
     document.body.style.backgroundColor = "black";
     document.body.style.backgroundImage = "none";
 
-    // Affichage du bouton
     endButton.style.display = "block";
     
-    // On le rend opaque (avec la transition) pour l'effet d'apparition
     setTimeout(() => {
         endButton.style.opacity = 1; 
     }, 50); 
-
-    // PRINCIPE 5: ZÉRO logique JS sur le bouton (il est déjà un lien statique)
 }
 
-
-// Lancement initial du moteur
+// Lancement initial
 document.getElementById("intro-overlay-zone2").onclick = () => {
     document.getElementById("intro-overlay-zone2").style.display = "none";
-    // Écouteur global pour avancer les étapes sans boîte de dialogue/image
+    
+    // Lancement de l'audio peur
+    audioFear.play().catch(e => console.log("Erreur audio fear:", e));
+
     document.body.addEventListener('click', next); 
     next(); 
 };
