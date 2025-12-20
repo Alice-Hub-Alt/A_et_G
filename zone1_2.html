@@ -3,280 +3,332 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zone 1.2 : Réalité Altérée</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+    <title>Zone 1.2</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            background-image: url('https://c.tenor.com/wIa91mot0tAAAAAd/tenor.gif');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+            font-family: 'Press Start 2P', monospace;
+            overflow: hidden;
+            background-color: rgba(0, 0, 0, 0.4); 
+            background-blend-mode: darken;
+        }
 
-body {
-    background-image: url('https://i.imgur.com/vHAs84n.gif');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center; 
-    background-attachment: fixed;
-    margin: 0;
-    padding: 0;
-    font-family: 'Press Start 2P', monospace;
-    overflow: hidden;
-    color: white;
-    transition: background-image 1.5s ease-in-out;
-}
+        #intro-overlay-zone2 {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: black; 
+            display: flex; 
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            cursor: pointer;
+            font-size: 1.5em;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.3);
+            text-align: center;
+            padding: 20px;
+        }
 
-/* INTRO OVERLAY */
-#intro-overlay {
-    position: fixed;
-    inset: 0;
-    background: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    font-size: 1.2em;
-    cursor: pointer;
-    text-align: center;
-    padding: 20px;
-}
+        #dialogue-box, #thought-box {
+            width: 90%;
+            box-sizing: border-box;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            padding: 20px;
+            display: none;
+        }
 
-/* BOITES DE TEXTE */
-#dialogue-box, #thought-box {
-    width: 90%;
-    position: fixed;
-    left: 50%;
-    bottom: 15px;
-    transform: translateX(-50%);
-    padding: 20px;
-    display: none;
-    z-index: 3000;
-    box-sizing: border-box;
-    cursor: pointer;
-}
+        #dialogue-box {
+            height: 20vh;
+            background-color: rgba(0,0,0,0.85);
+            border: 3px solid white;
+        }
 
-#dialogue-box {
-    background: rgba(0,0,0,0.85);
-    border: 3px solid white;
-    height: 22vh;
-}
+        #dialogue-text {
+            font-size: 0.8em;
+            line-height: 1.5;
+            white-space: normal;
+            overflow: hidden;
+            height: 100%;
+        }
 
-#thought-box {
-    background: rgba(0,0,0,0.7);
-    border: 3px dashed #55ffff;
-    color: #aaffff;
-}
+        #thought-box {
+            background-color: rgba(0,0,0,0.7);
+            border: 2px dashed #ff00ff;
+            padding: 15px;
+            cursor: pointer;
+        }
 
-#dialogue-text, #thought-text {
-    font-size: 0.75em;
-    line-height: 1.6;
-}
+        #thought-text {
+            font-size: 0.7em;
+            color: #ff00ff;
+            line-height:1.5;
+        }
 
-/* CURSEUR */
-.cursor-active {
-    border-right: 0.15em solid currentColor;
-    animation: blink 0.5s infinite step-end;
-}
-@keyframes blink {50%{border-color:transparent;}}
+        .cursor-active {
+            border-right: 0.15em solid white;
+            animation: blink-cursor 0.5s step-end infinite;
+        }
+        @keyframes blink-cursor {
+            from, to { border-color: transparent; }
+            50% { border-color: white; }
+        }
 
-/* GLITCHES */
-.glitch-gif {
-    position: absolute;
-    mix-blend-mode: screen;
-    opacity: 0.8;
-    z-index: 1500;
-    pointer-events: none;
-}
-
-/* IMAGES SCENE */
-.scene-img {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    max-width: 65%;
-    display: none;
-    z-index: 2500;
-    border: 2px solid white;
-}
-
-/* FADE FINAL */
-#fade-out {
-    position: fixed;
-    inset: 0;
-    background: black;
-    opacity: 0;
-    transition: opacity 2s ease-in-out;
-    pointer-events: none;
-    z-index: 5000;
-}
-</style>
+        .conv-screen {
+            display: none;
+            position: absolute;
+            top:45%;
+            left:50%;
+            transform: translate(-50%, -50%);
+            max-width:70%;
+            height:auto;
+            border:3px solid white;
+            opacity:0;
+            transition: opacity 1s ease-in-out;
+            z-index:20;
+            cursor:pointer;
+        }
+    </style>
 </head>
 
 <body>
+    <audio id="zone-audio" loop>
+        <source src="https://www.dropbox.com/scl/fi/02fiahycufeo1h9xa719l/Code-Lyoko-Romantic-MomentMomento-Romantico.mp3?dl=1" type="audio/mpeg">
+    </audio>
+    <audio id="type-sound" preload="auto" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?dl=1"></audio>
+    <audio id="type-sound-thought" preload="auto" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?dl=1"></audio>
 
-<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?dl=1"></audio>
-<audio id="type-sound-thought" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?dl=1"></audio>
-<audio id="music-bg" loop src="https://www.dropbox.com/scl/fi/7m96u787u51680m6v2394/Your-Love-Is-My-Drug-8bit-Slowed.mp3?dl=1"></audio>
+    <div id="intro-overlay-zone2">
+        Quelques mois plus tard... <br><br>
+    </div>
 
-<div id="fade-out"></div>
+    <div id="dialogue-box"><span id="dialogue-text"></span></div>
+    <div id="thought-box"><span id="thought-text"></span></div>
 
-<div id="intro-overlay">Le monde semble différent... <br><br> (Cliquer pour continuer)</div>
+    <img id="screen_a1" class="conv-screen" src="https://i.imgur.com/XA7ud3Z.png" alt="Screen 1">
+    <img id="screen_a2" class="conv-screen" src="https://i.imgur.com/AW3Nnom.png" alt="Screen 2">
+    <img id="screen_a3" class="conv-screen" src="https://i.imgur.com/aValYxk.png" alt="Screen 3">
+    <img id="screen_b1" class="conv-screen" src="https://i.imgur.com/4zgNYwT.png" alt="Screen Soucis">
+    <img id="screen_c1" class="conv-screen" src="https://i.imgur.com/3One5eE.png" alt="Screen Condition 1">
+    <img id="screen_c2" class="conv-screen" src="https://i.imgur.com/TU3SW7O.png" alt="Screen Condition 2">
+    <img id="screen_d1" class="conv-screen" src="https://i.imgur.com/QBa0Hkv.png" alt="Screen Passions 1">
+    <img id="screen_d2" class="conv-screen" src="https://i.imgur.com/DAcEnVA.png" alt="Screen Passions 2">
+    <img id="screen_d3" class="conv-screen" src="https://i.imgur.com/sjenGQe.png" alt="Screen Passions 3">
+    <img id="screen_e1" class="conv-screen" src="https://i.imgur.com/Ll5DcFY.png" alt="Screen Meilleur ami 1">
+    <img id="screen_e2" class="conv-screen" src="https://i.imgur.com/Ug7Zv5N.png" alt="Screen Meilleur ami 2">
+    <img id="screen_e3" class="conv-screen" src="https://i.imgur.com/4OMCAbt.png" alt="Screen Meilleur ami 3">
 
-<div id="dialogue-box"><span id="dialogue-text"></span></div>
-<div id="thought-box"><span id="thought-text"></span></div>
+    <script>
+        // --- Données de la séquence ---
+        const dialogueSequence = [
+            { text: "Mais au fil du temps, Alice compris.", type: "narrator", action: "dialogue" },
+            { text: "Ce n'était pas quelqu'un comme les autres, il avais quelque chose d'unique en lui.", type: "narrator", action: "dialogue" },
+            { image: "screen_a1", action: "show_image_click_to_continue" },
+            { image: "screen_a2", action: "show_image_click_to_continue" },
+            { image: "screen_a3", action: "show_image_click_to_continue" },
+            { text: "Il s'intéressais vraiment à elle.", type: "narrator", action: "dialogue" },
+            { text: "Et il se souciais d'elle.", type: "narrator", action: "dialogue" },
+            { image: "screen_b1", action: "show_image_click_to_continue" },
+            { text: "Et il acceptais même ses conditions d'amitié absolument invraisemblable (comme ne jamais se rencontrée, qu'elle ne révèle jamais sa voix, ne montre jamais son visage, ou d'autres trucs objectivement absurde).", type: "narrator", action: "dialogue" },
+            { text: "Je rêve ou le narrateur viens de me juger là ?", type: "thought", action: "show_thought" },
+            { image: "screen_c1", action: "show_image_click_to_continue" },
+            { image: "screen_c2", action: "show_image_click_to_continue" },
+            { text: "Petit à Petit, Alice cessa d'être renfermé sur elle même (enfin, en vrais si elle l'était toujours beaucoup, mais pour cette reclus de la société c'était déjà pas mal !)", type: "narrator", action: "dialogue" },
+            { text: "(Nan mais chat vas pas ?!!!)", type: "thought", action: "show_thought" },
+            { text: "Ils partagèrent les mêmes passions.", type: "narrator", action: "dialogue" },
+            { image: "screen_d1", action: "show_image_click_to_continue" },
+            { image: "screen_d2", action: "show_image_click_to_continue" },
+            { image: "screen_d3", action: "show_image_click_to_continue" },
+            { text: "Puis un beau jour, elle cessa d'être seule.", type: "narrator", action: "dialogue" },
+            { image: "screen_e1", action: "show_image_click_to_continue" },
+            { image: "screen_e2", action: "show_image_click_to_continue" },
+            { image: "screen_e3", action: "show_image_click_to_continue" },
+            { action: "show_end_button" }
+        ];
 
-<img id="img-park" class="scene-img" src="https://i.imgur.com/uF9lVpD.png">
-<img id="img-glitch-1" class="scene-img" src="https://i.imgur.com/6jR2T3H.png">
+        let currentSequenceIndex = 0;
+        let activeImageElement = null;
+        let typingInterval;
+        let isTyping = false;
+        let skipRequested = false;
 
-<script>
-let isTyping = false, skipTyping = false;
-let currentImageShown = null;
+        const dialogueBox = document.getElementById('dialogue-box');
+        const dialogueTextElement = document.getElementById('dialogue-text');
+        const thoughtBox = document.getElementById('thought-box');
+        const thoughtTextElement = document.getElementById('thought-text');
+        const overlay = document.getElementById('intro-overlay-zone2');
+        const zoneAudio = document.getElementById('zone-audio');
+        const typeSound = document.getElementById('type-sound');
+        const typeSoundThought = document.getElementById('type-sound-thought');
 
-const dBox = document.getElementById("dialogue-box");
-const dText = document.getElementById("dialogue-text");
-const tBox = document.getElementById("thought-box");
-const tText = document.getElementById("thought-text");
+        // CORRECTION: Volume augmenté à 1.0 comme dans la Zone 3
+        typeSound.volume = 1.0;
+        typeSoundThought.volume = 1.0;
 
-const typeSound = document.getElementById("type-sound");
-const typeSoundThought = document.getElementById("type-sound-thought");
-const musicBg = document.getElementById("music-bg");
-const allImages = document.querySelectorAll(".scene-img");
+        const endButton = document.createElement('button');
+        endButton.textContent = "Se sentir aimé";
+        endButton.style.padding = "15px 30px";
+        endButton.style.fontFamily = "'Press Start 2P', monospace";
+        endButton.style.fontSize = "0.9em";
+        endButton.style.backgroundColor = "#550000";
+        endButton.style.color = "white";
+        endButton.style.border = "3px solid #ff00ff";
+        endButton.style.cursor = "pointer";
+        endButton.style.position = "fixed";
+        endButton.style.top = "50%";
+        endButton.style.left = "50%";
+        endButton.style.transform = "translate(-50%, -50%)";
+        endButton.style.zIndex = "50";
+        endButton.style.display = "none";
+        document.body.appendChild(endButton);
 
-// Réglages volumes calqués sur ta Zone 3
-typeSound.volume = 1.0; 
-typeSoundThought.volume = 1.0;
-musicBg.volume = 0.6;
-
-function stopSound(soundEl) {
-    soundEl.pause();
-    soundEl.currentTime = 0;
-}
-
-function showDialogue(t) { typeWriter(t, dBox, dText, typeSound, true); }
-function showThought(t) { typeWriter(t, tBox, tText, typeSoundThought, false); }
-
-/* MOTEUR TEXTE (LOGIQUE ZONE 3) */
-function typeWriter(text, box, span, sound, isLongSound = false) {
-    document.body.removeEventListener('click', hideImageAndContinue, true);
-    dBox.onclick = null;
-    tBox.onclick = null;
-
-    span.innerHTML = "";
-    box.style.display = "block";
-    tBox.style.display = (box === dBox ? "none" : tBox.style.display);
-    dBox.style.display = (box === tBox ? "none" : dBox.style.display);
-
-    isTyping = true;
-    skipTyping = false;
-    span.classList.add("cursor-active");
-    
-    // Lancement audio stabilisé
-    if (isLongSound) {
-        sound.currentTime = 0;
-        sound.play().catch(()=>{});
-    } else {
-        if(sound.paused || sound.currentTime > 0) { 
-            sound.currentTime = 0;
-            sound.play().catch(()=>{});
-        }
-    }
-
-    let i = 0;
-    const interval = setInterval(() => {
-        if (skipTyping) {
-            span.innerHTML = text;
-            end();
-        } else if (i < text.length) {
-            span.innerHTML += text[i++];
-            // Arrêt auto pour les sons longs en fin de phrase
-            if (isLongSound && i >= text.length - 1) {
-                stopSound(sound);
+        function skipText(e){
+            if(isTyping){
+                skipRequested = true;
+                e.stopPropagation();
             }
-        } else end();
-    }, 30);
-
-    box.onclick = (e) => {
-        if (isTyping) {
-            skipTyping = true;
-            stopSound(sound);
-            e.stopPropagation(); 
         }
-    };
 
-    function end() {
-        clearInterval(interval);
-        span.classList.remove("cursor-active");
-        if (!isLongSound) {
-            stopSound(sound);
+        // --- FONCTION TYPEWRITER CORRIGÉE ---
+        function typeWriter(text, targetElement, isThought, callback){
+            if(typingInterval) clearInterval(typingInterval);
+            skipRequested = false;
+            isTyping = true;
+            targetElement.innerHTML = '';
+            targetElement.classList.add('cursor-active');
+
+            let soundEl = isThought ? typeSoundThought : typeSound;
+            
+            // CORRECTION: On force le mode boucle (loop) au début
+            if(soundEl){ 
+                soundEl.currentTime = 0; 
+                soundEl.loop = true; // IMPORTANT : Le son boucle tant qu'on écrit
+                soundEl.play().catch(e => console.log("Erreur audio:", e)); 
+            }
+
+            let i=0;
+            typingInterval = setInterval(()=>{
+                if(skipRequested){
+                    targetElement.innerHTML = text;
+                    finalizeTyping();
+                    return;
+                }
+                if(i<text.length){
+                    targetElement.innerHTML += text.charAt(i++);
+                } else {
+                    finalizeTyping();
+                }
+            }, 28);
+
+            function finalizeTyping(){
+                clearInterval(typingInterval);
+                targetElement.classList.remove('cursor-active');
+                
+                // CORRECTION: On arrête le son proprement et on enlève la boucle
+                if(soundEl){ 
+                    soundEl.pause(); 
+                    soundEl.currentTime = 0; 
+                    soundEl.loop = false;
+                }
+                
+                isTyping=false;
+                if(callback) callback();
+            }
         }
-        isTyping = false;
-        box.onclick = next; 
-    }
-}
 
-function hideAllImages() {
-    allImages.forEach(img => img.style.display = "none");
-    currentImageShown = null;
-}
+        function hideActiveImage(callback){
+            if(activeImageElement){
+                activeImageElement.style.opacity=0;
+                setTimeout(()=>{
+                    activeImageElement.style.display='none';
+                    activeImageElement=null;
+                    if(callback) callback();
+                },1000);
+            } else if(callback) callback();
+        }
 
-function hideImageAndContinue(e) {
-    if (currentImageShown) {
-        hideAllImages();
-        document.body.removeEventListener('click', hideImageAndContinue, true);
-        e.stopPropagation(); 
-        next(); 
-    }
-}
+        function showImageAndAwaitClick(imageId){
+            hideActiveImage(()=>{
+                const img=document.getElementById(imageId);
+                img.style.display='block';
+                activeImageElement=img;
+                setTimeout(()=>{
+                    img.style.opacity=1;
+                    img.addEventListener('click', advanceSequence, {once:true});
+                },50);
+            });
+        }
 
-function showImage(id) {
-    dBox.style.display = "none";
-    tBox.style.display = "none";
-    hideAllImages();
-    const imgElement = document.getElementById(id);
-    imgElement.style.display = "block";
-    currentImageShown = imgElement;
-    document.body.addEventListener('click', hideImageAndContinue, {once: true, capture: true}); 
-}
+        function showThought(text){
+            hideActiveImage(()=>{
+                dialogueBox.style.display='none';
+                thoughtBox.style.display='block';
+                thoughtBox.addEventListener('click', skipText,false);
+                typeWriter(text, thoughtTextElement, true, ()=>{
+                    thoughtBox.addEventListener('click', hideThoughtAndContinue, {once:true});
+                });
+            });
+        }
 
-function spawnGlitch(amount) {
-    for (let i = 0; i < amount; i++) {
-        const g = document.createElement("img");
-        g.src = "https://i.imgur.com/UsrQHo8.gif";
-        g.className = "glitch-gif";
-        g.style.top = Math.random() * 85 + "vh";
-        g.style.left = Math.random() * 85 + "vw";
-        g.style.width = (Math.random() * 200 + 150) + "px";
-        document.body.appendChild(g);
-    }
-    setTimeout(next, 500); 
-}
+        function hideThoughtAndContinue(){
+            if(isTyping) return;
+            thoughtBox.style.display='none';
+            advanceSequence();
+        }
 
-/* SÉQUENCE ZONE 1.2 */
-const seq = [
-    ()=>showThought("C'est bizarre... j'ai l'impression que le décor sature."),
-    ()=>showDialogue("Alice remarqua que les couleurs du parc devenaient anormalement vives, presque douloureuses."),
-    ()=>showImage("img-park"),
-    ()=>showThought("Guilian ? Tu vois ça toi aussi ?"),
-    ()=>spawnGlitch(8),
-    ()=>showDialogue("Mais Guilian ne répondait pas. Le silence s'installait, entrecoupé de bruits parasites."),
-    ()=>showThought("C'est pas drôle, arrête tes conneries..."),
-    ()=>showImage("img-glitch-1"),
-    ()=>showDialogue("Une distorsion brutale déchira l'horizon. Ce n'était plus un simple bug."),
-    ()=> {
-        document.getElementById("fade-out").style.opacity = 1;
-        setTimeout(() => { window.location.href = "zone3.html"; }, 2000);
-    }
-];
+        function advanceSequence(){
+            if(isTyping) return;
+            dialogueBox.style.display='none';
+            thoughtBox.style.display='none';
+            if(currentSequenceIndex>=dialogueSequence.length) return;
 
-let index = 0;
-function next() {
-    if (index < seq.length && !isTyping && !currentImageShown) {
-        seq[index++]();
-    }
-}
+            const evt=dialogueSequence[currentSequenceIndex++];
 
-document.getElementById("intro-overlay").onclick = () => {
-    document.getElementById("intro-overlay").style.display = "none";
-    musicBg.play().catch(()=>{});
-    document.body.addEventListener('click', next); 
-    next(); 
-};
-</script>
+            if(evt.action==="dialogue"){
+                hideActiveImage(()=>{
+                    dialogueBox.style.display='block';
+                    dialogueBox.addEventListener('click', skipText,false);
+                    typeWriter(evt.text, dialogueTextElement, false, ()=>{
+                        dialogueBox.addEventListener('click', advanceSequence, {once:true});
+                    });
+                });
+            } else if(evt.action==="show_thought"){
+                showThought(evt.text);
+            } else if(evt.action==="show_image_click_to_continue"){
+                showImageAndAwaitClick(evt.image);
+            } else if(evt.action==="show_end_button"){
+                hideActiveImage(()=>{
+                    endButton.style.display='block';
+                    endButton.addEventListener('click', ()=>{
+                        zoneAudio.pause();
+                        window.location.href='zone2.html';
+                    }, {once:true});
+                });
+            }
+        }
+
+        overlay.addEventListener('click', ()=>{
+            overlay.style.display='none';
+            zoneAudio.play().catch(()=>{});
+            advanceSequence();
+        }, {once:true});
+    </script>
 </body>
 </html>
