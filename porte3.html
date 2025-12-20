@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-<title>Porte 3 - Les Jauges Corrigées</title>
+<title>Porte 3 - L'Introspection</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -19,7 +19,6 @@ html, body{
 
 /* --- UI GLOBALE --- */
 
-/* Retour */
 #back-btn{
   position:fixed; top:14px; left:14px;
   font-size:32px; color:red;
@@ -27,14 +26,13 @@ html, body{
   text-shadow: 2px 2px 0px black;
 }
 
-/* Dialogue */
 #dialogue-box{
   position:fixed;
   left:50%; bottom:26px;
   transform:translateX(-50%);
   width:84%;
   min-height:14vh; max-height:28vh;
-  background:rgba(0,0,0,0.55);
+  background:rgba(0,0,0,0.8);
   border:3px solid #ff00ff;
   padding:18px;
   color:#ff66ff;
@@ -42,8 +40,10 @@ html, body{
   z-index:9000;
   text-shadow:0 0 6px rgba(255,0,255,0.2);
   overflow:auto;
+  cursor: pointer;
 }
 #dialogue-text{ font-size:0.86em; line-height:1.45; }
+
 .cursor-active{
   border-right:0.15em solid #ff66ff;
   animation:blink 0.5s steps(1) infinite;
@@ -90,11 +90,10 @@ html, body{
   text-shadow: 2px 2px 0px #000;
 }
 .percentage-display {
-    color: #FFFFFF; /* Couleur du dialogue pour la cohérence */
+    color: #FFFFFF;
     text-shadow: 2px 2px 0px #000;
 }
 
-/* Style des Sliders */
 input[type=range] {
   -webkit-appearance: none;
   width: 100%;
@@ -104,11 +103,10 @@ input[type=range] {
   cursor: pointer;
 }
 
-/* La barre (Track) */
 input[type=range]::-webkit-slider-runnable-track {
   width: 100%;
   height: 16px;
-  border: 2px solid black; /* Contour noir demandé */
+  border: 2px solid black;
   border-radius: 0px;
 }
 input[type=range]::-moz-range-track {
@@ -118,14 +116,13 @@ input[type=range]::-moz-range-track {
   border-radius: 0px;
 }
 
-/* Le curseur (Thumb) - On le fait ressortir un peu */
 input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
   height: 24px;
   width: 12px;
   background: white;
   border: 2px solid black;
-  margin-top: -6px; /* Pour centrer le thumb sur la track */
+  margin-top: -6px;
   box-shadow: 2px 2px 0px rgba(0,0,0,0.5);
 }
 input[type=range]::-moz-range-thumb {
@@ -136,23 +133,12 @@ input[type=range]::-moz-range-thumb {
   box-shadow: 2px 2px 0px rgba(0,0,0,0.5);
 }
 
-/* Couleurs spécifiques des jauges */
 #range-joie::-webkit-slider-runnable-track { background: #ffff00; }
-#range-joie::-moz-range-track { background: #ffff00; }
-
 #range-tristesse::-webkit-slider-runnable-track { background: #0000ff; }
-#range-tristesse::-moz-range-track { background: #0000ff; }
-
 #range-peur::-webkit-slider-runnable-track { background: #00ff00; }
-#range-peur::-moz-range-track { background: #00ff00; }
-
 #range-colere::-webkit-slider-runnable-track { background: #ff0000; }
-#range-colere::-moz-range-track { background: #ff0000; }
+#range-cynisme::-webkit-slider-runnable-track { background: #9900cc; }
 
-#range-cynisme::-webkit-slider-runnable-track { background: #9900cc; } /* Violet */
-#range-cynisme::-moz-range-track { background: #9900cc; }
-
-/* Bouton Valider */
 #validate-btn {
   margin-top: 15px;
   padding: 15px;
@@ -165,20 +151,14 @@ input[type=range]::-moz-range-thumb {
   font-size: 0.9em;
   transition: transform 0.1s;
 }
-#validate-btn:active {
-  transform: scale(0.95);
-}
+#validate-btn:active { transform: scale(0.95); }
 
-/* Image de victoire */
 #win-image-container {
   position: fixed;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
   z-index: 5000;
   display: none;
-  /* Suppression des bordures et ombres */
-  border: none; 
-  box-shadow: none;
 }
 #win-img {
   display: block;
@@ -191,8 +171,12 @@ input[type=range]::-moz-range-thumb {
 
 <body>
 
+<audio id="rain-music" loop autoplay>
+    <source src="https://www.dropbox.com/scl/fi/jok34th31rldmh68qzr9i/12-Hours-Relaxing-Sleep-Music-Meditation-Music-Stress-Relief-Music-Study-Music-Sounds-of-Rain.mp3?dl=1" type="audio/mpeg">
+</audio>
+
 <div id="back-btn" onclick="location.href='zone2_1.html'">⬅</div>
-<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=0"></audio>
+<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=1"></audio>
 
 <div id="puzzle-container">
   
@@ -247,7 +231,7 @@ input[type=range]::-moz-range-thumb {
 <div id="dialogue-box"><div id="dialogue-text"></div></div>
 
 <script>
-/* --- CONFIGURATION DU TYPEWRITER --- */
+const music = document.getElementById("rain-music");
 const dialogueBox = document.getElementById("dialogue-box");
 const dialogueText = document.getElementById("dialogue-text");
 const typeSound = document.getElementById("type-sound");
@@ -255,29 +239,21 @@ let typingInterval;
 let isTyping = false;
 let skipRequested = false;
 
-// Tableau des dialogues d'introduction (MIS À JOUR)
 const introDialogues = [
     "Tiens, on dirait un panneau de configuration... Est-ce que c'est censé représenté ma personnalité via les émotions ?",
     "C'est pas un peu simpliste ? Et puis pourquoi cynisme ?! C'est pas une émotion ça !"
 ];
 
-// Dialogues de victoire/échec mis à jour
 const winDialogue = "A ce point là ?!!! Nan mais c'est bon c'est abusé je suis plus heureuse que ça quand même c'est pas bien fait ce truc !";
 const failDialogue = "Ah nan clairement pas c'est n'importe quoi là ! Mais je me conais mal c'est pas ma faute aussi si j'ai pas de recul sur moi même !";
 
+function stopSound(){ try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){} }
 
-function stopSound(){
-  try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){}
-}
-
-// Nouvelle fonction pour fermer la boîte de dialogue
 function closeDialogue(){
     dialogueBox.style.display = "none";
-    // Important : On doit aussi enlever l'écouteur de clic qui a déclenché cette fermeture pour ne pas la laisser traîner
     dialogueBox.removeEventListener('click', closeDialogue); 
 }
 
-// Fonction TypeWriter mise à jour avec Callback
 function typeWriter(text, callback){
     if(typingInterval) clearInterval(typingInterval);
     skipRequested = false;
@@ -287,7 +263,6 @@ function typeWriter(text, callback){
         stopSound();
         dialogueText.classList.remove("cursor-active");
         isTyping = false;
-        // Si un callback est fourni, on l'ajoute comme écouteur pour le clic suivant.
         if(callback) dialogueBox.addEventListener('click', callback, { once:true });
     };
 
@@ -296,7 +271,6 @@ function typeWriter(text, callback){
     dialogueBox.style.display = "block";
     dialogueText.classList.add("cursor-active");
     
-    // Jouer le son
     try{ typeSound.play().catch(()=>{});}catch(e){}
     
     let i=0;
@@ -314,7 +288,6 @@ function typeWriter(text, callback){
     }, 28);
 }
 
-// Gestion du skip
 dialogueBox.addEventListener("click", (event)=>{
     if(isTyping){
         skipRequested = true;
@@ -323,38 +296,16 @@ dialogueBox.addEventListener("click", (event)=>{
     }
 });
 
-// Fonctions d'enchaînement des dialogues d'introduction
-function introSequenceStep2(){
-    // La fonction introSequenceStep2 est déjà le callback du clic
-    // Elle lance le deuxième dialogue et appelle endIntroSequence au prochain clic
-    typeWriter(introDialogues[1], endIntroSequence);
-}
-
-function endIntroSequence(){
-    // Une fois que la deuxième phrase est finie et qu'on clique, on ferme la boîte
-    dialogueBox.style.display = "none";
-    // Supprime l'écouteur d'événement final pour ne pas interférer avec le bouton de validation
-    dialogueBox.removeEventListener('click', endIntroSequence); 
-}
-
-
-/* --- LOGIQUE DU PUZZLE --- */
+function introSequenceStep2(){ typeWriter(introDialogues[1], endIntroSequence); }
+function endIntroSequence(){ dialogueBox.style.display = "none"; dialogueBox.removeEventListener('click', endIntroSequence); }
 
 const btnValidate = document.getElementById("validate-btn");
 const puzzleContainer = document.getElementById("puzzle-container");
 const winContainer = document.getElementById("win-image-container");
 
-// Cibles et marge d'erreur
-const targets = {
-  joie: 15,
-  tristesse: 20,
-  peur: 25,
-  colere: 10,
-  cynisme: 30
-};
+const targets = { joie: 15, tristesse: 20, peur: 25, colere: 10, cynisme: 30 };
 const margin = 5;
 
-// Elements des jauges et pourcentages
 const sliders = {
     joie: document.getElementById("range-joie"),
     tristesse: document.getElementById("range-tristesse"),
@@ -370,55 +321,39 @@ const displays = {
     cynisme: document.getElementById("perc-cynisme")
 };
 
-// Fonction pour mettre à jour l'affichage des pourcentages
-function updatePercentage(emotion) {
-    displays[emotion].textContent = sliders[emotion].value + "%";
-}
+function updatePercentage(emotion) { displays[emotion].textContent = sliders[emotion].value + "%"; }
 
-// Ajouter les écouteurs d'événements pour mettre à jour l'affichage en temps réel
 for (const emotion in sliders) {
     sliders[emotion].addEventListener("input", () => updatePercentage(emotion));
-    // Mettre à jour l'affichage initial
     updatePercentage(emotion); 
 }
 
-// Intro au chargement (Lancement de la première étape de la cinématique)
 window.onload = ()=>{
-    // Lance le premier dialogue et appelle introSequenceStep2 au clic suivant
+    music.play().catch(() => { console.log("Lecture auto bloquée."); });
     typeWriter(introDialogues[0], introSequenceStep2);
 }
 
 btnValidate.addEventListener("click", ()=>{
-  // Récupération des valeurs
   let valJoie = parseInt(sliders.joie.value);
   let valTristesse = parseInt(sliders.tristesse.value);
   let valPeur = parseInt(sliders.peur.value);
   let valColere = parseInt(sliders.colere.value);
   let valCynisme = parseInt(sliders.cynisme.value);
 
-  // Vérification avec la marge d'erreur
   const checkValue = (val, target) => (val >= target - margin && val <= target + margin);
 
-  let okJoie = checkValue(valJoie, targets.joie);
-  let okTristesse = checkValue(valTristesse, targets.tristesse);
-  let okPeur = checkValue(valPeur, targets.peur);
-  let okColere = checkValue(valColere, targets.colere);
-  let okCynisme = checkValue(valCynisme, targets.cynisme);
-
-  if(okJoie && okTristesse && okPeur && okColere && okCynisme) {
-    // VICTOIRE
-    puzzleContainer.style.display = "none"; // Cache les jauges
-    winContainer.style.display = "block"; // Affiche l'image
-    // typeWriter doit appeler closeDialogue au clic suivant
+  if(checkValue(valJoie, targets.joie) && 
+     checkValue(valTristesse, targets.tristesse) && 
+     checkValue(valPeur, targets.peur) && 
+     checkValue(valColere, targets.colere) && 
+     checkValue(valCynisme, targets.cynisme)) {
+    puzzleContainer.style.display = "none";
+    winContainer.style.display = "block";
     typeWriter(winDialogue, closeDialogue);
   } else {
-    // ECHEC
-    // typeWriter doit appeler closeDialogue au clic suivant
     typeWriter(failDialogue, closeDialogue);
   }
 });
-
 </script>
-
 </body>
 </html>
