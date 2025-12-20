@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zone 1.2 : Un Faisceau de Lumière</title>
+    <title>Zone 1.2</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
@@ -40,13 +40,14 @@
             font-size: 1.5em;
             text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.3);
             text-align: center;
+            padding: 20px;
         }
 
         #dialogue-box, #thought-box {
             width: 90%;
             box-sizing: border-box;
             position: fixed;
-            bottom: 0;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
@@ -93,7 +94,7 @@
         .conv-screen {
             display: none;
             position: absolute;
-            top:50%;
+            top:45%;
             left:50%;
             transform: translate(-50%, -50%);
             max-width:70%;
@@ -108,26 +109,22 @@
 </head>
 
 <body>
-    <!-- AUDIO -->
     <audio id="zone-audio" loop>
-        <source src="" type="audio/mpeg">
+        <source src="https://www.dropbox.com/scl/fi/02fiahycufeo1h9xa719l/Code-Lyoko-Romantic-MomentMomento-Romantico.mp3?dl=1" type="audio/mpeg">
     </audio>
-    <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?rlkey=q1hljzkfdh6b4qjj89yut92oy&st=8d2bqys3&dl=0"></audio>
-    <audio id="type-sound-thought" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=u3fz7wy8&dl=0"></audio>
+    <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?dl=1"></audio>
+    <audio id="type-sound-thought" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?dl=1"></audio>
 
-    <!-- OVERLAY -->
     <div id="intro-overlay-zone2">
         Quelques mois plus tard... <br><br> (Cliquer pour continuer)
     </div>
 
-    <!-- BOÎTES -->
     <div id="dialogue-box"><span id="dialogue-text"></span></div>
     <div id="thought-box"><span id="thought-text"></span></div>
 
-    <!-- SCREENS -->
-    <img id="screen_a1" class="conv-screen" src="https://i.imgur.com/XA7ud3Z.png" alt="Screen 1 (Evolution)">
-    <img id="screen_a2" class="conv-screen" src="https://i.imgur.com/AW3Nnom.png" alt="Screen 2 (Evolution)">
-    <img id="screen_a3" class="conv-screen" src="https://i.imgur.com/aValYxk.png" alt="Screen 3 (Evolution)">
+    <img id="screen_a1" class="conv-screen" src="https://i.imgur.com/XA7ud3Z.png" alt="Screen 1">
+    <img id="screen_a2" class="conv-screen" src="https://i.imgur.com/AW3Nnom.png" alt="Screen 2">
+    <img id="screen_a3" class="conv-screen" src="https://i.imgur.com/aValYxk.png" alt="Screen 3">
     <img id="screen_b1" class="conv-screen" src="https://i.imgur.com/4zgNYwT.png" alt="Screen Soucis">
     <img id="screen_c1" class="conv-screen" src="https://i.imgur.com/3One5eE.png" alt="Screen Condition 1">
     <img id="screen_c2" class="conv-screen" src="https://i.imgur.com/TU3SW7O.png" alt="Screen Condition 2">
@@ -163,7 +160,7 @@
             { image: "screen_e1", action: "show_image_click_to_continue" },
             { image: "screen_e2", action: "show_image_click_to_continue" },
             { image: "screen_e3", action: "show_image_click_to_continue" },
-            { action: "show_end_button" } // ici le bouton remplace complètement le texte final
+            { action: "show_end_button" }
         ];
 
         let currentSequenceIndex = 0;
@@ -184,16 +181,15 @@
         typeSound.volume = 0.5;
         typeSoundThought.volume = 0.5;
 
-        // --- Bouton final ---
         const endButton = document.createElement('button');
         endButton.textContent = "Se sentir aimé";
         endButton.style.padding = "15px 30px";
-        endButton.style.fontSize = "1.2em";
+        endButton.style.fontFamily = "'Press Start 2P', monospace";
+        endButton.style.fontSize = "0.9em";
         endButton.style.backgroundColor = "#550000";
         endButton.style.color = "white";
         endButton.style.border = "3px solid #ff00ff";
         endButton.style.cursor = "pointer";
-        endButton.style.textShadow = "1px 1px 2px black";
         endButton.style.position = "fixed";
         endButton.style.top = "50%";
         endButton.style.left = "50%";
@@ -304,8 +300,6 @@
                 showImageAndAwaitClick(evt.image);
             } else if(evt.action==="show_end_button"){
                 hideActiveImage(()=>{
-                    dialogueBox.style.display='none';
-                    thoughtBox.style.display='none';
                     endButton.style.display='block';
                     endButton.addEventListener('click', ()=>{
                         zoneAudio.pause();
