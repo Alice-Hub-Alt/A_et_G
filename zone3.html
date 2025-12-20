@@ -3,426 +3,439 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zone 3</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-        
-        body {
-            /* Fond de départ : Spooky */
-            background-image: url('https://neocardmaker.com/uploads/monthly_2019_10/1502293590_Spooky2.gif.aa0118140c56d49b8ecc4294d9e4bd34.gif');
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            background-position: center center;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            color: white;
-            font-family: 'Press Start 2P', monospace;
-            overflow: hidden;
-            background-color: black; 
-            transition: background-image 1s ease-in-out;
-        }
+    <title>Zone 3 : C'est la merde</title>
 
-        #intro-overlay-zone2 {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: black; 
-            display: flex; 
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            cursor: pointer;
-            font-size: 1.5em;
-            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.3);
-            text-align: center;
-            padding: 20px;
-        }
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-        #dialogue-box, #thought-box {
-            width: 90%;
-            box-sizing: border-box;
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 3000; /* Z-index très haut pour passer au dessus des glitchs */
-            padding: 20px;
-            display: none;
-        }
+body {
+    background-image: url('https://neocardmaker.com/uploads/monthly_2019_10/1502293590_Spooky2.gif.aa0118140c56d49b8ecc4294d9e4bd34.gif');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center; 
+    background-attachment: fixed;
+    margin: 0;
+    padding: 0;
+    font-family: 'Press Start 2P', monospace;
+    overflow: hidden;
+    color: white;
+    z-index: 1;
+    transition: background-image 1s ease-in-out;
+}
 
-        #dialogue-box {
-            height: 20vh;
-            background-color: rgba(0,0,0,0.85);
-            border: 3px solid white;
-            cursor: pointer;
-        }
+/* INTRO OVERLAY */
+#intro-overlay-zone2 {
+    position: fixed;
+    inset: 0;
+    background: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    font-size: 1.5em;
+    cursor: pointer;
+}
 
-        #dialogue-text {
-            font-size: 0.8em;
-            line-height: 1.5;
-            white-space: normal;
-            overflow: hidden;
-            height: 100%;
-        }
+/* BOITES DE TEXTE */
+#dialogue-box, #thought-box {
+    width: 90%;
+    position: fixed;
+    left: 50%;
+    bottom: 10px;
+    transform: translateX(-50%);
+    padding: 20px;
+    display: none;
+    z-index: 3000;
+    box-sizing: border-box;
+    cursor: pointer;
+}
 
-        #thought-box {
-            background-color: rgba(0,0,0,0.7);
-            border: 2px dashed #ff00ff;
-            padding: 15px;
-            cursor: pointer;
-        }
+#dialogue-box {
+    background: rgba(0,0,0,0.85);
+    border: 3px solid white;
+    height: 20vh;
+    color: white;
+}
 
-        #thought-text {
-            font-size: 0.7em;
-            color: #ff00ff;
-            line-height:1.5;
-        }
+#thought-box {
+    background: rgba(0,0,0,0.65);
+    border: 3px dashed #ff55ff;
+    color: #ff99ff;
+}
 
-        .cursor-active {
-            border-right: 0.15em solid white;
-            animation: blink-cursor 0.5s step-end infinite;
-        }
-        @keyframes blink-cursor {
-            from, to { border-color: transparent; }
-            50% { border-color: white; }
-        }
+#dialogue-text, #thought-text {
+    font-size: 0.75em;
+    line-height: 1.5;
+}
 
-        .conv-screen {
-            display: none;
-            position: fixed; /* Fixed pour être sûr qu'elles soient centrées même avec des glitchs */
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            max-width: 70%;
-            height: auto;
-            border: 3px solid white;
-            z-index: 2500;
-            cursor: pointer;
-        }
+/* CURSEUR */
+.cursor-active {
+    border-right: 0.15em solid currentColor;
+    animation: blink 0.5s infinite step-end;
+}
+@keyframes blink {50%{border-color:transparent;}}
 
-        /* Style spécifique pour les glitchs */
-        .glitch-gif {
-            position: absolute;
-            pointer-events: none;
-            opacity: 0.9;
-        }
+/* GLITCH GIFS */
+.glitch-gif {
+    position: absolute;
+    /* MODIFICATION GLITCH: Screen permet de rendre le noir transparent et d'éviter l'effet de superposition "bloc" */
+    mix-blend-mode: screen; 
+    opacity: 0.9;
+    z-index: 1500;
+    pointer-events: none;
+}
 
-        /* Fondu au noir pour la fin */
-        #fade-black {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: black;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 2s;
-            z-index: 5000;
-        }
-    </style>
+/* IMAGES SCENE */
+.scene-img {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 60%;
+    display: none;
+    z-index: 2500;
+    border: 2px solid white; 
+}
+
+/* FONDU FINAL */
+#fade-black {
+    position: fixed;
+    inset: 0;
+    background: black;
+    opacity: 0;
+    transition: opacity 1.3s ease-in-out; 
+    pointer-events: none;
+    z-index: 5000;
+}
+
+/* BOUTON FIN */
+#end-button {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 15px 30px;
+    background: #FF00FF; 
+    border: 3px solid white;
+    color: black;
+    font-size: 1em;
+    cursor: pointer;
+    z-index: 6000; 
+    display: none;
+    text-decoration: none; 
+    text-align: center;
+    transition: opacity 0.5s; 
+    opacity: 0; 
+}
+</style>
 </head>
 
 <body>
-    <audio id="audio-fear" loop>
-        <source src="https://www.dropbox.com/scl/fi/v745wspc750tckh9kkjux/AMBIANCE-SONORE-QUI-FAIT-PEUR-pluie-orage-vents-grincements-chuchotements-bizarres....mp3?dl=1" type="audio/mpeg">
-    </audio>
-    <audio id="audio-peace" loop>
-        <source src="https://www.dropbox.com/scl/fi/c12x3k9zwrnf1chexzeqq/Nightingale-singing-The-best-bird-song-in-the-world-Luscinia-megarhynchos.mp3?dl=1" type="audio/mpeg">
-    </audio>
+
+<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?rlkey=q1hljzkfdh6b4qjj89yut92oy&dl=1"></audio>
+<audio id="type-sound-thought" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=183ys2rx&dl=1"></audio>
+
+<audio id="music-ambiance" loop src="https://www.dropbox.com/scl/fi/v745wspc750tckh9kkjux/AMBIANCE-SONORE-QUI-FAIT-PEUR-pluie-orage-vents-grincements-chuchotements-bizarres....mp3?rlkey=ce0jmp51kst5rlr10kg46g9pc&st=g7j82ivw&dl=1"></audio>
+<audio id="music-bird" loop src="https://www.dropbox.com/scl/fi/c12x3k9zwrnf1chexzeqq/Nightingale-singing-The-best-bird-song-in-the-world-Luscinia-megarhynchos.mp3?rlkey=sca24hwywsgfxeljsej8vwyln&st=zmdcm9gf&dl=1"></audio>
+
+<div id="fade-black"></div>
+
+<div id="intro-overlay-zone2">...</div>
+
+<div id="dialogue-box"><span id="dialogue-text"></span></div>
+<div id="thought-box"><span id="thought-text"></span></div>
+
+<a id="end-button" href="fin.html">Se réveiller</a> 
+
+<img id="img1" class="scene-img" src="https://i.imgur.com/LHb0oXX.png">
+<img id="img2" class="scene-img" src="https://i.imgur.com/eUtYYag.png">
+<img id="img3" class="scene-img" src="https://i.imgur.com/72KkopR.png">
+<img id="img4" class="scene-img" src="https://i.imgur.com/beA11BA.png">
+<img id="img5" class="scene-img" src="https://i.imgur.com/oBwbwxW.png">
+<img id="img6" class="scene-img" class="scene-img" src="https://i.imgur.com/kuEm3Fv.png">
+
+<script>
+/* ---------------------- CONSTANTES & ETAT ---------------------- */
+
+let isTyping = false, skipTyping = false;
+let currentImageShown = null;
+const LAST_IMAGE_ID = "img6"; 
+
+const dBox = document.getElementById("dialogue-box");
+const dText = document.getElementById("dialogue-text");
+const tBox = document.getElementById("thought-box");
+const tText = document.getElementById("thought-text");
+
+// SONS
+const typeSound = document.getElementById("type-sound");
+const typeSoundThought = document.getElementById("type-sound-thought");
+const musicAmbiance = document.getElementById("music-ambiance");
+const musicBird = document.getElementById("music-bird");
+
+const allImages = document.querySelectorAll(".scene-img");
+
+// REGLAGE VOLUME (Vital pour éviter les conflits)
+typeSound.volume = 0.6;          // Narrateur assez fort
+typeSoundThought.volume = 0.8;   // Pensée très distincte
+musicAmbiance.volume = 0.2;      // Fond sonore discret
+musicBird.volume = 0.2;          // Oiseaux discrets
+
+/* ---------------------- UTILS ---------------------- */
+
+function stopSound(soundEl) {
+    soundEl.pause();
+    soundEl.currentTime = 0;
+}
+
+function showDialogue(t) { typeWriter(t, dBox, dText, typeSound, true); }
+function showThought(t) { typeWriter(t, tBox, tText, typeSoundThought, false); }
+
+
+/* ---------------------- TEXT ENGINE ---------------------- */
+
+function typeWriter(text, box, span, sound, isLongSound = false) {
+    document.body.removeEventListener('click', hideImageAndContinue, true);
+    dBox.onclick = null;
+    tBox.onclick = null;
+
+    span.innerHTML = "";
+    box.style.display = "block";
+    tBox.style.display = (box === dBox ? "none" : tBox.style.display);
+    dBox.style.display = (box === tBox ? "none" : dBox.style.display);
+
+    isTyping = true;
+    skipTyping = false;
+    span.classList.add("cursor-active");
     
-    <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?dl=1"></audio>
-    <audio id="type-sound-thought" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?dl=1"></audio>
+    // GESTION SONORE
+    if (isLongSound) {
+        sound.currentTime = 0;
+        sound.play().catch(()=>{});
+    } else {
+        if(sound.paused || sound.currentTime > 0) { 
+            sound.currentTime = 0;
+            sound.play().catch(()=>{});
+        }
+    }
 
-    <div id="intro-overlay-zone2">
-        ... <br><br>
-        (Cliquer pour commencer)
-    </div>
-
-    <div id="dialogue-box"><span id="dialogue-text"></span></div>
-    <div id="thought-box"><span id="thought-text"></span></div>
-
-    <img id="img1" class="conv-screen" src="https://i.imgur.com/LHb0oXX.png" alt="Screen 1">
-    <img id="img2" class="conv-screen" src="https://i.imgur.com/eUtYYag.png" alt="Screen 2">
-    <img id="img3" class="conv-screen" src="https://i.imgur.com/72KkopR.png" alt="Screen 3">
-    <img id="img4" class="conv-screen" src="https://i.imgur.com/beA11BA.png" alt="Screen 4">
-    <img id="img5" class="conv-screen" src="https://i.imgur.com/oBwbwxW.png" alt="Screen 5">
-    <img id="img6" class="conv-screen" src="https://i.imgur.com/kuEm3Fv.png" alt="Screen 6">
-
-    <div id="fade-black"></div>
-
-    <script>
-        // --- Données de la séquence ---
-        const dialogueSequence = [
-            { text: "Oula, c'est, particulier disons...", type: "thought", action: "show_thought" },
-            { text: "Alice fut abasourdie, elle qui pensais être tiré d'affaire était en fait sur le point de réellement sombrer.", type: "narrator", action: "dialogue" },
-            { text: "Ah bah t'es de retour toi !", type: "thought", action: "show_thought" },
-            { text: "Et encourageant en plus !", type: "thought", action: "show_thought" },
-            { text: "Alice avais beau se cacher sous son sarcasme, elle était terrorisée.", type: "narrator", action: "dialogue" },
+    let i = 0;
+    const interval = setInterval(() => {
+        if (skipTyping) {
+            span.innerHTML = text;
+            end();
+        } else if (i < text.length) {
+            span.innerHTML += text[i++];
             
-            // Premier Glitch (Moyen)
-            { action: "glitch", count: 25, size: "medium" },
-            
-            { text: "Et elle avais raison d'avoir aussi peur, car elle savais très bien qu'un jour ça finirais par se produire.", type: "narrator", action: "dialogue" },
-            { text: "Euh, quoi ?", type: "thought", action: "show_thought" },
-            { text: "Guilian t'abandonne Alice.", type: "narrator", action: "dialogue" },
-            { text: "Ta vie est fini, abandonne, arrête d'essayer d'être heureuse, c'est vain.", type: "narrator", action: "dialogue" },
-            { text: "Oui, je sais.", type: "thought", action: "show_thought" },
-            
-            // Deuxième Glitch (Massif)
-            { action: "glitch", count: 80, size: "heavy" },
-            
-            { text: "Je commence à me sentir mal là, arrête.", type: "thought", action: "show_thought" },
-            { text: "Alice savais que je ne fessais que dire la vérité mais continuais de nier.", type: "narrator", action: "dialogue" },
-            { text: "Non par pitié, je t'en supplie, ARRÊTE.", type: "thought", action: "show_thought" },
-            
-            { image: "img1", action: "show_image_click_to_continue" },
-            { text: "Quoi ? T'es pas censé m'avoir abandonné toi ?", type: "thought", action: "show_thought" },
-            { text: "Arrête de faire semblant de m'aimer, je sais que je ne te mérite pas.", type: "thought", action: "show_thought" },
-            
-            { image: "img2", action: "show_image_click_to_continue" },
-            { image: "img3", action: "show_image_click_to_continue" },
-            { text: "Je me déteste.", type: "thought", action: "show_thought" },
-            { image: "img4", action: "show_image_click_to_continue" },
-            
-            // On enlève un peu de glitchs pour voir les images
-            { action: "clean_glitch_partial" },
-            
-            { text: "Belle formulation j'avoue, t'es doué.", type: "thought", action: "show_thought" },
-            { text: "Mais ça ne changera pas le fait que je suis qu'une merde.", type: "thought", action: "show_thought" },
-            
-            { image: "img5", action: "show_image_click_to_continue" },
-            { text: "Merci beaucoup, je sais pas ce que je ferais sans toi...", type: "thought", action: "show_thought" },
-            
-            // Changement d'ambiance
-            { action: "change_bg" },
-            
-            { image: "img6", action: "show_image_click_to_continue" },
-            { action: "show_end_button" }
-        ];
-
-        let currentSequenceIndex = 0;
-        let activeImageElement = null;
-        let typingInterval;
-        let isTyping = false;
-        let skipRequested = false;
-
-        const dialogueBox = document.getElementById('dialogue-box');
-        const dialogueTextElement = document.getElementById('dialogue-text');
-        const thoughtBox = document.getElementById('thought-box');
-        const thoughtTextElement = document.getElementById('thought-text');
-        const overlay = document.getElementById('intro-overlay-zone2');
+            if (isLongSound && i >= text.length - 1) {
+                stopSound(sound);
+            }
+        } else end();
         
-        // Audio
-        const audioFear = document.getElementById('audio-fear');
-        const audioPeace = document.getElementById('audio-peace');
-        const typeSound = document.getElementById('type-sound');
-        const typeSoundThought = document.getElementById('type-sound-thought');
+    }, 28);
 
-        typeSound.volume = 0.5;
-        typeSoundThought.volume = 0.5;
+    box.onclick = (e) => {
+        if (isTyping) {
+            skipTyping = true;
+            e.stopPropagation(); 
+        }
+    };
 
-        // Bouton Fin
-        const endButton = document.createElement('button');
-        endButton.textContent = "Se réveiller";
-        endButton.style.padding = "15px 30px";
-        endButton.style.fontFamily = "'Press Start 2P', monospace";
-        endButton.style.fontSize = "0.9em";
-        endButton.style.backgroundColor = "#ff00ff";
-        endButton.style.color = "black";
-        endButton.style.border = "3px solid white";
-        endButton.style.cursor = "pointer";
-        endButton.style.position = "fixed";
-        endButton.style.top = "50%";
-        endButton.style.left = "50%";
-        endButton.style.transform = "translate(-50%, -50%)";
-        endButton.style.zIndex = "6000";
-        endButton.style.display = "none";
-        document.body.appendChild(endButton);
+    function end() {
+        clearInterval(interval);
+        span.classList.remove("cursor-active");
+        
+        if (!isLongSound) {
+            stopSound(sound);
+        }
+        
+        isTyping = false;
+        box.onclick = next; 
+    }
+}
 
-        // --- Fonctions Glitch ---
-        function spawnGlitch(count, size) {
-            for (let i = 0; i < count; i++) {
-                const g = document.createElement("img");
-                g.src = "https://i.imgur.com/UsrQHo8.gif";
-                g.className = "glitch-gif";
-                g.style.top = Math.random() * 90 + "vh";
-                g.style.left = Math.random() * 90 + "vw";
-                
-                if (size === 'medium') {
-                    const s = Math.floor(Math.random() * 150) + 100;
-                    g.style.width = s + "px";
-                    g.style.zIndex = 1000;
-                } else {
-                    const s = Math.floor(Math.random() * 300) + 200;
-                    g.style.width = s + "px";
-                    g.style.zIndex = Math.floor(Math.random() * 50) + 1500;
-                }
-                document.body.appendChild(g);
-            }
+
+/* ---------------------- SCENE IMAGES & GESTION DU FLUX ---------------------- */
+
+function hideAllImages() {
+    allImages.forEach(img => img.style.display = "none");
+    currentImageShown = null;
+}
+
+function hideImageAndContinue(e) {
+    if (currentImageShown) {
+        const isLastImage = currentImageShown.id === LAST_IMAGE_ID; 
+        
+        hideAllImages();
+        document.body.removeEventListener('click', hideImageAndContinue, true);
+        e.stopPropagation(); 
+
+        if (isLastImage) {
+            initiateFinalSequence(); 
+        } else {
+            next(); 
+        }
+    }
+}
+
+function showImage(id) {
+    dBox.style.display = "none";
+    tBox.style.display = "none";
+    hideAllImages();
+    
+    const imgElement = document.getElementById(id);
+    imgElement.style.display = "block";
+    currentImageShown = imgElement;
+
+    document.body.addEventListener('click', hideImageAndContinue, {once: true, capture: true}); 
+}
+
+function changeBackground(url) {
+    document.body.style.backgroundImage = `url('${url}')`;
+    
+    // --- BASCULE DE MUSIQUE ICI ---
+    // On coupe progressivement la musique qui fait peur et on lance les oiseaux
+    musicAmbiance.pause();
+    musicBird.currentTime = 0;
+    musicBird.play().catch(e => console.log("Erreur lecture audio:", e));
+    
+    setTimeout(next, 1200); 
+}
+
+// MODIFICATION GLITCH : Meilleure répartition et taille
+function spawnGlitch(amount) {
+    // Si amount est grand (ex: 10), on considère que c'est la "grosse vague"
+    const isBigWave = amount > 8;
+    const count = isBigWave ? 25 : 6; // On augmente drastiquement le nombre pour la 2ème vague
+
+    for (let i = 0; i < count; i++) {
+        const g = document.createElement("img");
+        g.src = "https://i.imgur.com/UsrQHo8.gif";
+        g.className = "glitch-gif";
+        
+        // Positionnement aléatoire sur tout l'écran
+        g.style.top = Math.random() * 90 + "vh";
+        g.style.left = Math.random() * 90 + "vw";
+        
+        // Taille variable
+        if (isBigWave) {
+            // Pour la 2ème vague : taille entre 150px et 350px
+            const size = Math.floor(Math.random() * 200) + 150;
+            g.style.width = size + "px";
+        } else {
+            // Pour la 1ère vague : taille standard
+            g.style.width = "180px";
         }
 
-        function removeGlitch(percent) {
-            const gifs = document.querySelectorAll(".glitch-gif");
-            const count = Math.floor(gifs.length * percent);
-            for (let i = gifs.length - 1; i >= gifs.length - count; i--) {
-                if(gifs[i]) gifs[i].remove();
-            }
-        }
+        document.body.appendChild(g);
+    }
+    next(); 
+}
 
-        // --- Fonctions Moteur ---
+function removeGlitch(percent) {
+    const gifs = [...document.querySelectorAll(".glitch-gif")];
+    const count = Math.floor(gifs.length * percent);
+    for (let i = 0; i < count; i++) {
+        const indexToRemove = gifs.length - 1 - i;
+        if(indexToRemove >= 0) gifs[indexToRemove].remove();
+    }
+}
 
-        function skipText(e){
-            if(isTyping){
-                skipRequested = true;
-                e.stopPropagation();
-            }
-        }
+function runActionsAndContinue(actions, delay=10) {
+    actions.forEach(action => action());
+    setTimeout(next, delay);
+}
 
-        function typeWriter(text, targetElement, isThought, callback){
-            if(typingInterval) clearInterval(typingInterval);
-            skipRequested = false;
-            isTyping = true;
-            targetElement.innerHTML = '';
-            targetElement.classList.add('cursor-active');
 
-            let soundEl = isThought ? typeSoundThought : typeSound;
-            
-            let i=0;
-            typingInterval = setInterval(()=>{
-                if(skipRequested){
-                    targetElement.innerHTML = text;
-                    finalizeTyping();
-                    return;
-                }
-                if(i<text.length){
-                    // On joue le son à chaque caractère pour l'effet de texte
-                    if(soundEl) {
-                        soundEl.currentTime = 0;
-                        soundEl.play().catch(()=>{});
-                    }
-                    targetElement.innerHTML += text.charAt(i++);
-                } else {
-                    finalizeTyping();
-                }
-            }, 28);
+/* ---------------------- SEQUENCE ---------------------- */
 
-            function finalizeTyping(){
-                clearInterval(typingInterval);
-                targetElement.classList.remove('cursor-active');
-                if(soundEl){ soundEl.pause(); soundEl.currentTime=0; }
-                isTyping=false;
-                if(callback) callback();
-            }
-        }
+const seq = [
+    ()=>showThought("Oula, c'est, particulier disons"),
+    ()=>showDialogue("Alice fut abasourdie, elle qui pensais être tiré d'affaire était en fait sur le point de réellement sombrer"),
+    ()=>showThought("Ah bah t'es de retour toi !"),
+    ()=>showThought("Et encourageant en plus !"),
+    ()=>showDialogue("Alice avais beau se cacher sous sous sarcasme, elle était terrorisé"),
+    ()=>spawnGlitch(6),
+    ()=>showDialogue("Et elle avais raison d'avoir aussi peur, car elle savais très bien qu'un jour ça finirais par se produite"),
+    ()=>showThought("Euh, quoi ?"),
+    ()=>showDialogue("Guilian t'abandonne Alice."),
+    ()=>showDialogue("Ta vie est fini, abandonne, arrête d'essayer d'être heureuse, c'est vain."),
+    ()=>showThought("Oui, je sais."),
+    ()=>spawnGlitch(10), // Ici, ça lancera la "Grosse vague" de glitchs
+    ()=>showThought("Je commence à me sentir mal là, arrête."),
+    ()=>showDialogue("Alice savais que je ne fessai que dire la vérité mais continuais de nier"),
+    ()=>showThought("Non par pitié, je t'en supplie, ARRÊTE."),
+    ()=>showImage("img1"),
+    ()=>showThought("Quoi ? T'es pas censé m'avoir abandonné toi ?"),
+    ()=>showThought("Arrête de faire semblant de m'aimer, je sais que je ne te mérite pas."),
+    ()=>showImage("img2"),
+    ()=>showImage("img3"),
+    ()=>showThought("Je me déteste"),
+    ()=>showImage("img4"),
+    ()=>runActionsAndContinue([()=>removeGlitch(0.4)]), 
+    ()=>showThought("Belle formulation j'avoue, t'es doué."),
+    ()=>showThought("Mais ça ne changera pas le fait que je suis qu'une merde."),
+    ()=>showImage("img5"), 
+    ()=>showThought("Merci beaucoup, je sais pas ce que je ferais sans toi"), 
+    // Au changement de fond, la musique changera automatiquement grâce à la modif dans changeBackground
+    ()=>runActionsAndContinue([()=>removeGlitch(1), ()=>changeBackground('https://c.tenor.com/ZL7fgNaWWXMAAAAd/tenor.gif')]),
+    ()=>showImage("img6"), 
+];
 
-        function hideActiveImage(callback){
-            if(activeImageElement){
-                activeImageElement.style.opacity=0;
-                setTimeout(()=>{
-                    activeImageElement.style.display='none';
-                    activeImageElement=null;
-                    if(callback) callback();
-                }, 500); 
-            } else if(callback) callback();
-        }
+let index = 0;
 
-        function showImageAndAwaitClick(imageId){
-            hideActiveImage(()=>{
-                const img=document.getElementById(imageId);
-                img.style.display='block';
-                activeImageElement=img;
-                setTimeout(()=>{
-                    img.style.opacity=1;
-                    img.addEventListener('click', advanceSequence, {once:true});
-                }, 50);
-            });
-        }
+function next() {
+    if (index < seq.length && !isTyping && !currentImageShown) {
+        seq[index++]();
+    }
+}
 
-        function showThought(text){
-            hideActiveImage(()=>{
-                dialogueBox.style.display='none';
-                thoughtBox.style.display='block';
-                // Retirer les anciens listeners pour éviter les conflits
-                const newThoughtBox = thoughtBox.cloneNode(true);
-                thoughtBox.parentNode.replaceChild(newThoughtBox, thoughtBox);
-                
-                const currentThoughtBox = document.getElementById('thought-box');
-                const currentThoughtText = document.getElementById('thought-text');
-                
-                currentThoughtBox.addEventListener('click', skipText, false);
-                typeWriter(text, currentThoughtText, true, ()=>{
-                    currentThoughtBox.addEventListener('click', hideThoughtAndContinue, {once:true});
-                });
-            });
-        }
+/* ---------------------- FIN D'URGENCE (STATIQUE) ---------------------- */
 
-        function hideThoughtAndContinue(){
-            if(isTyping) return;
-            document.getElementById('thought-box').style.display='none';
-            advanceSequence();
-        }
+function initiateFinalSequence() {
+    document.body.removeEventListener('click', next);
+    dBox.onclick = null;
+    tBox.onclick = null;
+    
+    stopSound(typeSound);
+    stopSound(typeSoundThought);
+    // On arrête aussi la musique des oiseaux à la fin
+    stopSound(musicBird);
+    
+    dBox.style.display = "none";
+    tBox.style.display = "none";
+    
+    const black = document.getElementById("fade-black");
+    black.style.opacity = 1;
+    
+    setTimeout(showEndButton, 1500); 
+}
 
-        function advanceSequence(){
-            if(isTyping) return;
-            dialogueBox.style.display='none';
-            document.getElementById('thought-box').style.display='none';
-            
-            if(currentSequenceIndex>=dialogueSequence.length) return;
+function showEndButton() {
+    const black = document.getElementById("fade-black");
+    const endButton = document.getElementById("end-button");
+    
+    black.style.display = "none";
+    document.body.style.backgroundColor = "black";
+    document.body.style.backgroundImage = "none";
 
-            const evt=dialogueSequence[currentSequenceIndex++];
+    endButton.style.display = "block";
+    
+    setTimeout(() => {
+        endButton.style.opacity = 1; 
+    }, 50); 
+}
 
-            if(evt.action==="dialogue"){
-                hideActiveImage(()=>{
-                    dialogueBox.style.display='block';
-                    // Reset listeners
-                    const newBox = dialogueBox.cloneNode(true);
-                    dialogueBox.parentNode.replaceChild(newBox, dialogueBox);
-                    const currentBox = document.getElementById('dialogue-box');
-                    const currentText = document.getElementById('dialogue-text');
 
-                    currentBox.addEventListener('click', skipText, false);
-                    typeWriter(evt.text, currentText, false, ()=>{
-                        currentBox.addEventListener('click', advanceSequence, {once:true});
-                    });
-                });
-            } else if(evt.action==="show_thought"){
-                showThought(evt.text);
-            } else if(evt.action==="show_image_click_to_continue"){
-                showImageAndAwaitClick(evt.image);
-            } else if(evt.action==="glitch"){
-                spawnGlitch(evt.count, evt.size);
-                advanceSequence();
-            } else if(evt.action==="clean_glitch_partial"){
-                removeGlitch(0.5);
-                advanceSequence();
-            } else if(evt.action==="change_bg"){
-                document.body.style.backgroundImage = "url('https://c.tenor.com/wIa91mot0tAAAAAd/tenor.gif')";
-                removeGlitch(1);
-                audioFear.pause();
-                audioPeace.play().catch(()=>{});
-                setTimeout(advanceSequence, 1500);
-            } else if(evt.action==="show_end_button"){
-                hideActiveImage(()=>{
-                    document.getElementById('fade-black').style.opacity = 1;
-                    setTimeout(() => {
-                        endButton.style.display='block';
-                        endButton.addEventListener('click', ()=>{
-                            window.location.href='fin.html';
-                        }, {once:true});
-                    }, 1500);
-                });
-            }
-        }
+// Lancement initial
+document.getElementById("intro-overlay-zone2").onclick = () => {
+    document.getElementById("intro-overlay-zone2").style.display = "none";
+    
+    // --- LANCEMENT MUSIQUE 1 ICI ---
+    musicAmbiance.play().catch(e => console.log("Erreur lecture musique debut:", e));
 
-        overlay.addEventListener('click', ()=>{
-            overlay.style.display='none';
-            audioFear.play().catch(()=>{});
-            advanceSequence();
-        }, {once:true});
-    </script>
+    document.body.addEventListener('click', next); 
+    next(); 
+};
+</script>
 </body>
 </html>
