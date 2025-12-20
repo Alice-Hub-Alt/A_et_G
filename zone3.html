@@ -3,431 +3,419 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zone 3 : C'est la merde</title>
+    <title>Zone 3</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            /* Fond de départ : Spooky */
+            background-image: url('https://neocardmaker.com/uploads/monthly_2019_10/1502293590_Spooky2.gif.aa0118140c56d49b8ecc4294d9e4bd34.gif');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+            font-family: 'Press Start 2P', monospace;
+            overflow: hidden;
+            background-color: black; 
+            transition: background-image 1s ease-in-out;
+        }
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        #intro-overlay-zone2 {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: black; 
+            display: flex; 
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            cursor: pointer;
+            font-size: 1.5em;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.3);
+            text-align: center;
+            padding: 20px;
+        }
 
-body {
-    background-image: url('https://neocardmaker.com/uploads/monthly_2019_10/1502293590_Spooky2.gif.aa0118140c56d49b8ecc4294d9e4bd34.gif');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center; 
-    background-attachment: fixed;
-    margin: 0;
-    padding: 0;
-    font-family: 'Press Start 2P', monospace;
-    overflow: hidden;
-    color: white;
-    z-index: 1;
-    transition: background-image 1s ease-in-out;
-}
+        #dialogue-box, #thought-box {
+            width: 90%;
+            box-sizing: border-box;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3000; /* Z-index très haut pour passer au dessus des glitchs */
+            padding: 20px;
+            display: none;
+        }
 
-/* INTRO OVERLAY */
-#intro-overlay-zone2 {
-    position: fixed;
-    inset: 0;
-    background: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    font-size: 1.5em;
-    cursor: pointer;
-    text-align: center;
-    padding: 20px;
-}
+        #dialogue-box {
+            height: 20vh;
+            background-color: rgba(0,0,0,0.85);
+            border: 3px solid white;
+            cursor: pointer;
+        }
 
-/* BOITES DE TEXTE */
-#dialogue-box, #thought-box {
-    width: 90%;
-    position: fixed;
-    left: 50%;
-    bottom: 20px;
-    transform: translateX(-50%);
-    padding: 20px;
-    display: none;
-    z-index: 3000;
-    box-sizing: border-box;
-    cursor: pointer;
-}
+        #dialogue-text {
+            font-size: 0.8em;
+            line-height: 1.5;
+            white-space: normal;
+            overflow: hidden;
+            height: 100%;
+        }
 
-#dialogue-box {
-    background: rgba(0,0,0,0.85);
-    border: 3px solid white;
-    height: 20vh;
-    color: white;
-}
+        #thought-box {
+            background-color: rgba(0,0,0,0.7);
+            border: 2px dashed #ff00ff;
+            padding: 15px;
+            cursor: pointer;
+        }
 
-#thought-box {
-    background: rgba(0,0,0,0.65);
-    border: 3px dashed #ff55ff;
-    color: #ff99ff;
-}
+        #thought-text {
+            font-size: 0.7em;
+            color: #ff00ff;
+            line-height:1.5;
+        }
 
-#dialogue-text, #thought-text {
-    font-size: 0.75em;
-    line-height: 1.5;
-}
+        .cursor-active {
+            border-right: 0.15em solid white;
+            animation: blink-cursor 0.5s step-end infinite;
+        }
+        @keyframes blink-cursor {
+            from, to { border-color: transparent; }
+            50% { border-color: white; }
+        }
 
-/* CURSEUR */
-.cursor-active {
-    border-right: 0.15em solid currentColor;
-    animation: blink 0.5s infinite step-end;
-}
-@keyframes blink {50%{border-color:transparent;}}
+        .conv-screen {
+            display: none;
+            position: fixed; /* Fixed pour être sûr qu'elles soient centrées même avec des glitchs */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 70%;
+            height: auto;
+            border: 3px solid white;
+            z-index: 2500;
+            cursor: pointer;
+        }
 
-/* GLITCH GIFS */
-.glitch-gif {
-    position: absolute;
-    pointer-events: none; /* Important pour cliquer au travers */
-    opacity: 0.9;
-}
+        /* Style spécifique pour les glitchs */
+        .glitch-gif {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.9;
+        }
 
-/* IMAGES SCENE */
-.scene-img {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    max-width: 60%;
-    display: none;
-    z-index: 2500;
-    border: 2px solid white; 
-    box-shadow: 0 0 15px rgba(0,0,0,0.8);
-    cursor: pointer;
-}
-
-/* FONDU FINAL */
-#fade-black {
-    position: fixed;
-    inset: 0;
-    background: black;
-    opacity: 0;
-    transition: opacity 1.3s ease-in-out; 
-    pointer-events: none;
-    z-index: 5000;
-}
-
-/* BOUTON FIN */
-#end-button {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 15px 30px;
-    background: #FF00FF; 
-    border: 3px solid white;
-    color: black;
-    font-size: 1em;
-    cursor: pointer;
-    z-index: 6000; 
-    display: none;
-    text-decoration: none; 
-    text-align: center;
-    transition: opacity 0.5s; 
-    opacity: 0; 
-}
-</style>
+        /* Fondu au noir pour la fin */
+        #fade-black {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: black;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 2s;
+            z-index: 5000;
+        }
+    </style>
 </head>
 
 <body>
-
-<audio id="audio-fear" loop>
-    <source src="https://www.dropbox.com/scl/fi/v745wspc750tckh9kkjux/AMBIANCE-SONORE-QUI-FAIT-PEUR-pluie-orage-vents-grincements-chuchotements-bizarres....mp3?dl=1" type="audio/mpeg">
-</audio>
-
-<audio id="audio-peace" loop>
-    <source src="https://www.dropbox.com/scl/fi/c12x3k9zwrnf1chexzeqq/Nightingale-singing-The-best-bird-song-in-the-world-Luscinia-megarhynchos.mp3?dl=1" type="audio/mpeg">
-</audio>
-
-<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?dl=1"></audio>
-<audio id="type-sound-thought" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?dl=1"></audio>
-
-<div id="fade-black"></div>
-<div id="intro-overlay-zone2">Cliquer pour entrer dans le cauchemar...</div>
-
-<div id="dialogue-box"><span id="dialogue-text"></span></div>
-<div id="thought-box"><span id="thought-text"></span></div>
-
-<a id="end-button" href="fin.html">Se réveiller</a> 
-
-<img id="img1" class="scene-img" src="https://i.imgur.com/LHb0oXX.png">
-<img id="img2" class="scene-img" src="https://i.imgur.com/eUtYYag.png">
-<img id="img3" class="scene-img" src="https://i.imgur.com/72KkopR.png">
-<img id="img4" class="scene-img" src="https://i.imgur.com/beA11BA.png">
-<img id="img5" class="scene-img" src="https://i.imgur.com/oBwbwxW.png">
-<img id="img6" class="scene-img" class="scene-img" src="https://i.imgur.com/kuEm3Fv.png">
-
-<script>
-    // --- Configuration des Glitchs ---
-    function spawnGlitch(count, mode) {
-        for (let i = 0; i < count; i++) {
-            const g = document.createElement("img");
-            g.src = "https://i.imgur.com/UsrQHo8.gif";
-            g.className = "glitch-gif";
-            
-            // Position aléatoire sur tout l'écran
-            g.style.top = Math.random() * 95 + "vh";
-            g.style.left = Math.random() * 95 + "vw";
-            
-            if (mode === 'medium') {
-                // Assez gros dès le début
-                const size = Math.floor(Math.random() * 100) + 100; // 100px à 200px
-                g.style.width = size + "px";
-                g.style.zIndex = 1000;
-            } else if (mode === 'heavy') {
-                // Énormes pour recouvrir
-                const size = Math.floor(Math.random() * 300) + 200; // 200px à 500px
-                g.style.width = size + "px";
-                g.style.zIndex = Math.floor(Math.random() * 50) + 1500;
-            }
-            document.body.appendChild(g);
-        }
-    }
-
-    function removeGlitch(percent) {
-        const gifs = [...document.querySelectorAll(".glitch-gif")];
-        const count = Math.floor(gifs.length * percent);
-        for (let i = 0; i < count; i++) {
-            const indexToRemove = gifs.length - 1 - i;
-            if(indexToRemove >= 0) gifs[indexToRemove].remove();
-        }
-    }
-
-    // --- Séquence Narrative (Format Objet comme Zone 1.2) ---
-    const sequenceData = [
-        { text: "Oula, c'est, particulier disons", type: "thought" },
-        { text: "Alice fut abasourdie, elle qui pensais être tiré d'affaire était en fait sur le point de réellement sombrer", type: "narrator" },
-        { text: "Ah bah t'es de retour toi !", type: "thought" },
-        { text: "Et encourageant en plus !", type: "thought" },
-        { text: "Alice avais beau se cacher sous sous sarcasme, elle était terrorisé", type: "narrator" },
-        
-        // Premier Glitch : Plus gros et plus nombreux
-        { action: "glitch", count: 25, mode: "medium" }, 
-        
-        { text: "Et elle avais raison d'avoir aussi peur, car elle savais très bien qu'un jour ça finirais par se produite", type: "narrator" },
-        { text: "Euh, quoi ?", type: "thought" },
-        { text: "Guilian t'abandonne Alice.", type: "narrator" },
-        { text: "Ta vie est fini, abandonne, arrête d'essayer d'être heureuse, c'est vain.", type: "narrator" },
-        { text: "Oui, je sais.", type: "thought" },
-        
-        // Deuxième Glitch : Invasion totale
-        { action: "glitch", count: 80, mode: "heavy" }, 
-        
-        { text: "Je commence à me sentir mal là, arrête.", type: "thought" },
-        { text: "Alice savais que je ne fessai que dire la vérité mais continuais de nier", type: "narrator" },
-        { text: "Non par pitié, je t'en supplie, ARRÊTE.", type: "thought" },
-        
-        { action: "image", id: "img1" },
-        { text: "Quoi ? T'es pas censé m'avoir abandonné toi ?", type: "thought" },
-        { text: "Arrête de faire semblant de m'aimer, je sais que je ne te mérite pas.", type: "thought" },
-        { action: "image", id: "img2" },
-        { action: "image", id: "img3" },
-        { text: "Je me déteste", type: "thought" },
-        { action: "image", id: "img4" },
-        
-        { action: "remove_glitch", percent: 0.4 }, // On calme un peu le jeu
-        { text: "Belle formulation j'avoue, t'es doué.", type: "thought" },
-        { text: "Mais ça ne changera pas le fait que je suis qu'une merde.", type: "thought" },
-        { action: "image", id: "img5" },
-        { text: "Merci beaucoup, je sais pas ce que je ferais sans toi", type: "thought" },
-        
-        // Le grand changement (Musique + Fond + Suppression Glitch)
-        { action: "background_change", url: "https://c.tenor.com/ZL7fgNaWWXMAAAAd/tenor.gif" },
-        
-        { action: "image", id: "img6", isLast: true }
-    ];
-
-    // --- Moteur (Inspiré de Zone 1.2) ---
-    let currentStep = 0;
-    let isTyping = false;
-    let skipRequested = false;
-    let typingInterval;
-    let activeImage = null;
-
-    const dBox = document.getElementById("dialogue-box");
-    const dText = document.getElementById("dialogue-text");
-    const tBox = document.getElementById("thought-box");
-    const tText = document.getElementById("thought-text");
+    <audio id="audio-fear" loop>
+        <source src="https://www.dropbox.com/scl/fi/v745wspc750tckh9kkjux/AMBIANCE-SONORE-QUI-FAIT-PEUR-pluie-orage-vents-grincements-chuchotements-bizarres....mp3?dl=1" type="audio/mpeg">
+    </audio>
+    <audio id="audio-peace" loop>
+        <source src="https://www.dropbox.com/scl/fi/c12x3k9zwrnf1chexzeqq/Nightingale-singing-The-best-bird-song-in-the-world-Luscinia-megarhynchos.mp3?dl=1" type="audio/mpeg">
+    </audio>
     
-    const audioFear = document.getElementById("audio-fear");
-    const audioPeace = document.getElementById("audio-peace");
-    const typeSound = document.getElementById("type-sound");
-    const typeSoundThought = document.getElementById("type-sound-thought");
+    <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?dl=1"></audio>
+    <audio id="type-sound-thought" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?dl=1"></audio>
 
-    // Volumes
-    typeSound.volume = 0.5;
-    typeSoundThought.volume = 0.5;
-    audioPeace.volume = 0.6;
+    <div id="intro-overlay-zone2">
+        ... <br><br>
+    </div>
 
-    // --- Fonction Typewriter (La version stable) ---
-    function typeWriter(text, targetElement, isThought, callback) {
-        if (typingInterval) clearInterval(typingInterval);
-        skipRequested = false;
-        isTyping = true;
-        targetElement.innerHTML = '';
-        targetElement.classList.add('cursor-active');
+    <div id="dialogue-box"><span id="dialogue-text"></span></div>
+    <div id="thought-box"><span id="thought-text"></span></div>
 
-        // Gestion du son : On joue au début, on coupe à la fin
-        let soundEl = isThought ? typeSoundThought : typeSound;
-        if (soundEl) { 
-            soundEl.currentTime = 0; 
-            soundEl.play().catch(()=>{}); 
-        }
+    <img id="img1" class="conv-screen" src="https://i.imgur.com/LHb0oXX.png" alt="Screen 1">
+    <img id="img2" class="conv-screen" src="https://i.imgur.com/eUtYYag.png" alt="Screen 2">
+    <img id="img3" class="conv-screen" src="https://i.imgur.com/72KkopR.png" alt="Screen 3">
+    <img id="img4" class="conv-screen" src="https://i.imgur.com/beA11BA.png" alt="Screen 4">
+    <img id="img5" class="conv-screen" src="https://i.imgur.com/oBwbwxW.png" alt="Screen 5">
+    <img id="img6" class="conv-screen" src="https://i.imgur.com/kuEm3Fv.png" alt="Screen 6">
 
-        let i = 0;
-        typingInterval = setInterval(() => {
-            if (skipRequested) {
-                targetElement.innerHTML = text;
-                finalizeTyping();
-                return;
-            }
-            if (i < text.length) {
-                targetElement.innerHTML += text.charAt(i++);
-            } else {
-                finalizeTyping();
-            }
-        }, 28);
+    <div id="fade-black"></div>
 
-        function finalizeTyping() {
-            clearInterval(typingInterval);
-            targetElement.classList.remove('cursor-active');
-            if (soundEl) { 
-                soundEl.pause(); 
-                soundEl.currentTime = 0; 
-            }
-            isTyping = false;
-            if (callback) callback();
-        }
-    }
-
-    function skipText(e) {
-        if (isTyping) {
-            skipRequested = true;
-            e.stopPropagation();
-        }
-    }
-
-    // --- Gestion des Images ---
-    function hideActiveImage(callback) {
-        if (activeImage) {
-            activeImage.style.display = 'none';
-            activeImage = null;
-        }
-        if (callback) callback();
-    }
-
-    function showImageAndWait(id, isLast) {
-        dBox.style.display = 'none';
-        tBox.style.display = 'none';
+    <script>
+        // --- Données de la séquence (Adapté pour Zone 3) ---
+        // action: "dialogue" | "show_thought" | "show_image_click_to_continue" | "glitch" | "change_bg" | "end"
         
-        const img = document.getElementById(id);
-        img.style.display = 'block';
-        activeImage = img;
-
-        setTimeout(() => {
-            if (isLast) {
-                // Logique spéciale dernière image -> Fin
-                img.onclick = () => {
-                    img.style.display = 'none';
-                    initiateFinalSequence();
-                };
-            } else {
-                // Image normale
-                img.onclick = (e) => {
-                    e.stopPropagation();
-                    img.style.display = 'none';
-                    activeImage = null;
-                    nextStep();
-                };
-            }
-        }, 50);
-    }
-
-    // --- Gestionnaire d'étapes ---
-    function nextStep() {
-        if (isTyping) return;
-        
-        // Cache les boites par défaut
-        dBox.style.display = 'none';
-        tBox.style.display = 'none';
-
-        if (currentStep >= sequenceData.length) return;
-
-        const data = sequenceData[currentStep++];
-
-        // 1. DIALOGUE (Narrateur)
-        if (data.type === "narrator") {
-            dBox.style.display = 'block';
-            dBox.onclick = skipText;
-            typeWriter(data.text, dText, false, () => {
-                dBox.onclick = nextStep;
-            });
-        
-        // 2. PENSÉE
-        } else if (data.type === "thought") {
-            tBox.style.display = 'block';
-            tBox.onclick = skipText;
-            typeWriter(data.text, tText, true, () => {
-                tBox.onclick = nextStep;
-            });
-
-        // 3. IMAGE
-        } else if (data.action === "image") {
-            showImageAndWait(data.id, data.isLast);
-
-        // 4. GLITCH
-        } else if (data.action === "glitch") {
-            spawnGlitch(data.count, data.mode);
-            nextStep(); // On enchaine direct
-
-        // 5. RETRAIT GLITCH
-        } else if (data.action === "remove_glitch") {
-            removeGlitch(data.percent);
-            nextStep();
-
-        // 6. CHANGEMENT FOND (ET SON)
-        } else if (data.action === "background_change") {
-            // Visuel
-            document.body.style.backgroundImage = `url('${data.url}')`;
-            removeGlitch(1); // On vire tout le reste des glitchs
+        const dialogueSequence = [
+            { text: "Oula, c'est, particulier disons...", type: "thought", action: "show_thought" },
+            { text: "Alice fut abasourdie, elle qui pensais être tiré d'affaire était en fait sur le point de réellement sombrer.", type: "narrator", action: "dialogue" },
+            { text: "Ah bah t'es de retour toi !", type: "thought", action: "show_thought" },
+            { text: "Et encourageant en plus !", type: "thought", action: "show_thought" },
+            { text: "Alice avais beau se cacher sous son sarcasme, elle était terrorisée.", type: "narrator", action: "dialogue" },
             
-            // Son
-            audioFear.pause();
-            audioPeace.play().catch(()=>{});
+            // Premier Glitch (Moyen)
+            { action: "glitch", count: 25, size: "medium" },
             
-            setTimeout(nextStep, 1200); // Petite pause pour admirer le ciel
+            { text: "Et elle avais raison d'avoir aussi peur, car elle savais très bien qu'un jour ça finirais par se produire.", type: "narrator", action: "dialogue" },
+            { text: "Euh, quoi ?", type: "thought", action: "show_thought" },
+            { text: "Guilian t'abandonne Alice.", type: "narrator", action: "dialogue" },
+            { text: "Ta vie est fini, abandonne, arrête d'essayer d'être heureuse, c'est vain.", type: "narrator", action: "dialogue" },
+            { text: "Oui, je sais.", type: "thought", action: "show_thought" },
+            
+            // Deuxième Glitch (Massif)
+            { action: "glitch", count: 80, size: "heavy" },
+            
+            { text: "Je commence à me sentir mal là, arrête.", type: "thought", action: "show_thought" },
+            { text: "Alice savais que je ne fessais que dire la vérité mais continuais de nier.", type: "narrator", action: "dialogue" },
+            { text: "Non par pitié, je t'en supplie, ARRÊTE.", type: "thought", action: "show_thought" },
+            
+            { image: "img1", action: "show_image_click_to_continue" },
+            { text: "Quoi ? T'es pas censé m'avoir abandonné toi ?", type: "thought", action: "show_thought" },
+            { text: "Arrête de faire semblant de m'aimer, je sais que je ne te mérite pas.", type: "thought", action: "show_thought" },
+            
+            { image: "img2", action: "show_image_click_to_continue" },
+            { image: "img3", action: "show_image_click_to_continue" },
+            { text: "Je me déteste.", type: "thought", action: "show_thought" },
+            { image: "img4", action: "show_image_click_to_continue" },
+            
+            // On enlève un peu de glitchs pour voir les images
+            { action: "clean_glitch_partial" },
+            
+            { text: "Belle formulation j'avoue, t'es doué.", type: "thought", action: "show_thought" },
+            { text: "Mais ça ne changera pas le fait que je suis qu'une merde.", type: "thought", action: "show_thought" },
+            
+            { image: "img5", action: "show_image_click_to_continue" },
+            { text: "Merci beaucoup, je sais pas ce que je ferais sans toi...", type: "thought", action: "show_thought" },
+            
+            // Changement d'ambiance (Fond + Musique + Nettoyage complet)
+            { action: "change_bg" },
+            
+            { image: "img6", action: "show_image_click_to_continue" },
+            { action: "show_end_button" }
+        ];
+
+        let currentSequenceIndex = 0;
+        let activeImageElement = null;
+        let typingInterval;
+        let isTyping = false;
+        let skipRequested = false;
+
+        const dialogueBox = document.getElementById('dialogue-box');
+        const dialogueTextElement = document.getElementById('dialogue-text');
+        const thoughtBox = document.getElementById('thought-box');
+        const thoughtTextElement = document.getElementById('thought-text');
+        const overlay = document.getElementById('intro-overlay-zone2');
+        
+        // Audio
+        const audioFear = document.getElementById('audio-fear');
+        const audioPeace = document.getElementById('audio-peace');
+        const typeSound = document.getElementById('type-sound');
+        const typeSoundThought = document.getElementById('type-sound-thought');
+
+        typeSound.volume = 0.5;
+        typeSoundThought.volume = 0.5;
+
+        // Bouton Fin
+        const endButton = document.createElement('button');
+        endButton.textContent = "Se réveiller";
+        endButton.style.padding = "15px 30px";
+        endButton.style.fontFamily = "'Press Start 2P', monospace";
+        endButton.style.fontSize = "0.9em";
+        endButton.style.backgroundColor = "#ff00ff";
+        endButton.style.color = "black";
+        endButton.style.border = "3px solid white";
+        endButton.style.cursor = "pointer";
+        endButton.style.position = "fixed";
+        endButton.style.top = "50%";
+        endButton.style.left = "50%";
+        endButton.style.transform = "translate(-50%, -50%)";
+        endButton.style.zIndex = "6000";
+        endButton.style.display = "none";
+        document.body.appendChild(endButton);
+
+        // --- Fonctions Glitch ---
+        function spawnGlitch(count, size) {
+            for (let i = 0; i < count; i++) {
+                const g = document.createElement("img");
+                g.src = "https://i.imgur.com/UsrQHo8.gif";
+                g.className = "glitch-gif";
+                
+                // Position aléatoire écran complet
+                g.style.top = Math.random() * 90 + "vh";
+                g.style.left = Math.random() * 90 + "vw";
+                
+                if (size === 'medium') {
+                    // Gros mais pas trop (100-250px)
+                    const s = Math.floor(Math.random() * 150) + 100;
+                    g.style.width = s + "px";
+                    g.style.zIndex = 1000;
+                } else {
+                    // ENORME (200-500px) et par dessus tout
+                    const s = Math.floor(Math.random() * 300) + 200;
+                    g.style.width = s + "px";
+                    g.style.zIndex = Math.floor(Math.random() * 50) + 1500;
+                }
+                document.body.appendChild(g);
+            }
         }
-    }
 
-    // --- Fin de séquence ---
-    function initiateFinalSequence() {
-        const black = document.getElementById("fade-black");
-        black.style.opacity = 1;
-        
-        // Arrêt des sons
-        audioPeace.pause();
-        audioFear.pause();
-        
-        setTimeout(() => {
-            const endBtn = document.getElementById("end-button");
-            document.body.style.backgroundColor = "black";
-            document.body.style.backgroundImage = "none";
-            black.style.display = "none";
-            endBtn.style.display = "block";
-            setTimeout(() => endBtn.style.opacity = 1, 50);
-        }, 1500);
-    }
+        function removeGlitch(percent) {
+            const gifs = document.querySelectorAll(".glitch-gif");
+            const count = Math.floor(gifs.length * percent);
+            // On enlève les derniers ajoutés
+            for (let i = gifs.length - 1; i >= gifs.length - count; i--) {
+                if(gifs[i]) gifs[i].remove();
+            }
+        }
 
-    // --- Démarrage ---
-    const overlay = document.getElementById("intro-overlay-zone2");
-    overlay.onclick = () => {
-        overlay.style.display = "none";
-        audioFear.play().catch(()=>{});
-        nextStep();
-    };
+        // --- Fonctions Moteur (Identiques au modèle) ---
 
-</script>
+        function skipText(e){
+            if(isTyping){
+                skipRequested = true;
+                e.stopPropagation();
+            }
+        }
+
+        function typeWriter(text, targetElement, isThought, callback){
+            if(typingInterval) clearInterval(typingInterval);
+            skipRequested = false;
+            isTyping = true;
+            targetElement.innerHTML = '';
+            targetElement.classList.add('cursor-active');
+
+            let soundEl = isThought ? typeSoundThought : typeSound;
+            // On lance le son au début
+            if(soundEl){ soundEl.currentTime=0; soundEl.play().catch(()=>{}); }
+
+            let i=0;
+            typingInterval = setInterval(()=>{
+                if(skipRequested){
+                    targetElement.innerHTML = text;
+                    finalizeTyping();
+                    return;
+                }
+                if(i<text.length){
+                    targetElement.innerHTML += text.charAt(i++);
+                } else {
+                    finalizeTyping();
+                }
+            }, 28);
+
+            function finalizeTyping(){
+                clearInterval(typingInterval);
+                targetElement.classList.remove('cursor-active');
+                // On coupe le son à la fin
+                if(soundEl){ soundEl.pause(); soundEl.currentTime=0; }
+                isTyping=false;
+                if(callback) callback();
+            }
+        }
+
+        function hideActiveImage(callback){
+            if(activeImageElement){
+                activeImageElement.style.opacity=0;
+                setTimeout(()=>{
+                    activeImageElement.style.display='none';
+                    activeImageElement=null;
+                    if(callback) callback();
+                }, 500); // Transition un peu plus rapide pour le cauchemar
+            } else if(callback) callback();
+        }
+
+        function showImageAndAwaitClick(imageId){
+            hideActiveImage(()=>{
+                const img=document.getElementById(imageId);
+                img.style.display='block';
+                activeImageElement=img;
+                setTimeout(()=>{
+                    img.style.opacity=1;
+                    img.addEventListener('click', advanceSequence, {once:true});
+                }, 50);
+            });
+        }
+
+        function showThought(text){
+            hideActiveImage(()=>{
+                dialogueBox.style.display='none';
+                thoughtBox.style.display='block';
+                thoughtBox.addEventListener('click', skipText,false);
+                typeWriter(text, thoughtTextElement, true, ()=>{
+                    thoughtBox.addEventListener('click', hideThoughtAndContinue, {once:true});
+                });
+            });
+        }
+
+        function hideThoughtAndContinue(){
+            if(isTyping) return;
+            thoughtBox.style.display='none';
+            advanceSequence();
+        }
+
+        function advanceSequence(){
+            if(isTyping) return;
+            dialogueBox.style.display='none';
+            thoughtBox.style.display='none';
+            
+            if(currentSequenceIndex>=dialogueSequence.length) return;
+
+            const evt=dialogueSequence[currentSequenceIndex++];
+
+            if(evt.action==="dialogue"){
+                hideActiveImage(()=>{
+                    dialogueBox.style.display='block';
+                    dialogueBox.addEventListener('click', skipText,false);
+                    typeWriter(evt.text, dialogueTextElement, false, ()=>{
+                        dialogueBox.addEventListener('click', advanceSequence, {once:true});
+                    });
+                });
+            } else if(evt.action==="show_thought"){
+                showThought(evt.text);
+            } else if(evt.action==="show_image_click_to_continue"){
+                showImageAndAwaitClick(evt.image);
+            } else if(evt.action==="glitch"){
+                spawnGlitch(evt.count, evt.size);
+                advanceSequence(); // On passe direct à la suite sans clic
+            } else if(evt.action==="clean_glitch_partial"){
+                removeGlitch(0.5); // On retire 50%
+                advanceSequence();
+            } else if(evt.action==="change_bg"){
+                // Changement de fond et musique
+                document.body.style.backgroundImage = "url('https://c.tenor.com/wIa91mot0tAAAAAd/tenor.gif')";
+                removeGlitch(1); // On retire tout
+                audioFear.pause();
+                audioPeace.play().catch(()=>{});
+                setTimeout(advanceSequence, 1500); // Petite pause dramatique
+            } else if(evt.action==="show_end_button"){
+                hideActiveImage(()=>{
+                    // Fondu noir
+                    document.getElementById('fade-black').style.opacity = 1;
+                    setTimeout(() => {
+                        endButton.style.display='block';
+                        endButton.addEventListener('click', ()=>{
+                            window.location.href='fin.html';
+                        }, {once:true});
+                    }, 1500);
+                });
+            }
+        }
+
+        overlay.addEventListener('click', ()=>{
+            overlay.style.display='none';
+            audioFear.play().catch(()=>{});
+            advanceSequence();
+        }, {once:true});
+    </script>
 </body>
 </html>
