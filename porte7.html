@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Porte 7</title>
 
 <style>
@@ -21,7 +21,7 @@ html, body {
 #back-btn {
     position: fixed; top: 14px; left: 14px;
     font-size: 32px; color: red;
-    cursor: pointer; z-index: 20000; /* Priorité absolue pour rester cliquable */
+    cursor: pointer; z-index: 20000;
     text-shadow: 2px 2px 0px black;
 }
 
@@ -114,7 +114,7 @@ html, body {
     position: fixed; top: 0; left: 0;
     width: 100%; height: 100%;
     background: rgba(0,0,0,0.6); 
-    display: none; z-index: 15000; /* En dessous du back-btn */
+    display: none; z-index: 15000;
     flex-direction: column; align-items: center; justify-content: center;
 }
 #win-img { max-width: 90vw; max-height: 70vh; margin-bottom: 20px;}
@@ -129,6 +129,10 @@ html, body {
 </style>
 </head>
 <body>
+
+<audio id="battle-music" loop autoplay>
+    <source src="https://www.dropbox.com/scl/fi/14f6ya8klu8y8tixtedfx/Fight-Fighters-Battle-Suite.mp3?dl=1" type="audio/mpeg">
+</audio>
 
 <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=1"></audio>
 <audio id="sword-sound" src="https://dl.dropboxusercontent.com/scl/fi/0s9a907ztk60i2vl2c6t1/armor-impact-from-sword-393843.mp3?rlkey=ejusp7vuuok6b3gtsux4dgasu&dl=1"></audio>
@@ -209,6 +213,11 @@ const hpSpan = document.getElementById('player-hp');
 const menuBtns = document.querySelectorAll('#action-menu > .btn-action');
 
 window.onload = () => {
+    // Tentative de lecture automatique de la musique (nécessite souvent un clic utilisateur sur certains navigateurs)
+    const music = document.getElementById('battle-music');
+    music.play().catch(() => {
+        console.log("Lecture auto bloquée, elle démarrera au premier clic.");
+    });
     showDialogue(dialogs.intro[0], () => setTimeout(() => showDialogue(dialogs.intro[1]), 200));
 };
 
