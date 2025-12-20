@@ -83,7 +83,7 @@ html, body {
     height: 32px;
     border-bottom: 3px solid #ff00ff;
     margin: 0 8px;
-    color: #00ffff; /* Couleur différente pour les mots placés */
+    color: #00ffff; 
     cursor: pointer;
     transition: all 0.2s;
     vertical-align: middle;
@@ -112,7 +112,7 @@ html, body {
 }
 .word-item:hover { border-color: #ff00ff; color: #ff00ff; }
 .word-item.dragging { opacity: 0.3; }
-.word-item.used { display: none; } /* On cache le mot quand il est placé */
+.word-item.used { display: none; } 
 
 #win-image-container {
     position: fixed; top: 50%; left: 50%;
@@ -134,7 +134,11 @@ html, body {
 </head>
 <body>
 
-<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=0"></audio>
+<audio id="puzzle-music" loop autoplay>
+    <source src="https://www.dropbox.com/scl/fi/isoorq59n1m8dc7rxt7p8/The-Stanley-Parable-OST-02-Exploring-Stanley.mp3?dl=1" type="audio/mpeg">
+</audio>
+
+<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=1"></audio>
 
 <div id="back-btn" onclick="history.back()">⬅</div>
 
@@ -185,6 +189,7 @@ html, body {
 <div id="dialogue-box"></div>
 
 <script>
+const music = document.getElementById("puzzle-music");
 const dialogueBox = document.getElementById("dialogue-box");
 const typeSound = document.getElementById("type-sound");
 let typeInterval;
@@ -243,7 +248,6 @@ zones.forEach(zone => {
     zone.addEventListener('dragover', e => e.preventDefault());
     zone.addEventListener('drop', () => {
         if (draggedWord) {
-            // Si la zone est déjà pleine, on libère l'ancien mot
             if (zone.innerText !== "") {
                 const oldWordText = zone.innerText;
                 words.forEach(w => { if(w.innerText === oldWordText) w.classList.remove('used'); });
@@ -254,7 +258,6 @@ zones.forEach(zone => {
         }
     });
 
-    // RETIRER UN MOT EN CLIQUANT DESSUS
     zone.onclick = () => {
         if (zone.innerText !== "") {
             const wordToReturn = zone.innerText;
@@ -265,7 +268,10 @@ zones.forEach(zone => {
 });
 
 window.onload = () => {
-    // Mélange aléatoire des mots dans la banque
+    music.play().catch(() => {
+        console.log("Lecture auto bloquée.");
+    });
+
     const bank = document.getElementById('word-bank');
     for (let i = bank.children.length; i >= 0; i--) {
         bank.appendChild(bank.children[Math.random() * i | 0]);
@@ -294,12 +300,6 @@ document.getElementById('validate-btn').onclick = () => {
         container.classList.add('shake');
         setTimeout(() => container.classList.remove('shake'), 400);
         showDialogue(dialogs.fail);
-        
-        // Optionnel : Réinitialiser tout si tu veux être dure avec lui
-        /*
-        zones.forEach(zone => zone.innerText = "");
-        words.forEach(w => w.classList.remove('used'));
-        */
     }
 };
 </script>
