@@ -117,7 +117,7 @@
     <audio id="type-sound-thought" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=u3fz7wy8&dl=0"></audio>
 
     <div id="intro-overlay-zone2">
-        Quelques mois plus tard... <br><br> (Cliquer pour continuer)
+        Quelques mois plus tard... <br><br>
     </div>
 
     <div id="dialogue-box"><span id="dialogue-text"></span></div>
@@ -180,9 +180,9 @@
         const typeSoundThought = document.getElementById('type-sound-thought');
 
         // REGLAGE DU VOLUME
-        typeSound.volume = 0.5;
-        typeSoundThought.volume = 0.5;
-        zoneAudio.volume = 0.2; // Musique de fond basse pour ne pas gêner
+        typeSound.volume = 1;
+        typeSoundThought.volume = 1;
+        zoneAudio.volume = 0.8; // Musique de fond basse pour ne pas gêner
 
         // --- Bouton final ---
         const endButton = document.createElement('button');
