@@ -78,7 +78,7 @@ body {
 /* GLITCH GIFS */
 .glitch-gif {
     position: absolute;
-    /* MODIFICATION GLITCH: Screen permet de rendre le noir transparent et d'éviter l'effet de superposition "bloc" */
+    /* Screen permet de rendre le noir transparent et d'éviter l'effet de superposition "bloc" */
     mix-blend-mode: screen; 
     opacity: 0.9;
     z-index: 1500;
@@ -174,11 +174,11 @@ const musicBird = document.getElementById("music-bird");
 
 const allImages = document.querySelectorAll(".scene-img");
 
-// REGLAGE VOLUME (Vital pour éviter les conflits)
-typeSound.volume = 0.6;          // Narrateur assez fort
-typeSoundThought.volume = 0.8;   // Pensée très distincte
-musicAmbiance.volume = 0.2;      // Fond sonore discret
-musicBird.volume = 0.2;          // Oiseaux discrets
+// REGLAGE VOLUME (Modifié pour être plus fort)
+typeSound.volume = 1.0;          // MAX pour être entendu par dessus la musique
+typeSoundThought.volume = 1.0;   // MAX
+musicAmbiance.volume = 0.8;      // Beaucoup plus fort (était 0.2)
+musicBird.volume = 0.8;          // Beaucoup plus fort (était 0.2)
 
 /* ---------------------- UTILS ---------------------- */
 
@@ -191,7 +191,7 @@ function showDialogue(t) { typeWriter(t, dBox, dText, typeSound, true); }
 function showThought(t) { typeWriter(t, tBox, tText, typeSoundThought, false); }
 
 
-/* ---------------------- TEXT ENGINE ---------------------- */
+/* ---------------------- TEXT ENGINE (CORRIGÉ BUG SKIP) ---------------------- */
 
 function typeWriter(text, box, span, sound, isLongSound = false) {
     document.body.removeEventListener('click', hideImageAndContinue, true);
@@ -207,7 +207,7 @@ function typeWriter(text, box, span, sound, isLongSound = false) {
     skipTyping = false;
     span.classList.add("cursor-active");
     
-    // GESTION SONORE
+    // Lancement son initial
     if (isLongSound) {
         sound.currentTime = 0;
         sound.play().catch(()=>{});
@@ -236,6 +236,8 @@ function typeWriter(text, box, span, sound, isLongSound = false) {
     box.onclick = (e) => {
         if (isTyping) {
             skipTyping = true;
+            // CORRECTION: Arrêt immédiat du son dès le clic pour éviter qu'il continue
+            stopSound(sound);
             e.stopPropagation(); 
         }
     };
@@ -244,6 +246,7 @@ function typeWriter(text, box, span, sound, isLongSound = false) {
         clearInterval(interval);
         span.classList.remove("cursor-active");
         
+        // Sécurité supplémentaire
         if (!isLongSound) {
             stopSound(sound);
         }
@@ -292,8 +295,7 @@ function showImage(id) {
 function changeBackground(url) {
     document.body.style.backgroundImage = `url('${url}')`;
     
-    // --- BASCULE DE MUSIQUE ICI ---
-    // On coupe progressivement la musique qui fait peur et on lance les oiseaux
+    // BASCULE DE MUSIQUE
     musicAmbiance.pause();
     musicBird.currentTime = 0;
     musicBird.play().catch(e => console.log("Erreur lecture audio:", e));
@@ -301,30 +303,33 @@ function changeBackground(url) {
     setTimeout(next, 1200); 
 }
 
-// MODIFICATION GLITCH : Meilleure répartition et taille
+// MODIFICATION GLITCH : Version Intensifiée
 function spawnGlitch(amount) {
     // Si amount est grand (ex: 10), on considère que c'est la "grosse vague"
     const isBigWave = amount > 8;
-    const count = isBigWave ? 25 : 6; // On augmente drastiquement le nombre pour la 2ème vague
+    
+    // MODIF: Beaucoup plus nombreux
+    const count = isBigWave ? 60 : 20; 
 
     for (let i = 0; i < count; i++) {
         const g = document.createElement("img");
         g.src = "https://i.imgur.com/UsrQHo8.gif";
         g.className = "glitch-gif";
         
-        // Positionnement aléatoire sur tout l'écran
+        // Positionnement aléatoire
         g.style.top = Math.random() * 90 + "vh";
         g.style.left = Math.random() * 90 + "vw";
         
-        // Taille variable
+        // MODIF: Taille beaucoup plus grosse
+        let size;
         if (isBigWave) {
-            // Pour la 2ème vague : taille entre 150px et 350px
-            const size = Math.floor(Math.random() * 200) + 150;
-            g.style.width = size + "px";
+            // Vague 2: Très gros, chaos total (300px à 800px)
+            size = Math.floor(Math.random() * 500) + 300;
         } else {
-            // Pour la 1ère vague : taille standard
-            g.style.width = "180px";
+            // Vague 1: Gros mais lisible (200px à 450px)
+            size = Math.floor(Math.random() * 250) + 200;
         }
+        g.style.width = size + "px";
 
         document.body.appendChild(g);
     }
@@ -354,13 +359,13 @@ const seq = [
     ()=>showThought("Ah bah t'es de retour toi !"),
     ()=>showThought("Et encourageant en plus !"),
     ()=>showDialogue("Alice avais beau se cacher sous sous sarcasme, elle était terrorisé"),
-    ()=>spawnGlitch(6),
+    ()=>spawnGlitch(6), // Déclenche maintenant ~20 gros glitchs
     ()=>showDialogue("Et elle avais raison d'avoir aussi peur, car elle savais très bien qu'un jour ça finirais par se produite"),
     ()=>showThought("Euh, quoi ?"),
     ()=>showDialogue("Guilian t'abandonne Alice."),
     ()=>showDialogue("Ta vie est fini, abandonne, arrête d'essayer d'être heureuse, c'est vain."),
     ()=>showThought("Oui, je sais."),
-    ()=>spawnGlitch(10), // Ici, ça lancera la "Grosse vague" de glitchs
+    ()=>spawnGlitch(10), // Déclenche maintenant ~60 ÉNORMES glitchs
     ()=>showThought("Je commence à me sentir mal là, arrête."),
     ()=>showDialogue("Alice savais que je ne fessai que dire la vérité mais continuais de nier"),
     ()=>showThought("Non par pitié, je t'en supplie, ARRÊTE."),
@@ -376,7 +381,6 @@ const seq = [
     ()=>showThought("Mais ça ne changera pas le fait que je suis qu'une merde."),
     ()=>showImage("img5"), 
     ()=>showThought("Merci beaucoup, je sais pas ce que je ferais sans toi"), 
-    // Au changement de fond, la musique changera automatiquement grâce à la modif dans changeBackground
     ()=>runActionsAndContinue([()=>removeGlitch(1), ()=>changeBackground('https://c.tenor.com/ZL7fgNaWWXMAAAAd/tenor.gif')]),
     ()=>showImage("img6"), 
 ];
@@ -398,7 +402,6 @@ function initiateFinalSequence() {
     
     stopSound(typeSound);
     stopSound(typeSoundThought);
-    // On arrête aussi la musique des oiseaux à la fin
     stopSound(musicBird);
     
     dBox.style.display = "none";
@@ -430,7 +433,7 @@ function showEndButton() {
 document.getElementById("intro-overlay-zone2").onclick = () => {
     document.getElementById("intro-overlay-zone2").style.display = "none";
     
-    // --- LANCEMENT MUSIQUE 1 ICI ---
+    // Musique forte au lancement
     musicAmbiance.play().catch(e => console.log("Erreur lecture musique debut:", e));
 
     document.body.addEventListener('click', next); 
