@@ -109,23 +109,20 @@
 </head>
 
 <body>
-    <!-- AUDIO -->
     <audio id="zone-audio" loop>
-        <source src="" type="audio/mpeg">
+        <source src="https://www.dropbox.com/scl/fi/02fiahycufeo1h9xa719l/Code-Lyoko-Romantic-MomentMomento-Romantico.mp3?dl=1" type="audio/mpeg">
     </audio>
+    
     <audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/axdo9itskfifhv6d5d1av/Machine-crire-Bruitage-gratuit-et-libre-Effects-sonores.mp3?rlkey=q1hljzkfdh6b4qjj89yut92oy&st=8d2bqys3&dl=0"></audio>
     <audio id="type-sound-thought" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&st=u3fz7wy8&dl=0"></audio>
 
-    <!-- OVERLAY -->
     <div id="intro-overlay-zone2">
         Quelques mois plus tard... <br><br> (Cliquer pour continuer)
     </div>
 
-    <!-- BOÎTES -->
     <div id="dialogue-box"><span id="dialogue-text"></span></div>
     <div id="thought-box"><span id="thought-text"></span></div>
 
-    <!-- SCREENS -->
     <img id="screen_a1" class="conv-screen" src="https://i.imgur.com/XA7ud3Z.png" alt="Screen 1 (Evolution)">
     <img id="screen_a2" class="conv-screen" src="https://i.imgur.com/AW3Nnom.png" alt="Screen 2 (Evolution)">
     <img id="screen_a3" class="conv-screen" src="https://i.imgur.com/aValYxk.png" alt="Screen 3 (Evolution)">
@@ -182,8 +179,10 @@
         const typeSound = document.getElementById('type-sound');
         const typeSoundThought = document.getElementById('type-sound-thought');
 
+        // REGLAGE DU VOLUME
         typeSound.volume = 0.5;
         typeSoundThought.volume = 0.5;
+        zoneAudio.volume = 0.2; // Musique de fond basse pour ne pas gêner
 
         // --- Bouton final ---
         const endButton = document.createElement('button');
@@ -318,7 +317,8 @@
 
         overlay.addEventListener('click', ()=>{
             overlay.style.display='none';
-            zoneAudio.play().catch(()=>{});
+            // Joue la musique quand on clique sur l'overlay
+            zoneAudio.play().catch((e)=>{ console.log("Audio autoplay prevented", e); });
             advanceSequence();
         }, {once:true});
     </script>
