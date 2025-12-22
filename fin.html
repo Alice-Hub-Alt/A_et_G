@@ -1,1 +1,184 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 
+<title>Fin</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+html, body{
+  margin:0; padding:0; height:100%;
+  font-family:'Press Start 2P', monospace;
+  overflow:hidden;
+  /* Nouveau fond demandé */
+  background:url('https://i.pinimg.com/originals/d2/51/9f/d2519f97a780645b9b5335c3460ce25a.gif') center/cover no-repeat;
+}
+
+/* Écran de fin (caché au début) */
+#final-screen {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.4); /* Léger assombrissement pour lisibilité */
+}
+
+#final-text {
+  color: white;
+  font-size: 3vw; /* S'adapte à la largeur de l'écran */
+  text-align: center;
+  text-shadow: 4px 4px 0px #000000; /* Ombre portée pour le style rétro */
+  line-height: 1.5;
+}
+
+/* Dialogue (Même style que précédemment) */
+#dialogue-box{
+  position:fixed;
+  left:50%; bottom:26px;
+  transform:translateX(-50%);
+  width:84%;
+  min-height:14vh; max-height:28vh;
+  background:rgba(0,0,0,0.55);
+  border:3px solid #ff00ff;
+  padding:18px;
+  color:#ff66ff;
+  display:none; /* Caché jusqu'au load */
+  z-index:9000;
+  text-shadow:0 0 6px rgba(255,0,255,0.2);
+  overflow:auto;
+  cursor: pointer; /* Indique qu'on peut cliquer pour passer */
+}
+#dialogue-text{ font-size:0.86em; line-height:1.45; }
+.cursor-active{
+  border-right:0.15em solid #ff66ff;
+  animation:blink 0.5s steps(1) infinite;
+  padding-right:6px;
+}
+@keyframes blink{
+  0%,100%{border-color:transparent;}
+  50%{border-color:#ff66ff;}
+}
+
+/* Pas de bouton retour ni de livre, comme demandé */
+
+</style>
+</head>
+
+<body>
+
+<audio id="room-music" loop>
+    <source src="https://www.dropbox.com/scl/fi/cyrf1u4nzifeaj2pbn8m4/Howls-Moving-Castle-Theme-8-bit.mp3?dl=1" type="audio/mpeg">
+</audio>
+
+<audio id="type-sound" src="https://dl.dropboxusercontent.com/scl/fi/r88xcqkfq22gjne9usnea/phoenix-wright-talking-noise-made-with-Voicemod.mp3?rlkey=cuykwz6lmg1wa21zl0aqljobh&dl=1"></audio>
+
+<div id="dialogue-box"><div id="dialogue-text"></div></div>
+
+<div id="final-screen">
+    <div id="final-text">Merci d'avoir jouer !</div>
+</div>
+
+<script>
+const roomMusic = document.getElementById("room-music");
+const dialogueBox = document.getElementById("dialogue-box");
+const dialogueText = document.getElementById("dialogue-text");
+const typeSound = document.getElementById("type-sound");
+const finalScreen = document.getElementById("final-screen");
+
+// Séquence des dialogues
+const dialogues = [
+    "Merci d'avoir jouer !!!",
+    "Oui je brise le 4ème mur là je m'en fou !",
+    "J'ai passé pas mal de temps à faire ce petit jeu, je sais qu'il y a pleins de défauts, mais j'espère que ça t'as quand même plus !"
+];
+
+let currentDialogueIndex = 0;
+let isTyping = false;
+let skip = false;
+let interval = null;
+
+// Fonction pour arrêter le son
+function stopSound(){
+  try{ typeSound.pause(); typeSound.currentTime=0; }catch(e){}
+}
+
+// Fonction machine à écrire
+function typeWriter(text){
+  if(isTyping) return;
+  skip = false;
+  isTyping = true;
+  dialogueText.innerHTML = "";
+  dialogueBox.style.display = "block";
+  dialogueText.classList.add("cursor-active");
+  
+  try{ typeSound.play().catch(()=>{});}catch(e){}
+  
+  let i = 0;
+  interval = setInterval(()=>{
+    if(skip){
+      dialogueText.innerHTML = text;
+      clearInterval(interval);
+      finalizeTyping();
+      return;
+    }
+    if(i < text.length){
+      dialogueText.innerHTML += text.charAt(i++);
+    } else {
+      clearInterval(interval);
+      finalizeTyping();
+    }
+  }, 28);
+}
+
+function finalizeTyping(){
+    dialogueText.classList.remove("cursor-active");
+    stopSound();
+    isTyping = false;
+}
+
+// Gestion du clic pour avancer les dialogues
+dialogueBox.addEventListener("click", ()=>{
+  // Si le texte est en train de s'écrire, on l'affiche d'un coup
+  if(isTyping){
+    skip = true;
+    return;
+  }
+
+  // Si le texte est fini, on passe au suivant
+  currentDialogueIndex++;
+
+  if (currentDialogueIndex < dialogues.length) {
+      typeWriter(dialogues[currentDialogueIndex]);
+  } else {
+      // Plus de dialogues : on cache la boite et on affiche l'écran de fin
+      dialogueBox.style.display = "none";
+      finalScreen.style.display = "flex";
+  }
+});
+
+// Démarrage au chargement
+window.onload = ()=>{
+  // Essai de lecture musique
+  roomMusic.volume = 0.6; // Un peu moins fort pour la fin
+  roomMusic.play().catch(() => {
+    console.log("Lecture auto bloquée, clic requis.");
+    // On ajoute un écouteur global one-shot pour lancer la musique au premier clic si bloqué
+    document.body.addEventListener('click', () => {
+        roomMusic.play();
+    }, { once: true });
+  });
+
+  // Lance le premier dialogue
+  typeWriter(dialogues[0]);
+}
+
+</script>
+
+</body>
+</html>
